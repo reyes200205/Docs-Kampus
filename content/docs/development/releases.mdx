@@ -1,0 +1,69 @@
+---
+title: "Versiones y changelog"
+description: "Cómo se calcula y publica cada versión a partir de los commits."
+---
+
+Las versiones no se escriben a mano. Salen de los commits: por eso todos tienen que seguir la [convención](/docs/development/commits).
+
+<Callout title="Por ahora, solo en docs-kampus">
+  Este flujo está activo en el repositorio de la documentación. Cuando funcione bien, se llevará al backend y a la app.
+</Callout>
+
+## Flujo
+
+1. Trabajas en una rama `feature/T-XX-...` y haces commits con la convención. Si un mensaje no la sigue, el commit se rechaza en tu computadora.
+2. Abres un PR a `develop`. CI vuelve a revisar todos los commits del PR.
+3. Cuando se quiere publicar, se abre un **PR de `develop` a `main`**. Un bot comenta en el PR qué versión se publicará y su changelog.
+4. Al mergear ese PR se crean el tag `vX.Y.Z` y el **GitHub Release** con las notas, y se despliega el sitio.
+5. La página [/changelog](/changelog) muestra la versión nueva.
+
+## Qué versión se publica
+
+Se toman los commits desde el último tag. La primera versión es **v0.1.0**.
+
+| Commits en el PR | Versión | Ejemplo |
+| --- | --- | --- |
+| Solo `fix`, `perf`, `revert` o `docs` | Sube el último número | 0.1.0 → 0.1.1 |
+| Al menos un `feat` | Sube el número de en medio | 0.1.1 → 0.2.0 |
+| Un cambio importante (`feat!:` o `BREAKING CHANGE` en el cuerpo) | Antes de 1.0.0 sube el de en medio; después, el primero | 0.2.0 → 0.3.0 · 1.4.0 → 2.0.0 |
+| Solo `chore`, `ci`, `test`, `build`, `style` o `refactor` | No se publica versión | — |
+
+## Qué aparece en el changelog
+
+| Tipo de commit | Sección |
+| --- | --- |
+| `feat` | Nuevas funciones |
+| `fix`, `revert` | Correcciones |
+| `perf` | Mejoras |
+| `docs` | Documentación |
+| Con `!` o `BREAKING CHANGE` | Cambios importantes |
+
+Cada línea muestra la descripción del commit, su autor y un enlace al commit. Escribe la descripción pensando en quien la va a leer en el changelog.
+
+## Cómo hacer el merge a main
+
+Usa **"Create a merge commit"** en el PR de `develop` a `main`, no "Squash". Con squash se pierden los commits individuales y el changelog quedaría con una sola línea.
+
+## Configuración en GitHub
+
+Una sola vez, en *Settings* del repositorio:
+
+- **Branches → Branch protection** para `main` y `develop`: requerir PR, al menos una aprobación y que pasen los checks *Convención de commits* (y en `main`, *Vista previa de la versión*).
+- **Actions → General → Workflow permissions**: *Read and write permissions*, para que el workflow pueda crear tags, releases y comentarios.
+- **Secrets → Actions**: `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID` para el despliegue. Sin ellos se publica la versión pero no se despliega el sitio.
+
+## Archivos
+
+| Archivo | Qué hace |
+| --- | --- |
+| `commitlint.config.mjs` | Reglas de la convención |
+| `.husky/commit-msg` | Revisa cada commit en tu computadora (se instala con `pnpm install`) |
+| `.github/workflows/commits.yml` | Revisa los commits de cada PR |
+| `.github/workflows/release.yml` | Vista previa en el PR, publicación de la versión y despliegue |
+| `scripts/release.mjs` | Calcula la versión y escribe las notas |
+
+Puedes ver en tu computadora qué versión saldría con:
+
+```bash
+node scripts/release.mjs preview
+```

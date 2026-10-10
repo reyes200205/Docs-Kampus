@@ -3,6 +3,22 @@ import data from '../../content/changelog.json';
 export const sectionTypes = ['features', 'improvements', 'fixes', 'breaking', 'security', 'docs'] as const;
 export type SectionType = (typeof sectionTypes)[number];
 
+/** Títulos de cada sección. scripts/release.mjs escribe las notas de los GitHub Releases con estos mismos títulos. */
+export const sectionLabel: Record<SectionType, string> = {
+  features: 'Nuevas funciones',
+  improvements: 'Mejoras',
+  fixes: 'Correcciones',
+  breaking: 'Cambios importantes',
+  security: 'Seguridad',
+  docs: 'Documentación',
+};
+
+/**
+ * Repositorios cuyos GitHub Releases aparecen en /changelog. Los crea el workflow `Versión`
+ * al mergear un PR a main. Para un repo privado, el build necesita `GITHUB_TOKEN` con acceso de lectura.
+ */
+const releaseSources = [{ repo: 'reyes200205/Docs-Kampus', project: 'docs' }];
+
 export interface ChangelogItem {
   text: string;
   author?: string;
@@ -49,8 +65,73 @@ function validate(raw: unknown): Release[] {
   return releases as Release[];
 }
 
-export function getReleases(): Release[] {
-  return [...validate(data)].sort((a, b) => b.date.localeCompare(a.date));
+interface GitHubRelease {
+  tag_name: string;
+  html_url: string;
+  body: string | null;
+  published_at: string | null;
+  draft: boolean;
+}
+
+/** Convierte las notas de un release (### Sección + líneas "- texto · autor ([abc1234](url))") en secciones. */
+function parseNotes(body: string): ChangelogSection[] {
+  const result: ChangelogSection[] = [];
+  let current: ChangelogSection | undefined;
+
+  for (const line of body.split(/\r?\n/)) {
+    const heading = line.match(/^###\s+(.+?)\s*$/);
+    if (heading) {
+      const type = sectionTypes.find((t) => sectionLabel[t] === heading[1]);
+      current = type ? { type, items: [] } : undefined;
+      if (current) result.push(current);
+      continue;
+    }
+
+    const item = line.match(/^[-*]\s+(.+)$/);
+    if (!current || !item) continue;
+    const parts = item[1].match(/^(.*?)(?: · (.+?))?(?: \(\[[0-9a-f]{7,}\]\((\S+)\)\))?$/);
+    current.items.push({ text: parts?.[1] ?? item[1], author: parts?.[2], link: parts?.[3] });
+  }
+
+  return result.filter((section) => section.items.length > 0);
+}
+
+async function fetchReleases({ repo, project }: (typeof releaseSources)[number]): Promise<Release[]> {
+  const headers: Record<string, string> = { Accept: 'application/vnd.github+json' };
+  if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+
+  try {
+    const res = await fetch(`https://api.github.com/repos/${repo}/releases?per_page=100`, {
+      headers,
+      cache: 'force-cache',
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const releases = (await res.json()) as GitHubRelease[];
+
+    return releases
+      .filter((r) => !r.draft && r.published_at)
+      .map((r) => ({
+        date: r.published_at!.slice(0, 10),
+        project,
+        version: r.tag_name,
+        link: r.html_url,
+        sections: parseNotes(r.body ?? ''),
+      }))
+      .filter((r) => r.sections.length > 0);
+  } catch (error) {
+    // Sin red o sin acceso: se publica solo lo de changelog.json en vez de romper el build.
+    console.warn(`changelog: no se pudieron leer los releases de ${repo} (${error}).`);
+    return [];
+  }
+}
+
+/** Versiones de los GitHub Releases + content/changelog.json. Si una versión está en ambos, gana el release. */
+export async function getReleases(): Promise<Release[]> {
+  const fromGitHub = (await Promise.all(releaseSources.map(fetchReleases))).flat();
+  const published = new Set(fromGitHub.map(releaseId));
+  const manual = validate(data).filter((r) => !published.has(releaseId(r)));
+
+  return [...fromGitHub, ...manual].sort((a, b) => b.date.localeCompare(a.date));
 }
 
 export function releaseId(release: Release): string {

@@ -53,7 +53,9 @@ Los nombres de archivo van en inglés y con guiones (`git-workflow.mdx`); los t�
 
 ## Publicar una versión en el changelog
 
-Edita `content/changelog.json`. VS Code autocompleta y marca errores gracias a `changelog.schema.json`. Si algo está mal, el build falla con un mensaje claro.
+Las versiones de la documentación se publican solas al mergear `develop` en `main` (ver [Versiones y changelog](/docs/development/releases)). La página también lee `content/changelog.json`, para agregar a mano versiones de otros proyectos mientras no tengan su propio versionado.
+
+Para agregar una a mano, edita `content/changelog.json`. VS Code autocompleta y marca errores gracias a `changelog.schema.json`. Si algo está mal, el build falla con un mensaje claro.
 
 ```json
 {

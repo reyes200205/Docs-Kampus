@@ -3,8 +3,8 @@ import { MessagesSquare, SquareKanban } from 'lucide-react';
 import { LogoMark } from '@/components/logo';
 import { planeUrl, slackUrl } from './shared';
 
-/** Enlaces a las herramientas del equipo; también se muestran en el sidebar de la documentación. */
-export const toolLinks: LinkItemType[] = [
+/** Enlaces a las herramientas del equipo (barra superior). */
+const toolLinks: LinkItemType[] = [
   { icon: <SquareKanban />, text: 'Plane', description: 'Tareas y cronograma', url: planeUrl, external: true },
   { icon: <MessagesSquare />, text: 'Slack', description: 'Canal del equipo', url: slackUrl, external: true },
 ];
