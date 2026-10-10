@@ -27,3 +27,7 @@ export function getPageImageUrl(page: { slugs: string[]; locale?: string }) {
 
   return { segments, url: getImageUrl(segments, page.locale) };
 }
+
+// Herramientas del equipo: tareas y cronograma en Plane, comunicación en Slack.
+export const planeUrl = 'https://app.plane.so/utt-plane/';
+export const slackUrl = 'https://app.slack.com/client/T0C3K8PBWG1/C0C3FBXP938';

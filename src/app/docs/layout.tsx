@@ -1,6 +1,6 @@
 import { source } from '@/lib/source';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { baseOptions } from '@/lib/layout.shared';
+import { baseOptions, toolLinks } from '@/lib/layout.shared';
 
 // Color del ícono de cada sección en el selector del sidebar (carpetas con `"root": true` en meta.json).
 const tabColors: Record<string, string> = {
@@ -15,8 +15,8 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
     <DocsLayout
       tree={source.getPageTree()}
       {...baseOptions()}
-      // Sin los enlaces Home/Docs/Blog/Changelog: en la documentación el sidebar solo muestra las secciones.
-      links={[]}
+      // Sin Home/Docs/Blog/Changelog: en la documentación el sidebar muestra las secciones y solo Plane y Slack.
+      links={toolLinks}
       tabs={{
         transform: (tab) => ({
           ...tab,
