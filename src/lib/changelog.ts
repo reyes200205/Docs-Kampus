@@ -103,7 +103,8 @@ async function fetchReleases({ repo, project }: (typeof releaseSources)[number])
   try {
     const res = await fetch(`https://api.github.com/repos/${repo}/releases?per_page=100`, {
       headers,
-      cache: 'force-cache',
+      // Caché corta: cada build (y cada minuto en `pnpm dev`) vuelve a leer los releases.
+      next: { revalidate: 60 },
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const releases = (await res.json()) as GitHubRelease[];
