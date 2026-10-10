@@ -9,7 +9,7 @@ description: "Convención para escribir los mensajes de commit."
 tipo: descripción breve en presente
 ```
 
-- En español y en minúsculas.
+- El tipo va en minúsculas; la descripción, en español.
 - La descripción dice **qué hace** el commit, en presente: "agrega", "corrige", "extrae".
 
 ## Tipos
@@ -21,7 +21,18 @@ tipo: descripción breve en presente
 | `test` | Agregar o ajustar pruebas |
 | `docs` | Documentación |
 | `refactor` | Cambio interno que no altera el comportamiento |
-| `chore` | Configuración, dependencias, CI |
+| `perf` | Mejora de rendimiento |
+| `revert` | Revierte un commit anterior |
+| `chore` | Configuración y dependencias |
+| `ci` | Workflows de GitHub Actions |
+| `build` | Sistema de build |
+| `style` | Formato, sin cambios de lógica |
+
+Opcionalmente, un alcance entre paréntesis: `docs(api): documenta el login`. Un cambio que rompe compatibilidad lleva `!`: `feat!: cambia las rutas de la API`.
+
+<Callout type="warn" title="Se revisa automáticamente">
+  En `docs-kampus`, un commit que no siga la convención se rechaza al hacer `git commit` y en CI. El tipo decide la versión que se publica: ver [Versiones y changelog](/docs/development/releases).
+</Callout>
 
 ## Ejemplos
 

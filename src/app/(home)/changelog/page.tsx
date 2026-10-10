@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { BookOpen, Bug, ExternalLink, ShieldCheck, Sparkles, TrendingUp, TriangleAlert } from 'lucide-react';
-import { getReleases, releaseId, type ChangelogItem, type Release, type SectionType } from '@/lib/changelog';
+import { getReleases, releaseId, sectionLabel, type ChangelogItem, type Release, type SectionType } from '@/lib/changelog';
 import { CopyReleaseButton } from './copy-release-button';
 
 export const metadata: Metadata = {
@@ -9,19 +9,22 @@ export const metadata: Metadata = {
   description: 'Cambios, mejoras y correcciones de la API, la app y la documentación de Kampus.',
 };
 
+// Sitio estático: los GitHub Releases se leen en el build.
+export const dynamic = 'force-static';
+
 const sectionMeta: Record<SectionType, { label: string; icon: typeof Sparkles; color: string }> = {
-  features: { label: 'Nuevas funciones', icon: Sparkles, color: 'text-brand' },
-  improvements: { label: 'Mejoras', icon: TrendingUp, color: 'text-fd-success' },
-  fixes: { label: 'Correcciones', icon: Bug, color: 'text-fd-warning' },
-  breaking: { label: 'Cambios importantes', icon: TriangleAlert, color: 'text-fd-error' },
-  security: { label: 'Seguridad', icon: ShieldCheck, color: 'text-fd-info' },
-  docs: { label: 'Documentación', icon: BookOpen, color: 'text-fd-muted-foreground' },
+  features: { label: sectionLabel.features, icon: Sparkles, color: 'text-brand' },
+  improvements: { label: sectionLabel.improvements, icon: TrendingUp, color: 'text-fd-success' },
+  fixes: { label: sectionLabel.fixes, icon: Bug, color: 'text-fd-warning' },
+  breaking: { label: sectionLabel.breaking, icon: TriangleAlert, color: 'text-fd-error' },
+  security: { label: sectionLabel.security, icon: ShieldCheck, color: 'text-fd-info' },
+  docs: { label: sectionLabel.docs, icon: BookOpen, color: 'text-fd-muted-foreground' },
 };
 
 const dateFormat = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 
-export default function ChangelogPage() {
-  const releases = getReleases();
+export default async function ChangelogPage() {
+  const releases = await getReleases();
 
   return (
     <main className="grid flex-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">

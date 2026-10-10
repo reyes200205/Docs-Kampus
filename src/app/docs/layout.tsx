@@ -15,7 +15,7 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
     <DocsLayout
       tree={source.getPageTree()}
       {...baseOptions()}
-      // Sin los enlaces Home/Docs/Blog/Changelog: en la documentación el sidebar solo muestra las secciones.
+      // Sin los enlaces de la barra superior: en la documentación el sidebar solo muestra las secciones.
       links={[]}
       tabs={{
         transform: (tab) => ({

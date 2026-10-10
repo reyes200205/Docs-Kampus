@@ -1,5 +1,13 @@
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+import type { BaseLayoutProps, LinkItemType } from 'fumadocs-ui/layouts/shared';
+import { MessagesSquare, SquareKanban } from 'lucide-react';
 import { LogoMark } from '@/components/logo';
+import { planeUrl, slackUrl } from './shared';
+
+/** Enlaces a las herramientas del equipo (barra superior). */
+const toolLinks: LinkItemType[] = [
+  { icon: <SquareKanban />, text: 'Plane', description: 'Tareas y cronograma', url: planeUrl, external: true },
+  { icon: <MessagesSquare />, text: 'Slack', description: 'Canal del equipo', url: slackUrl, external: true },
+];
 
 export function baseOptions(): BaseLayoutProps {
   return {
@@ -20,6 +28,7 @@ export function baseOptions(): BaseLayoutProps {
       { text: 'Blog', url: '/blog', active: 'nested-url' },
       { text: 'Changelog', url: '/changelog', active: 'nested-url' },
       { text: 'Equipo', url: '/team', active: 'nested-url' },
+      ...toolLinks,
     ],
   };
 }

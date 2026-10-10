@@ -3,5 +3,5 @@
   "description": "Ramas, commits, PRs y documentación",
   "icon": "GitBranch",
   "root": true,
-  "pages": ["index", "git-workflow", "commits", "pull-requests", "documentation"]
+  "pages": ["index", "git-workflow", "commits", "pull-requests", "releases", "documentation"]
 }
