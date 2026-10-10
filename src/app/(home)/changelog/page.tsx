@@ -27,10 +27,12 @@ export default async function ChangelogPage() {
   const releases = await getReleases();
 
   return (
-    <main className="grid flex-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
-      <aside className="relative overflow-hidden border-b lg:border-r lg:border-b-0">
+    // Como nuxt.com/changelog: en pantallas anchas el panel izquierdo se queda fijo y solo avanza la lista
+    // de versiones. Su borde derecho es la línea de tiempo.
+    <main className="flex-1 lg:grid lg:grid-cols-2">
+      <aside className="relative overflow-hidden border-b lg:sticky lg:top-14 lg:h-[calc(100dvh-3.5rem)] lg:border-r lg:border-b-0">
         <div className="changelog-glow pointer-events-none absolute inset-0" />
-        <div className="relative flex flex-col justify-center px-6 py-16 md:px-12 lg:sticky lg:top-14 lg:h-[calc(100dvh-3.5rem)] lg:py-0 xl:pl-[max(3rem,calc((100vw-1400px)/2+3rem))]">
+        <div className="relative flex h-full flex-col justify-center px-6 py-16 md:px-12 lg:py-0 xl:pl-[max(3rem,calc((100vw-1400px)/2+3rem))]">
           <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">Changelog</h1>
           <p className="mt-4 max-w-md text-lg text-fd-muted-foreground">
             Cambios, mejoras y correcciones de la API, la app y la documentación de Kampus.
@@ -43,11 +45,12 @@ export default async function ChangelogPage() {
         </div>
       </aside>
 
-      <section className="px-6 py-16 md:px-12">
+      {/* En pantallas anchas la lista entra 8rem en el panel izquierdo: ahí van la fecha y el punto, sobre la línea. */}
+      <section className="relative px-6 py-16 md:px-12 lg:-ms-32 lg:ps-0 lg:py-24">
         {releases.length === 0 ? (
-          <p className="text-fd-muted-foreground">Todavía no hay versiones publicadas.</p>
+          <p className="text-fd-muted-foreground lg:ps-44">Todavía no hay versiones publicadas.</p>
         ) : (
-          <ol className="relative max-w-2xl">
+          <ol className="relative lg:flex lg:flex-col lg:gap-20">
             {releases.map((release) => (
               <ReleaseEntry key={releaseId(release)} release={release} />
             ))}
@@ -62,55 +65,66 @@ function ReleaseEntry({ release }: { release: Release }) {
   const id = releaseId(release);
 
   return (
-    <li id={id} className="relative scroll-mt-24 border-l pb-16 pl-8 last:pb-0">
-      <span className="absolute top-1.5 -left-1.25 size-2.5 rounded-full bg-brand ring-4 ring-brand/20" />
-      <time dateTime={release.date} className="font-mono text-xs text-fd-muted-foreground">
-        {dateFormat.format(new Date(release.date))}
-      </time>
+    <li id={id} className="relative scroll-mt-24 border-l pb-16 pl-8 last:pb-0 lg:flex lg:items-start lg:border-l-0 lg:pb-0 lg:pl-0">
+      {/* Pantallas anchas: fecha y punto en la línea del panel; se quedan arriba mientras se lee la versión. */}
+      <div className="sticky top-14 -mt-24 hidden w-32 shrink-0 items-center justify-end gap-3 pt-24 lg:flex">
+        <time dateTime={release.date} className="truncate font-mono text-xs text-fd-muted-foreground">
+          {dateFormat.format(new Date(release.date))}
+        </time>
+        <span className="-me-[4.5px] size-2.5 shrink-0 rounded-full bg-brand ring-4 ring-brand/20" />
+      </div>
 
-      <div className="mt-3 flex items-start justify-between gap-4">
-        <div>
-          <span className="inline-flex rounded-md border bg-fd-secondary px-2 py-0.5 font-mono text-xs">
-            {release.project}
-          </span>
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-            <a href={`#${id}`} className="hover:text-brand">
-              {release.version}
-            </a>
-          </h2>
-          {release.summary && <p className="mt-2 text-fd-muted-foreground">{release.summary}</p>}
+      <div className="min-w-0 max-w-2xl flex-1 lg:ps-12">
+        {/* Pantallas angostas: línea de tiempo a la izquierda de cada versión. */}
+        <span className="absolute top-1.5 -left-1.25 size-2.5 rounded-full bg-brand ring-4 ring-brand/20 lg:hidden" />
+        <time dateTime={release.date} className="font-mono text-xs text-fd-muted-foreground lg:hidden">
+          {dateFormat.format(new Date(release.date))}
+        </time>
+
+        <div className="mt-3 flex items-start justify-between gap-4 lg:mt-0">
+          <div>
+            <span className="inline-flex rounded-md border bg-fd-secondary px-2 py-0.5 font-mono text-xs">
+              {release.project}
+            </span>
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight">
+              <a href={`#${id}`} className="hover:text-brand">
+                {release.version}
+              </a>
+            </h2>
+            {release.summary && <p className="mt-2 text-fd-muted-foreground">{release.summary}</p>}
+          </div>
+          <CopyReleaseButton markdown={toMarkdown(release)} />
         </div>
-        <CopyReleaseButton markdown={toMarkdown(release)} />
-      </div>
 
-      <div className="mt-6 space-y-8 border-t pt-6">
-        {release.sections.map((section, i) => {
-          const { label, icon: Icon, color } = sectionMeta[section.type];
-          return (
-            <div key={i}>
-              <h3 className="flex items-center gap-2 font-semibold">
-                <Icon className={`size-4 ${color}`} /> {label}
-              </h3>
-              <ul className="mt-3 list-disc space-y-2 pl-5 marker:text-fd-muted-foreground">
-                {section.items.map((item, j) => (
-                  <ChangelogLine key={j} item={item} />
-                ))}
-              </ul>
-            </div>
-          );
-        })}
-      </div>
+        <div className="mt-6 space-y-8 border-t pt-6">
+          {release.sections.map((section, i) => {
+            const { label, icon: Icon, color } = sectionMeta[section.type];
+            return (
+              <div key={i}>
+                <h3 className="flex items-center gap-2 font-semibold">
+                  <Icon className={`size-4 ${color}`} /> {label}
+                </h3>
+                <ul className="mt-3 list-disc space-y-2 pl-5 marker:text-fd-muted-foreground">
+                  {section.items.map((item, j) => (
+                    <ChangelogLine key={j} item={item} />
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
 
-      {release.link && (
-        <a
-          href={release.link}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline"
-        >
-          Ver cambios <ExternalLink className="size-3.5" />
-        </a>
-      )}
+        {release.link && (
+          <a
+            href={release.link}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline"
+          >
+            Ver cambios <ExternalLink className="size-3.5" />
+          </a>
+        )}
+      </div>
     </li>
   );
 }
@@ -145,10 +159,12 @@ function InlineCode({ text }: { text: string }) {
   );
 }
 
-/** github.com/org/repo/pull/12 → #12; cualquier otro enlace → "enlace". */
+/** github.com/org/repo/pull/12 → #12; …/commit/abc1234… → abc1234; cualquier otro enlace → "enlace". */
 function shortLink(url: string): string {
-  const match = url.match(/\/(?:pull|issues)\/(\d+)/) ?? url.match(/\/commit\/([0-9a-f]{7})/);
-  return match ? (/^\d+$/.test(match[1]) ? `#${match[1]}` : match[1]) : 'enlace';
+  const pr = url.match(/\/(?:pull|issues)\/(\d+)/);
+  if (pr) return `#${pr[1]}`;
+  const commit = url.match(/\/commit\/([0-9a-f]{7})/);
+  return commit ? commit[1] : 'enlace';
 }
 
 function toMarkdown(release: Release): string {
