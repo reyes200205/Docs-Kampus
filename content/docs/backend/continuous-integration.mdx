@@ -1,0 +1,25 @@
+---
+title: "Integración continua"
+description: "Qué revisa GitHub Actions en cada push y pull request."
+---
+
+Cada push y cada pull request hacia `main` o `develop` ejecuta el workflow `.github/workflows/ci.yml`.
+
+## Pasos
+
+1. **Formato**: `./vendor/bin/pint --test`.
+2. **Migraciones**: `php artisan migrate --force` contra un PostgreSQL 16 real.
+3. **Pruebas**: `php artisan test`.
+
+Si un paso falla, el PR no está listo para revisión.
+
+## Entorno de CI
+
+| Elemento | Valor |
+| --- | --- |
+| Sistema | `ubuntu-latest` |
+| PHP | 8.3 (`mbstring`, `bcmath`, `intl`, `pdo_pgsql`, `pdo_sqlite`, `sqlite3`) |
+| Base de datos | Servicio `postgres:16`, base `kampus_test` |
+| Caché | `vendor/` según el hash de `composer.lock` |
+
+Si se empuja un nuevo commit a la misma rama, la ejecución anterior se cancela.

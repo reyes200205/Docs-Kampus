@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 104 120" role="img" aria-label="Kampus">
+  <!-- Pin de mapa (círculo con una esquina en punta, rotado 45°) con la K, como en la app. -->
+  <path fill="#FF7A1A" transform="rotate(45 50 50)" d="M50 0A50 50 0 0 1 100 50V88A12 12 0 0 1 88 100H50A50 50 0 0 1 0 50A50 50 0 0 1 50 0Z"/>
+  <path fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" d="M38 29V71M63 29L40 52M46 46L64 71"/>
+</svg>

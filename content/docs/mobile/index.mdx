@@ -1,0 +1,51 @@
+---
+title: "App móvil"
+description: "App de Kampus hecha con Expo, React Native y Expo Router."
+---
+
+El repositorio [`Frontend-Kampus`](https://github.com/reyes200205/Frontend-Kampus) contiene la app móvil. Consume la [API REST](/docs/api-docs) del backend.
+
+## Stack
+
+| Componente | Tecnología |
+| --- | --- |
+| Framework | [Expo](https://expo.dev) SDK 57 · React Native 0.86 |
+| Navegación | [Expo Router](https://docs.expo.dev/router/introduction/) (rutas basadas en archivos, rutas tipadas) |
+| Compilador | React Compiler (activado en `app.json`) |
+| Tipografía | Sora (`@expo-google-fonts/sora`) |
+| Gestor de paquetes | pnpm |
+
+## Estructura
+
+```
+Frontend-kampus/
+├── assets/               # Imágenes, íconos y fuentes
+├── scripts/              # Scripts auxiliares
+├── src/
+│   ├── app/              # Pantallas y rutas (Expo Router)
+│   │   ├── _layout.tsx   # Layout raíz
+│   │   ├── (tabs)/       # Pantallas con barra de pestañas
+│   │   └── auth/         # Login, registro y recuperar contraseña
+│   ├── components/       # Componentes reutilizables
+│   │   ├── auth/         # Componentes de las pantallas de autenticación
+│   │   └── ui/           # Botones, inputs, checkbox, etc.
+│   ├── constants/        # Tema, colores y constantes
+│   └── hooks/            # Hooks personalizados
+├── app.json              # Configuración de Expo
+├── package.json
+└── pnpm-lock.yaml
+```
+
+Cada archivo dentro de `src/app/` es una ruta. Por ejemplo, `src/app/auth/login/` corresponde a la pantalla `/auth/login`. El código que no es pantalla (componentes, hooks, utilidades) va fuera de `src/app/`.
+
+## Tema
+
+Los colores, espaciados y radios viven en `src/constants/theme.ts`, con variantes para modo claro y oscuro. El color de acento de la marca es el naranja `#FF7A1A`.
+
+## Contenido
+
+<Cards>
+  <Card title="Instalación" href="/docs/mobile/installation">Requisitos, instalación y scripts.</Card>
+  <Card title="Ver la app en tu celular" href="/docs/mobile/device">Wi-Fi, túnel, USB y conexión con el backend.</Card>
+  <Card title="Solución de problemas" href="/docs/mobile/troubleshooting">Errores comunes y cómo resolverlos.</Card>
+</Cards>

@@ -1,0 +1,81 @@
+---
+title: "Documentación"
+description: "Cómo agregar páginas, versiones del changelog y publicaciones del blog."
+---
+
+Este sitio vive en el repositorio `docs-kampus` y está hecho con [Fumadocs](https://fumadocs.dev). Todo el contenido está en la carpeta `content/`.
+
+## Levantar el sitio
+
+```bash
+pnpm install
+pnpm dev
+```
+
+Abre `http://localhost:3000`.
+
+## Agregar una página
+
+1. Crea un archivo `.mdx` dentro de la sección que corresponda:
+
+   | Sección | Carpeta |
+   | --- | --- |
+   | General | `content/docs/(general)/` |
+   | API REST | `content/docs/api-docs/` |
+   | Backend | `content/docs/backend/` |
+   | App móvil | `content/docs/mobile/` |
+   | Desarrollo | `content/docs/development/` |
+
+2. Empieza con el encabezado:
+
+   ```mdx
+   ---
+   title: "Título de la página"
+   description: "Una línea que explica de qué trata."
+   ---
+   ```
+
+3. Agrega el nombre del archivo (sin `.mdx`) a `pages` en el `meta.json` de la carpeta, en el orden en que debe aparecer.
+
+Los nombres de archivo van en inglés y con guiones (`git-workflow.mdx`); los títulos, en español.
+
+## Componentes disponibles
+
+```mdx
+<Callout type="warn" title="Atención">Texto del aviso.</Callout>
+
+<Cards>
+  <Card title="Backend" href="/docs/backend">Descripción.</Card>
+</Cards>
+```
+
+`Callout` acepta `type="info"`, `"warn"`, `"error"` y `"success"`.
+
+## Publicar una versión en el changelog
+
+Edita `content/changelog.json`. VS Code autocompleta y marca errores gracias a `changelog.schema.json`. Si algo está mal, el build falla con un mensaje claro.
+
+```json
+{
+  "date": "2026-10-20",
+  "project": "api",
+  "version": "v0.2.0",
+  "summary": "Registro e inicio de sesión.",
+  "sections": [
+    { "type": "features", "items": [{ "text": "Endpoint `POST /api/register`.", "author": "Wilbert" }] }
+  ]
+}
+```
+
+Tipos de sección: `features`, `improvements`, `fixes`, `breaking`, `security`, `docs`.
+
+## Publicar en el blog
+
+1. Agrega la publicación a `content/blog.json` (`slug`, `title`, `description`, `date`, `category`).
+2. Crea `content/blog/<slug>.mdx` con el artículo, o usa `href` para enlazar a otra página.
+
+Categorías: `release`, `project`, `module`, `article`.
+
+## Publicación
+
+El sitio se genera como archivos estáticos (`pnpm build` → carpeta `out/`) y se publica en **Cloudflare Workers**. El acceso está protegido con **Cloudflare Access**.

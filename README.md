@@ -1,45 +1,46 @@
 # docs-kampus
 
-This is a Next.js application generated with
-[Create Fumadocs](https://github.com/fuma-nama/fumadocs).
+Documentación interna de **Kampus**, hecha con [Fumadocs](https://fumadocs.dev) (Next.js) y publicada como sitio estático en Cloudflare Workers con acceso restringido por Cloudflare Access.
 
-Run development server:
+## Desarrollo
 
 ```bash
-npm run dev
-# or
+pnpm install
 pnpm dev
-# or
-yarn dev
 ```
 
-Open http://localhost:3000 with your browser to see the result.
+Abre http://localhost:3000.
 
-## Explore
+## Contenido
 
-In the project, you can see:
+| Ruta | Qué contiene |
+| --- | --- |
+| `content/docs/(general)/` | Introducción, el proyecto, privacidad de la ubicación y equipo |
+| `content/docs/api-docs/` | API REST |
+| `content/docs/backend/` | Backend (Laravel) |
+| `content/docs/mobile/` | App móvil (Expo) |
+| `content/docs/development/` | Flujo de Git, commits, pull requests y cómo documentar |
+| `content/changelog.json` | Versiones publicadas (página `/changelog`) |
+| `content/blog.json` + `content/blog/*.mdx` | Publicaciones del blog (página `/blog`) |
 
-- `lib/source.ts`: Code for content source adapter, [`loader()`](https://fumadocs.dev/docs/headless/source-api) provides the interface to access your content.
-- `lib/layout.shared.tsx`: Shared options for layouts, optional but preferred to keep.
+Cada carpeta de `content/docs` con `"root": true` en su `meta.json` es una sección del selector del menú lateral. La guía completa está en la página **Desarrollo → Documentación**.
 
-| Route                     | Description                                            |
-| ------------------------- | ------------------------------------------------------ |
-| `app/(home)`              | The route group for your landing page and other pages. |
-| `app/docs`                | The documentation layout and pages.                    |
-| `app/api/search/route.ts` | The Route Handler for search.                          |
+## Build y despliegue
 
-### Fumadocs MDX
+```bash
+pnpm build                      # genera el sitio estático en out/
+npx wrangler deploy             # publica out/ en Cloudflare Workers
+```
 
-Collections are defined with the [Macro API](https://fumadocs.dev/docs/mdx/macro) in `lib/source.ts`.
+La configuración del Worker está en `wrangler.jsonc`.
 
-Read the [Introduction](https://fumadocs.dev/docs/mdx) for further details.
+## Código
 
-## Learn More
-
-To learn more about Next.js and Fumadocs, take a look at the following
-resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js
-  features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [Fumadocs](https://fumadocs.dev) - learn about Fumadocs
+| Ruta | Descripción |
+| --- | --- |
+| `src/app/(home)` | Inicio, blog y changelog |
+| `src/app/docs` | Layout y páginas de la documentación |
+| `src/app/api/search/route.ts` | Índice de búsqueda estático |
+| `src/lib/source.ts` | Colecciones de contenido (docs y blog) |
+| `src/lib/changelog.ts`, `src/lib/blog.ts` | Lectura y validación de los JSON |
+| `src/app/global.css` | Colores de la marca |

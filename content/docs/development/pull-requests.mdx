@@ -1,0 +1,41 @@
+---
+title: "Pull requests"
+description: "Cómo abrir, revisar y cerrar un pull request."
+---
+
+## Abrir un PR
+
+- El destino siempre es `develop`.
+- El título sigue la [convención de commits](/docs/development/commits).
+- Llena la plantilla del repositorio (`.github/pull_request_template.md`):
+
+| Apartado | Qué poner |
+| --- | --- |
+| Qué hace este PR | Descripción breve del cambio y por qué es necesario |
+| Tarea relacionada | Tarea y requisito, p. ej. `T-05 · RF-02 · Closes #12` |
+| Cómo probarlo | Pasos para que quien revisa pueda verificarlo |
+| Definition of Done | La lista de abajo, marcada |
+| Notas para quien revisa | Decisiones de diseño, dudas abiertas, deuda técnica |
+
+## Revisión
+
+- Al menos **otro integrante** revisa y aprueba el PR.
+- CI debe pasar. En el backend: formato, migraciones y pruebas (ver [Integración continua](/docs/backend/continuous-integration)).
+
+## Definition of Done
+
+Una tarea se considera terminada cuando:
+
+1. El código fue revisado por otro integrante mediante PR.
+2. Las pruebas del módulo pasan.
+3. La funcionalidad se verificó manualmente.
+4. La documentación quedó actualizada (en la API, cada endpoint nuevo o modificado).
+
+Lista de la plantilla del backend:
+
+- [ ] El código fue revisado por otro integrante del equipo.
+- [ ] Las pruebas del módulo pasan (`php artisan test`).
+- [ ] El formato de código pasa (`./vendor/bin/pint --test`).
+- [ ] La funcionalidad se verificó manualmente.
+- [ ] La documentación de la API quedó actualizada si cambiaron endpoints.
+- [ ] No se subieron credenciales, archivos `.env` ni datos personales.

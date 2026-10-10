@@ -1,0 +1,42 @@
+---
+title: "El proyecto"
+description: "Qué es Kampus, a quién va dirigido y con qué está construido."
+---
+
+## Qué es Kampus
+
+Kampus ayuda a estudiantes universitarios de La Laguna a conocerse e integrarse: descubrir a otras personas, hacer *match*, chatear, hacer videollamadas y encontrar gente **cerca de ti** sin exponer su ubicación exacta.
+
+## Instituciones
+
+El registro solo acepta correos institucionales (RF-01):
+
+| Institución | Dominio |
+| --- | --- |
+| Universidad Tecnológica de Torreón (UTT) | `utt.edu.mx` |
+| Universidad Autónoma de Coahuila (UAdeC) | `uadec.edu.mx` |
+| Tecnológico de la Laguna | Pendiente de confirmar |
+
+<Callout type="warn" title="Dominio del Tecnológico de la Laguna">
+  El backend acepta `correo.itlalaguna.edu.mx` (variable `KAMPUS_ALLOWED_EMAIL_DOMAINS`) y la app valida `lalaguna.tecnm.mx` (`src/constants/auth.ts`). Hay que confirmar el dominio correcto y usar el mismo en ambos proyectos.
+</Callout>
+
+## Arquitectura
+
+El proyecto se divide en dos aplicaciones independientes, cada una en su repositorio:
+
+- **Backend**: API REST en Laravel que concentra los datos, la autenticación y la lógica. Ver [Backend](/docs/backend).
+- **App móvil**: aplicación en Expo (React Native) que consume la API. Ver [App móvil](/docs/mobile).
+
+## Stack
+
+| Capa | Tecnología |
+| --- | --- |
+| API | Laravel 13 (PHP 8.3) |
+| Autenticación | Laravel Sanctum (tokens) |
+| Base de datos | PostgreSQL 16 |
+| Tiempo real | Laravel Reverb + Echo (chat y notificaciones de match) |
+| Archivos | Bucket compatible con S3 (Cloudflare R2 / MinIO) |
+| Videollamada | LiveKit, detrás de una interfaz `VideoCallProvider` |
+| App | Expo SDK 57, React Native, Expo Router |
+| Documentación | Fumadocs (Next.js), publicada en Cloudflare |

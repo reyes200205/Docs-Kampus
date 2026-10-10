@@ -1,0 +1,35 @@
+---
+title: "Commits"
+description: "Convención para escribir los mensajes de commit."
+---
+
+## Formato
+
+```
+tipo: descripción breve en presente
+```
+
+- En español y en minúsculas.
+- La descripción dice **qué hace** el commit, en presente: "agrega", "corrige", "extrae".
+
+## Tipos
+
+| Tipo | Cuándo usarlo |
+| --- | --- |
+| `feat` | Nueva funcionalidad |
+| `fix` | Corrección de un error |
+| `test` | Agregar o ajustar pruebas |
+| `docs` | Documentación |
+| `refactor` | Cambio interno que no altera el comportamiento |
+| `chore` | Configuración, dependencias, CI |
+
+## Ejemplos
+
+```
+feat: agrega endpoint de registro con validación de dominio
+fix: corrige expiración del token de Sanctum
+test: agrega pruebas del algoritmo de descubrimiento
+docs: actualiza el contrato de la API
+refactor: extrae la consulta de descubrimiento a un Builder
+chore: configura el pipeline de CI
+```

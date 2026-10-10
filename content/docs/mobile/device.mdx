@@ -1,0 +1,57 @@
+---
+title: "Ver la app en tu celular"
+description: "Formas de abrir la app en un dispositivo y conectarla con el backend."
+---
+
+## Opción A: misma red Wi-Fi (recomendada)
+
+1. Conecta **tu computadora y tu celular a la misma red Wi-Fi**.
+2. Ejecuta `pnpm start` en la computadora.
+3. Escanea el código QR:
+   - **Android:** abre **Expo Go** → *Scan QR code*.
+   - **iPhone:** abre la app de **Cámara** y apunta al QR; toca el aviso para abrir en Expo Go.
+4. Espera a que cargue el bundle (la primera vez tarda un poco más).
+
+### En Windows: revisa la red y el firewall
+
+Si el celular se queda cargando o muestra *"Could not connect to development server"*:
+
+- La red Wi-Fi debe estar configurada como **Privada**: *Configuración → Red e Internet → Wi-Fi → (tu red) → Tipo de perfil de red → Privada*.
+- Cuando Windows pregunte si **Node.js** puede comunicarse en la red, acepta para **redes privadas**. Si ya lo rechazaste: *Panel de control → Firewall de Windows Defender → Permitir una aplicación… → Node.js → marcar "Privada"*.
+
+## Opción B: túnel (redes de escuela o redes distintas)
+
+Si no estás en la misma red, o la red bloquea conexiones entre dispositivos (común en el Wi-Fi de las universidades), usa un túnel:
+
+```bash
+pnpm expo start --tunnel
+```
+
+La primera vez te pedirá instalar `@expo/ngrok`; acepta. Luego escanea el QR igual que en la opción A. Es más lento, pero funciona desde cualquier red.
+
+## Opción C: cable USB (solo Android)
+
+1. Activa **Opciones de desarrollador** y **Depuración USB** en tu Android.
+2. Conecta el celular por USB y acepta el aviso de depuración.
+3. Ejecuta `pnpm start` y presiona `a`.
+
+Requiere tener instalado [Android Platform Tools (adb)](https://developer.android.com/tools/releases/platform-tools).
+
+## Otras formas de verla
+
+- **Navegador:** `pnpm web` o presiona `w` en la terminal de Expo.
+- **Emulador Android:** instala [Android Studio](https://docs.expo.dev/workflow/android-studio-emulator/), crea un dispositivo virtual, ábrelo y presiona `a`.
+- **Simulador iOS:** solo en macOS con [Xcode](https://docs.expo.dev/workflow/ios-simulator/); presiona `i`.
+
+## Conectar con el backend
+
+En el celular, `localhost` o `127.0.0.1` apunta al propio celular, no a tu computadora. Para consumir la API:
+
+1. Obtén la **IP local de tu PC** con `ipconfig` (por ejemplo `192.168.1.50`).
+2. Levanta el backend escuchando en la red:
+
+   ```bash
+   php artisan serve --host=0.0.0.0 --port=8000
+   ```
+
+3. En la app, usa `http://192.168.1.50:8000/api` como URL de la API.

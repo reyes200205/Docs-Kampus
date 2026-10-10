@@ -1,0 +1,32 @@
+---
+title: "Flujo de Git"
+description: "Ramas del proyecto y cómo se integra el trabajo."
+---
+
+## Ramas
+
+| Rama | Uso |
+| --- | --- |
+| `main` | Código estable y desplegable. Solo recibe merges desde `develop`. |
+| `develop` | Rama de integración. Es la rama por defecto y el destino de todos los PR. |
+| `feature/T-XX-descripcion` | Una rama por tarea del cronograma. Ej.: `feature/T-05-api-login`. |
+| `fix/descripcion` | Corrección de errores. |
+
+<Callout type="warn" title="Sin push directo">
+  **Nadie hace push directo a `main` ni a `develop`.** Todo entra por pull request con la revisión de al menos otro integrante.
+</Callout>
+
+## Empezar una tarea
+
+```bash
+git switch develop
+git pull
+git switch -c feature/T-05-api-login
+# ...trabajas y haces commits...
+git push -u origin feature/T-05-api-login
+gh pr create --base develop
+```
+
+El número `T-XX` es el de la tarea en el cronograma. Así cada rama y cada PR se relacionan con su tarea.
+
+Después, sigue [Pull requests](/docs/development/pull-requests).

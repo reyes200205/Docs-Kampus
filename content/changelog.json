@@ -1,0 +1,34 @@
+{
+  "$schema": "./changelog.schema.json",
+  "releases": [
+    {
+      "date": "2026-10-09",
+      "project": "docs",
+      "version": "v0.1.0",
+      "summary": "Primera versión de la documentación interna de Kampus, construida con Fumadocs.",
+      "sections": [
+        {
+          "type": "features",
+          "items": [
+            { "text": "Secciones General, API REST, Backend, App móvil y Desarrollo." },
+            { "text": "Página de inicio con los colores de Kampus." },
+            { "text": "Buscador estático: el índice se genera en el build y la búsqueda corre en el navegador." },
+            { "text": "Changelog y blog alimentados desde `content/changelog.json` y `content/blog.json`." }
+          ]
+        },
+        {
+          "type": "docs",
+          "items": [
+            { "text": "Migración de los README del backend y de la app: instalación, flujo de Git, commits y Definition of Done." }
+          ]
+        },
+        {
+          "type": "security",
+          "items": [
+            { "text": "Sitio publicado en Cloudflare Workers y protegido con Cloudflare Access." }
+          ]
+        }
+      ]
+    }
+  ]
+}

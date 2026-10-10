@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Debe coincidir con el nombre del Worker en el panel de Cloudflare.
+  "name": "docs-kampus",
+  "compatibility_date": "2026-10-01",
+  // Sitio 100% estático: se sube la carpeta que genera `next build` con `output: 'export'`.
+  "assets": {
+    "directory": "./out",
+    // /docs/backend → out/docs/backend.html
+    "html_handling": "auto-trailing-slash",
+    // Rutas inexistentes → out/404.html
+    "not_found_handling": "404-page"
+  }
+}

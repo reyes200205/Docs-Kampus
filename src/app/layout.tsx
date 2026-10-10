@@ -1,5 +1,6 @@
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import './global.css';
+import StaticSearchDialog from '@/components/search';
 import { Inter } from 'next/font/google';
 
 const inter = Inter({
@@ -8,9 +9,9 @@ const inter = Inter({
 
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="en" className={inter.className} suppressHydrationWarning>
+    <html lang="es" className={inter.className} suppressHydrationWarning>
       <body className="flex flex-col min-h-screen">
-        <RootProvider>{children}</RootProvider>
+        <RootProvider search={{ SearchDialog: StaticSearchDialog }}>{children}</RootProvider>
       </body>
     </html>
   );

@@ -1,0 +1,45 @@
+---
+title: "Autenticación"
+description: "Cómo se autentica la app contra la API con Laravel Sanctum."
+---
+
+La API usa **Laravel Sanctum** con tokens personales. La app obtiene un token al iniciar sesión y lo envía en cada petición protegida.
+
+## Enviar el token
+
+```http
+GET /api/user
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+### Respuesta `200`
+
+```json
+{
+  "id": 1,
+  "name": "Ana López",
+  "email": "ana.lopez@utt.edu.mx",
+  "email_verified_at": "2026-10-01T18:00:00.000000Z",
+  "created_at": "2026-10-01T17:55:00.000000Z",
+  "updated_at": "2026-10-01T18:00:00.000000Z"
+}
+```
+
+### Respuesta `401`
+
+Sin token, o con un token inválido:
+
+```json
+{
+  "message": "Unauthenticated."
+}
+```
+
+## Registro
+
+Solo se aceptan correos institucionales (RF-01). El backend toma la lista de dominios de la variable `KAMPUS_ALLOWED_EMAIL_DOMAINS`; ver [El proyecto](/docs/project#instituciones).
+
+<Callout title="Pendiente">
+  Los endpoints de registro, inicio y cierre de sesión se documentarán aquí cuando se implementen.
+</Callout>

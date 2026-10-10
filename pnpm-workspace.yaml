@@ -1,3 +1,8 @@
 allowBuilds:
-  esbuild: set this to true or false
-  unrs-resolver: set this to true or false
+  esbuild: true
+  unrs-resolver: true
+minimumReleaseAgeExclude:
+  - '@fumadocs/base-ui@16.17.1'
+  - '@fumadocs/tailwind@0.1.3'
+  - fumadocs-core@16.17.1
+  - fumadocs-mdx@15.4.7

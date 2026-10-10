@@ -1,0 +1,42 @@
+---
+title: "Backend"
+description: "API REST de Kampus construida con Laravel."
+---
+
+El repositorio [`backend-kampus`](https://github.com/WilbertDevMx/backend-kampus) contiene únicamente la API. La app móvil vive en su propio repositorio y consume esta API.
+
+## Stack
+
+| Componente | Tecnología |
+| --- | --- |
+| Framework | Laravel 13 (PHP 8.3) |
+| Autenticación | Laravel Sanctum (tokens) |
+| Base de datos | PostgreSQL 16 |
+| Tiempo real | Laravel Reverb + Echo (chat y notificaciones de match) |
+| Archivos | Bucket compatible con S3 (Cloudflare R2 / MinIO) |
+| Videollamada | LiveKit, detrás de una interfaz `VideoCallProvider` |
+| Pruebas | PHPUnit · Formato: Laravel Pint |
+
+## Estructura
+
+```
+backend-kampus/
+├── app/                # Modelos, controladores y lógica
+├── bootstrap/app.php   # Rutas, middleware y manejo de excepciones
+├── config/             # Configuración de Laravel
+├── database/           # Migraciones, factories y seeders
+├── routes/
+│   ├── api.php         # Endpoints de la API (prefijo /api)
+│   └── web.php
+├── tests/              # Pruebas (Feature y Unit)
+└── .github/            # CI y plantilla de pull request
+```
+
+## Contenido
+
+<Cards>
+  <Card title="Instalación" href="/docs/backend/installation">Requisitos y puesta en marcha local.</Card>
+  <Card title="Configuración" href="/docs/backend/configuration">Variables de entorno.</Card>
+  <Card title="Comandos útiles" href="/docs/backend/commands">Pruebas, formato y base de datos.</Card>
+  <Card title="Integración continua" href="/docs/backend/continuous-integration">Qué revisa CI en cada push y PR.</Card>
+</Cards>

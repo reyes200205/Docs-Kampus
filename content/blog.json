@@ -1,0 +1,22 @@
+{
+  "$schema": "./blog.schema.json",
+  "posts": [
+    {
+      "slug": "new-documentation",
+      "title": "Kampus ya tiene documentación",
+      "description": "Un solo lugar para la API, el backend, la app móvil y la forma de trabajar del equipo.",
+      "date": "2026-10-09",
+      "category": "release",
+      "coverText": "Docs v0.1",
+      "authors": [{ "name": "Jorge Alejandro Rentería Reyes" }]
+    },
+    {
+      "slug": "how-to-document",
+      "title": "Cómo documentar en Kampus",
+      "description": "Agregar páginas, publicar versiones en el changelog y escribir en este blog editando archivos MDX y JSON.",
+      "date": "2026-10-09",
+      "category": "article",
+      "href": "/docs/development/documentation"
+    }
+  ]
+}

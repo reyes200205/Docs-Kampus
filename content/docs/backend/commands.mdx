@@ -1,0 +1,13 @@
+---
+title: "Comandos útiles"
+description: "Comandos del día a día en el backend."
+---
+
+```bash
+php artisan test                 # Ejecuta las pruebas
+./vendor/bin/pint                # Corrige el formato del código
+./vendor/bin/pint --test         # Solo revisa el formato (lo mismo que hace CI)
+php artisan migrate:fresh --seed # Reinicia la base de datos con datos de prueba
+```
+
+Antes de abrir un pull request, corre `php artisan test` y `./vendor/bin/pint --test`: son las mismas revisiones que hace [CI](/docs/backend/continuous-integration).

@@ -1,0 +1,35 @@
+---
+title: "Solución de problemas"
+description: "Errores comunes al desarrollar la app y cómo resolverlos."
+---
+
+## La app no refleja cambios o muestra errores raros
+
+Limpia la caché de Metro:
+
+```bash
+pnpm expo start -c
+```
+
+## El celular no se conecta al servidor
+
+- Verifica que ambos estén en la misma Wi-Fi.
+- Revisa el firewall de Windows (ver [En Windows: revisa la red y el firewall](/docs/mobile/device#en-windows-revisa-la-red-y-el-firewall)).
+- Prueba con `pnpm expo start --tunnel`.
+
+## Expo Go dice que el proyecto es incompatible
+
+Actualiza Expo Go desde la tienda. El proyecto usa **SDK 57**.
+
+## pnpm descarga todo de nuevo
+
+Pasa si antes instalaste con `npm`. Borra `node_modules` y reinstala solo con pnpm:
+
+```powershell
+Remove-Item -Recurse -Force node_modules
+pnpm install
+```
+
+## La app no llega a la API
+
+Revisa [Conectar con el backend](/docs/mobile/device#conectar-con-el-backend): desde el celular hay que usar la IP de tu PC, no `localhost`.

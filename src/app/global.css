@@ -2,6 +2,37 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
+/* Paleta Kampus: el naranja de acento de la app (#FF7A1A) sobre neutros. */
+@theme {
+  --color-fd-primary: #c2510a;
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-ring: #ff7a1a;
+
+  /* brand: texto resaltado · brand-solid: botones · brand-deep / brand-light: degradados */
+  --color-brand: #c2510a;
+  --color-brand-solid: #e8650e;
+  --color-brand-deep: #7a2e05;
+  --color-brand-light: #ffb27a;
+}
+
+/* Modo oscuro con los mismos neutros que la app (fondo #09090B). */
+.dark {
+  --color-fd-background: #09090b;
+  --color-fd-card: #111113;
+  --color-fd-popover: #141416;
+  --color-fd-secondary: #18181b;
+  --color-fd-muted: #18181b;
+  --color-fd-border: #26262b;
+  --color-fd-primary: #ff9a4d;
+  --color-fd-primary-foreground: #1f0d02;
+  --color-fd-ring: #ff9a4d;
+
+  --color-brand: #ff9a4d;
+  --color-brand-solid: #e8650e;
+  --color-brand-deep: #5c2204;
+  --color-brand-light: #ffb27a;
+}
+
 html {
   scrollbar-gutter: stable;
 }
@@ -9,4 +40,43 @@ html {
 html > body[data-scroll-locked] {
   margin-right: 0px !important;
   --removed-body-scroll-bar-size: 0px !important;
+}
+
+/* Fondo del hero: manchas de color + grano. */
+.hero-bg {
+  background-color: var(--color-fd-background);
+  background-image:
+    radial-gradient(60% 70% at 0% 100%, color-mix(in oklch, var(--color-brand-solid) 75%, transparent), transparent 70%),
+    radial-gradient(45% 55% at 55% 0%, color-mix(in oklch, var(--color-brand-light) 30%, transparent), transparent 70%),
+    radial-gradient(50% 60% at 100% 30%, color-mix(in oklch, var(--color-brand-deep) 70%, transparent), transparent 70%);
+}
+
+.hero-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  opacity: 0.55;
+}
+
+/* Esfera de puntos. */
+.dot-sphere {
+  background-image: radial-gradient(circle, var(--color-brand-light) 1.6px, transparent 1.8px);
+  background-size: 7px 7px;
+  mask-image:
+    radial-gradient(circle at 50% 50%, black 0 49%, transparent 50%),
+    linear-gradient(200deg, black 35%, transparent 90%);
+  mask-composite: intersect;
+}
+
+/* Panel izquierdo del changelog: resplandor naranja desde la línea de tiempo. */
+.changelog-glow {
+  background-image:
+    radial-gradient(70% 60% at 100% 55%, color-mix(in oklch, var(--color-brand-solid) 30%, transparent), transparent 70%),
+    radial-gradient(40% 40% at 90% 20%, color-mix(in oklch, var(--color-brand-deep) 50%, transparent), transparent 70%);
+}
+
+/* Encabezado del blog: degradado naranja desde arriba. */
+.blog-glow {
+  background-image:
+    linear-gradient(to bottom, color-mix(in oklch, var(--color-brand-deep) 55%, transparent), transparent 85%),
+    radial-gradient(60% 80% at 15% 0%, color-mix(in oklch, var(--color-brand-solid) 30%, transparent), transparent 70%);
 }

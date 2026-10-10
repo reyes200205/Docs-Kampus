@@ -1,0 +1,44 @@
+---
+title: "Configuración"
+description: "Variables de entorno del backend."
+---
+
+La configuración vive en `.env`, que se crea a partir de `.env.example`. **Nunca** subas `.env` al repositorio.
+
+## Aplicación
+
+| Variable | Valor local | Para qué sirve |
+| --- | --- | --- |
+| `APP_NAME` | `Kampus` | Nombre de la aplicación |
+| `APP_URL` | `http://localhost:8000` | URL de la API |
+| `FRONTEND_URL` | `http://localhost:5173` | URL del cliente que consume la API |
+| `APP_LOCALE` | `es` | Idioma de mensajes y validaciones |
+| `APP_FAKER_LOCALE` | `es_MX` | Datos de prueba en español de México |
+
+## Base de datos
+
+| Variable | Valor local |
+| --- | --- |
+| `DB_CONNECTION` | `pgsql` |
+| `DB_HOST` | `127.0.0.1` |
+| `DB_PORT` | `5432` |
+| `DB_DATABASE` | `kampus` |
+| `DB_USERNAME` | `kampus` |
+| `DB_PASSWORD` | La de tu instalación local |
+
+## Kampus
+
+| Variable | Para qué sirve |
+| --- | --- |
+| `KAMPUS_ALLOWED_EMAIL_DOMAINS` | Dominios institucionales aceptados en el registro (RF-01), separados por comas |
+
+## Servicios
+
+| Variable | Valor local | Notas |
+| --- | --- | --- |
+| `SESSION_DRIVER` | `database` | |
+| `QUEUE_CONNECTION` | `database` | |
+| `CACHE_STORE` | `database` | |
+| `BROADCAST_CONNECTION` | `log` | Se cambiará a Reverb para el chat |
+| `MAIL_MAILER` | `log` | Los correos se escriben en `storage/logs` |
+| `FILESYSTEM_DISK` | `local` | En producción, el bucket S3 (`AWS_*`) |

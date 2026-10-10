@@ -1,0 +1,43 @@
+---
+title: "Instalación"
+description: "Cómo levantar el backend en tu computadora."
+---
+
+## Requisitos
+
+- PHP 8.3 o superior
+- Composer 2
+- PostgreSQL 16 (o MySQL 8, ver la nota más abajo)
+
+## Puesta en marcha
+
+```bash
+git clone https://github.com/WilbertDevMx/backend-kampus.git
+cd backend-kampus
+composer install
+cp .env.example .env
+php artisan key:generate
+```
+
+Crea la base de datos, ajusta las credenciales en `.env` (ver [Configuración](/docs/backend/configuration)) y levanta el servidor:
+
+```bash
+php artisan migrate
+php artisan serve
+```
+
+La API queda disponible en `http://localhost:8000/api`.
+
+## Usar la API desde el celular
+
+En el celular, `localhost` apunta al propio celular. Para que la app pueda consumir la API, levanta el servidor escuchando en la red:
+
+```bash
+php artisan serve --host=0.0.0.0 --port=8000
+```
+
+Y en la app usa la IP local de tu PC (por ejemplo `http://192.168.1.50:8000`). Ver [App móvil](/docs/mobile/device#conectar-con-el-backend).
+
+<Callout title="PostgreSQL o MySQL">
+  El proyecto está configurado para PostgreSQL porque la vista **Cerca** trabaja con datos geográficos. Si el equipo decide usar MySQL, basta con cambiar `DB_CONNECTION=mysql` y `DB_PORT=3306` en `.env`, y el servicio de base de datos en `.github/workflows/ci.yml`.
+</Callout>

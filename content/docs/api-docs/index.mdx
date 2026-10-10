@@ -1,0 +1,38 @@
+---
+title: "API REST"
+description: "Referencia de la API de Kampus: convenciones, autenticación y endpoints."
+---
+
+Esta sección documenta los endpoints de la API, con ejemplos de petición y respuesta.
+
+## URL base
+
+| Entorno | URL |
+| --- | --- |
+| Local | `http://localhost:8000/api` |
+| Local desde el celular | `http://<IP-de-tu-PC>:8000/api` (ver [App móvil](/docs/mobile/device#conectar-con-el-backend)) |
+
+## Convenciones
+
+- Todas las peticiones y respuestas usan **JSON**. Envía siempre `Accept: application/json`.
+- Los errores de cualquier ruta bajo `/api/*` se devuelven en JSON, nunca como página HTML.
+- Las rutas protegidas requieren un token de Sanctum. Ver [Autenticación](/docs/api-docs/authentication).
+- El idioma de los mensajes de validación es español (`APP_LOCALE=es`).
+
+## Estado del servicio
+
+```http
+GET /up
+```
+
+Responde `200` cuando la aplicación está arriba. Útil para monitoreo.
+
+## Endpoints
+
+| Método | Ruta | Auth | Descripción |
+| --- | --- | --- | --- |
+| `GET` | `/api/user` | Sí | Usuario autenticado |
+
+<Callout title="En construcción">
+  La API está en sus primeras tareas. Cada endpoint nuevo se documenta aquí como parte de la [Definition of Done](/docs/development/pull-requests#definition-of-done).
+</Callout>

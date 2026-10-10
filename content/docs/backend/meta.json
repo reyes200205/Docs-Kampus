@@ -1,0 +1,7 @@
+{
+  "title": "Backend",
+  "description": "Laravel, base de datos y operación",
+  "icon": "ServerCog",
+  "root": true,
+  "pages": ["index", "installation", "configuration", "commands", "continuous-integration"]
+}

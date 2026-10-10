@@ -1,0 +1,78 @@
+---
+title: "Instalación"
+description: "Requisitos, instalación y ejecución de la app."
+---
+
+## Requisitos
+
+| Herramienta | Versión | Cómo verificar |
+| --- | --- | --- |
+| [Node.js](https://nodejs.org/) | 20 LTS o superior (recomendado 22 o 24) | `node -v` |
+| [pnpm](https://pnpm.io/installation) | 10 o superior | `pnpm -v` |
+| [Git](https://git-scm.com/) | Cualquiera reciente | `git --version` |
+
+Si no tienes pnpm:
+
+```bash
+npm install -g pnpm
+```
+
+En tu celular instala **Expo Go**: [Android](https://play.google.com/store/apps/details?id=host.exp.exponent) · [iOS](https://apps.apple.com/app/expo-go/id982107779).
+
+<Callout type="warn" title="Este proyecto usa pnpm">
+  No uses `npm install` ni `yarn`: generan otro lockfile y mezclar gestores causa errores (módulos duplicados, descargas repetidas, etc.).
+</Callout>
+
+## Instalación
+
+```bash
+git clone https://github.com/reyes200205/Frontend-Kampus.git
+cd Frontend-Kampus
+pnpm install
+```
+
+La primera instalación tarda unos minutos. Las siguientes son mucho más rápidas porque pnpm reutiliza los paquetes que ya descargó.
+
+## Ejecutar
+
+```bash
+pnpm start
+```
+
+Esto levanta el servidor de desarrollo (Metro) y muestra un **código QR** y estos atajos:
+
+| Tecla | Acción |
+| --- | --- |
+| `a` | Abrir en emulador Android |
+| `i` | Abrir en simulador iOS (solo macOS) |
+| `w` | Abrir en el navegador |
+| `r` | Recargar la app |
+| `j` | Abrir el depurador |
+| `m` | Abrir el menú de desarrollo en el dispositivo |
+
+Deja esta terminal abierta mientras desarrollas. Al guardar cambios, la app se actualiza sola (Fast Refresh). Para abrirla en tu celular, ve a [Ver la app en tu celular](/docs/mobile/device).
+
+## Scripts
+
+| Comando | Qué hace |
+| --- | --- |
+| `pnpm start` | Inicia el servidor de desarrollo de Expo |
+| `pnpm android` | Inicia y abre en Android |
+| `pnpm ios` | Inicia y abre en iOS (macOS) |
+| `pnpm web` | Inicia y abre en el navegador |
+| `pnpm lint` | Revisa el código con ESLint |
+| `pnpm tsc --noEmit` | Revisa los tipos de TypeScript |
+
+Corre `pnpm lint` y `pnpm tsc --noEmit` antes de abrir un pull request.
+
+## Agregar dependencias
+
+Usa siempre `expo install` en lugar de `pnpm add`, porque elige la versión compatible con el SDK de Expo:
+
+```bash
+pnpm expo install <paquete>
+```
+
+<Callout title="Módulos nativos">
+  Expo Go solo trae los módulos nativos de Expo. Si agregas una librería con código nativo propio, ya no abrirá en Expo Go y se necesitará un [development build](https://docs.expo.dev/develop/development-builds/introduction/).
+</Callout>

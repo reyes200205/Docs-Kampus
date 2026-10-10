@@ -1,0 +1,7 @@
+{
+  "title": "API REST",
+  "description": "Endpoints, autenticación y ejemplos",
+  "icon": "Braces",
+  "root": true,
+  "pages": ["index", "authentication"]
+}

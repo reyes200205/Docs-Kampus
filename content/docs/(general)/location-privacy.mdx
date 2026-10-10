@@ -1,0 +1,27 @@
+---
+title: "Privacidad de la ubicación"
+description: "Reglas obligatorias para el manejo de datos de ubicación (RNF-11)."
+---
+
+Kampus maneja datos de ubicación para la vista **Cerca de ti**. Estas reglas aplican a todo el código, tanto en el backend como en la app.
+
+<Callout type="error" title="Regla principal">
+  **Nunca** se guarda la coordenada exacta de un usuario para el mapa.
+</Callout>
+
+## Qué se puede guardar
+
+- La **zona declarada** por el usuario (campus o colonia).
+- Una **celda aproximada de ~1 km**: un geohash de precisión 6.
+
+## Ubicación exacta
+
+La ubicación exacta solo viaja dentro de un **mensaje de chat** que el emisor autorizó explícitamente. No se almacena fuera de ese mensaje.
+
+## Borrado
+
+Al desactivar **Cerca de ti** o eliminar la cuenta, los datos de ubicación se borran.
+
+## Por qué PostgreSQL
+
+La vista **Cerca** trabaja con datos geográficos; por eso el backend usa PostgreSQL. Ver [Instalación del backend](/docs/backend/installation).
