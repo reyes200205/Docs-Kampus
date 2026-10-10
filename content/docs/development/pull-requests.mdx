@@ -1,13 +1,79 @@
 ---
 title: "Pull requests"
-description: "Cómo abrir, revisar y cerrar un pull request."
+description: "Paso a paso para abrir, revisar y mergear un pull request."
 ---
 
-## Abrir un PR
+Hay dos tipos de pull request, y cada uno va en una dirección distinta:
 
-- El destino siempre es `develop`.
-- El título sigue la [convención de commits](/docs/development/commits).
-- Llena la plantilla del repositorio (`.github/pull_request_template.md`):
+| PR | Dirección | Para qué | Cómo se mergea |
+| --- | --- | --- | --- |
+| **De tarea** | `feature/T-XX-...` → `develop` | Integrar tu trabajo | **Squash and merge** |
+| **De publicación** | `develop` → `main` | Publicar una versión | **Create a merge commit** |
+
+<Callout title="Los PR no se abren solos">
+  Hacer `git push` solo sube tus commits. El pull request lo abres tú en GitHub. A veces GitHub muestra un aviso amarillo **Compare & pull request** justo después del push; si no aparece, usa las ligas de abajo.
+</Callout>
+
+## PR de tarea: tu rama → develop
+
+1. Sube tu rama:
+
+   ```bash
+   git push -u origin feature/T-05-api-login
+   ```
+
+2. Abre la comparación en GitHub. Cambia el repositorio y el nombre de tu rama:
+
+   ```
+   https://github.com/reyes200205/Docs-Kampus/compare/develop...feature/T-05-api-login
+   ```
+
+   O desde el repositorio: **Pull requests → New pull request**.
+
+3. Revisa los selectores de arriba: **base: `develop`** ← **compare: `tu rama`**.
+4. Título con la [convención](/docs/development/commits), por ejemplo `feat: agrega login con correo institucional`. Con *squash*, **este título es el commit que llega a `develop`** y la línea que aparecerá en el changelog.
+5. Llena la plantilla (abajo) y da **Create pull request**.
+6. Espera los checks en verde y la aprobación de otro integrante.
+7. Mergea con **Squash and merge** y borra la rama.
+
+## PR de publicación: develop → main
+
+Se abre cuando el equipo decide publicar lo que ya está en `develop`.
+
+1. Abre esta liga (ya trae las ramas en el orden correcto):
+
+   ```
+   https://github.com/reyes200205/Docs-Kampus/compare/main...develop
+   ```
+
+2. Verifica la dirección: **base: `main`** ← **compare: `develop`**. La flecha apunta hacia `main`, que es a donde llega el código.
+3. Abajo debes ver los commits que se van a publicar y los archivos que cambian.
+4. Título: `chore(release): publica vX.Y.Z` (no afecta la versión, solo la identifica). Da **Create pull request**.
+5. Espera los checks. El bot comenta qué versión se publicará y su changelog; revísalo.
+6. Abre la flechita **▾** del botón verde y elige **Create a merge commit**. No uses *Squash*: se perderían los commits y el changelog quedaría con una sola línea.
+7. Revisa la pestaña **Releases** del repositorio: ahí aparece la versión nueva, y en unos minutos también en [/changelog](/changelog).
+
+### Así se ven los checks del PR de publicación
+
+![Checks del PR de develop a main: dos saltados y tres exitosos](/docs/pull-requests/checks.png)
+
+*Publicar versión* y *Desplegar en Cloudflare* aparecen como **Skipped**: es normal. Solo corren cuando el PR ya se mergeó a `main`.
+
+## Cómo saber si lo abriste bien
+
+### Al revés: base develop ← compare main
+
+![Comparación al revés: base develop, compare main](/docs/pull-requests/al-reves.png)
+
+Si arriba dice **base: `develop`** y **compare: `main`**, estás llevando `main` hacia `develop`. No lo crees: da clic en las flechas ⇄ entre los selectores para invertirlos. Otra pista: aparece un commit **"Merge pull request #..."** con **0 files changed**.
+
+### There isn't anything to compare
+
+![GitHub dice que no hay nada que comparar entre main y develop](/docs/pull-requests/nada-que-comparar.png)
+
+Con base `main` y compare `develop`, este mensaje significa que **`main` ya tiene todo lo de `develop`**: no hay nada pendiente de publicar. Probablemente ya se publicó; revisa **Releases** o la pestaña **Pull requests → Closed**. Primero hay que llevar cambios nuevos a `develop`.
+
+## Plantilla del PR
 
 | Apartado | Qué poner |
 | --- | --- |
@@ -21,10 +87,7 @@ description: "Cómo abrir, revisar y cerrar un pull request."
 
 - Al menos **otro integrante** revisa y aprueba el PR.
 - CI debe pasar. En el backend: formato, migraciones y pruebas (ver [Integración continua](/docs/backend/continuous-integration)). En la documentación: la convención de commits.
-
-## PR de develop a main
-
-Es el que publica una versión. Un bot comenta qué versión saldrá y su changelog; revísalo antes de aprobar y mergea con **"Create a merge commit"**. Ver [Versiones y changelog](/docs/development/releases).
+- Cómo se calcula la versión: ver [Versiones y changelog](/docs/development/releases).
 
 ## Definition of Done
 
