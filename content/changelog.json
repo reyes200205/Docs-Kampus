@@ -10,7 +10,7 @@
         {
           "type": "features",
           "items": [
-            { "text": "Secciones General, API REST, Backend, App móvil y Desarrollo." },
+            { "text": "Secciones General, Backend (con la API REST), App móvil y Desarrollo." },
             { "text": "Página de inicio con los colores de Kampus." },
             { "text": "Buscador estático: el índice se genera en el build y la búsqueda corre en el navegador." },
             { "text": "Changelog y blog alimentados desde `content/changelog.json` y `content/blog.json`." }

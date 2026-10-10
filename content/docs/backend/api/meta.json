@@ -1,7 +1,6 @@
 {
   "title": "API REST",
-  "description": "Endpoints, autenticación y ejemplos",
   "icon": "Braces",
-  "root": true,
+  "defaultOpen": true,
   "pages": ["index", "authentication"]
 }

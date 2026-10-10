@@ -1,18 +1,12 @@
 import Link from 'next/link';
 import { LogoMark } from '@/components/logo';
-import { AlignLeft, Braces, GitBranch, PanelLeft, Rocket, Search, ServerCog, Smartphone } from 'lucide-react';
+import { AlignLeft, GitBranch, PanelLeft, Rocket, Search, ServerCog, Smartphone } from 'lucide-react';
 
 const sections = [
   {
-    icon: Braces,
-    title: 'API REST',
-    description: 'Autenticación con Sanctum, formato de respuestas y endpoints con ejemplos de petición y respuesta.',
-    href: '/docs/api-docs',
-  },
-  {
     icon: ServerCog,
-    title: 'Backend',
-    description: 'Laravel 13, PostgreSQL, tiempo real, archivos y videollamada: cómo levantarlo y operarlo.',
+    title: 'Backend y API',
+    description: 'Laravel 13 y PostgreSQL: cómo levantarlo, y la API REST con autenticación y endpoints de ejemplo.',
     href: '/docs/backend',
   },
   {
@@ -49,12 +43,12 @@ export default function HomePage() {
             <div className="mt-10 flex flex-wrap gap-3">
               <Link
                 href="/docs"
-                className="rounded-full bg-brand-solid px-6 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                className="rounded-full bg-brand-solid px-6 py-3 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90"
               >
                 Empezar
               </Link>
               <Link
-                href="/docs/api-docs"
+                href="/docs/backend/api"
                 className="rounded-full border bg-fd-background/60 px-6 py-3 text-sm font-medium backdrop-blur transition-colors hover:bg-fd-accent"
               >
                 Ver la API
@@ -77,7 +71,7 @@ export default function HomePage() {
         </p>
       </section>
 
-      <section className="mx-auto mt-20 grid w-full max-w-350 gap-4 px-6 sm:grid-cols-2 md:px-20 lg:grid-cols-4">
+      <section className="mx-auto mt-20 grid w-full max-w-350 gap-4 px-6 sm:grid-cols-2 md:px-20 lg:grid-cols-3">
         {sections.map(({ icon: Icon, title, description, href }) => (
           <Link
             key={href}
@@ -106,7 +100,7 @@ export default function HomePage() {
             </div>
             <Link
               href="/docs"
-              className="inline-flex items-center gap-2 rounded-full bg-brand-solid px-6 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-full bg-brand-solid px-6 py-3 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90"
             >
               <Rocket className="size-4" />
               Ir a la introducción
@@ -120,7 +114,7 @@ export default function HomePage() {
 
 /** Maqueta estática de la interfaz de docs, como la vista previa de fumadocs.dev. */
 function DocsPreview() {
-  const nav = ['Introducción', 'API REST', 'Backend', 'App móvil', 'Desarrollo'];
+  const nav = ['Introducción', 'Backend', 'App móvil', 'Desarrollo'];
   const toc = ['Qué es Kampus', 'Instituciones', 'Stack', 'Equipo', 'Privacidad'];
 
   return (

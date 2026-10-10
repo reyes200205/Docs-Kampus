@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Equipo de Kampus",
+  "description": "Esquema de content/team.json. VS Code lo usa para autocompletar y marcar errores mientras escribes.",
+  "type": "object",
+  "required": ["members"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "members": {
+      "type": "array",
+      "description": "Integrantes, en el orden en que aparecen en la página.",
+      "items": { "$ref": "#/definitions/member" }
+    }
+  },
+  "definitions": {
+    "member": {
+      "type": "object",
+      "required": ["name", "role", "areas", "summary", "responsibilities"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": "string", "description": "Rol visible, p. ej. \"Scrum Master · Backend\"." },
+        "areas": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": ["scrum", "product", "backend", "frontend", "docs"],
+            "description": "scrum: Scrum · product: Producto · backend: Backend · frontend: App móvil · docs: Documentación"
+          }
+        },
+        "summary": { "type": "string", "description": "Una línea sobre lo que hace." },
+        "responsibilities": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" },
+          "description": "Qué hace en el proyecto. Se puede usar `código` entre comillas invertidas."
+        },
+        "github": { "type": "string", "description": "Opcional. Usuario de GitHub (sin @). Se usa también para el avatar." },
+        "avatar": { "type": "string", "description": "Opcional. Ruta dentro de /public, p. ej. /team/wilbert.jpg. Tiene prioridad sobre el avatar de GitHub." }
+      }
+    }
+  }
+}

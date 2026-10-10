@@ -2,39 +2,37 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
-/* Paleta Kampus: el naranja de acento de la app (#FF7A1A) sobre neutros. */
+/*
+ * Colores de fumadocs.dev: tema neutral + naranja (claro) / amarillo (oscuro).
+ * Coinciden con el acento de la app: naranja en modo claro y amarillo en oscuro.
+ */
 @theme {
-  --color-fd-primary: #c2510a;
-  --color-fd-primary-foreground: #ffffff;
-  --color-fd-ring: #ff7a1a;
+  --color-fd-primary: hsl(41, 100%, 40%);
 
-  /* brand: texto resaltado · brand-solid: botones · brand-deep / brand-light: degradados */
-  --color-brand: #c2510a;
-  --color-brand-solid: #e8650e;
-  --color-brand-deep: #7a2e05;
-  --color-brand-light: #ffb27a;
+  /* brand: texto resaltado · brand-solid / brand-foreground: botones · brand-deep / brand-light: degradados */
+  --color-brand: hsl(26, 73%, 51%);
+  --color-brand-solid: hsl(26, 73%, 51%);
+  --color-brand-foreground: #ffffff;
+  --color-brand-deep: #c6bb58;
+  --color-brand-light: hsl(33, 100%, 50%);
 }
 
-/* Modo oscuro con los mismos neutros que la app (fondo #09090B). */
 .dark {
-  --color-fd-background: #09090b;
-  --color-fd-card: #111113;
-  --color-fd-popover: #141416;
-  --color-fd-secondary: #18181b;
-  --color-fd-muted: #18181b;
-  --color-fd-border: #26262b;
-  --color-fd-primary: #ff9a4d;
-  --color-fd-primary-foreground: #1f0d02;
-  --color-fd-ring: #ff9a4d;
+  --color-fd-primary: #fff383;
 
-  --color-brand: #ff9a4d;
-  --color-brand-solid: #e8650e;
-  --color-brand-deep: #5c2204;
-  --color-brand-light: #ffb27a;
+  --color-brand: #fff383;
+  --color-brand-solid: #fff383;
+  --color-brand-foreground: #000000;
+  --color-brand-deep: #fc7744;
+  --color-brand-light: #fff7c8;
 }
 
 html {
   scrollbar-gutter: stable;
+}
+
+body {
+  background-color: var(--color-fd-background);
 }
 
 html > body[data-scroll-locked] {
@@ -46,9 +44,9 @@ html > body[data-scroll-locked] {
 .hero-bg {
   background-color: var(--color-fd-background);
   background-image:
-    radial-gradient(60% 70% at 0% 100%, color-mix(in oklch, var(--color-brand-solid) 75%, transparent), transparent 70%),
-    radial-gradient(45% 55% at 55% 0%, color-mix(in oklch, var(--color-brand-light) 30%, transparent), transparent 70%),
-    radial-gradient(50% 60% at 100% 30%, color-mix(in oklch, var(--color-brand-deep) 70%, transparent), transparent 70%);
+    radial-gradient(60% 70% at 0% 100%, color-mix(in oklch, var(--color-brand-solid) 35%, transparent), transparent 70%),
+    radial-gradient(45% 55% at 55% 0%, color-mix(in oklch, var(--color-brand-light) 15%, transparent), transparent 70%),
+    radial-gradient(50% 60% at 100% 30%, color-mix(in oklch, var(--color-brand-deep) 30%, transparent), transparent 70%);
 }
 
 .hero-grain {
@@ -67,16 +65,16 @@ html > body[data-scroll-locked] {
   mask-composite: intersect;
 }
 
-/* Panel izquierdo del changelog: resplandor naranja desde la línea de tiempo. */
+/* Panel izquierdo del changelog: resplandor de color desde la línea de tiempo. */
 .changelog-glow {
   background-image:
-    radial-gradient(70% 60% at 100% 55%, color-mix(in oklch, var(--color-brand-solid) 30%, transparent), transparent 70%),
-    radial-gradient(40% 40% at 90% 20%, color-mix(in oklch, var(--color-brand-deep) 50%, transparent), transparent 70%);
+    radial-gradient(70% 60% at 100% 55%, color-mix(in oklch, var(--color-brand-solid) 18%, transparent), transparent 70%),
+    radial-gradient(40% 40% at 90% 20%, color-mix(in oklch, var(--color-brand-deep) 20%, transparent), transparent 70%);
 }
 
-/* Encabezado del blog: degradado naranja desde arriba. */
+/* Encabezado del blog: degradado de color desde arriba. */
 .blog-glow {
   background-image:
-    linear-gradient(to bottom, color-mix(in oklch, var(--color-brand-deep) 55%, transparent), transparent 85%),
-    radial-gradient(60% 80% at 15% 0%, color-mix(in oklch, var(--color-brand-solid) 30%, transparent), transparent 70%);
+    linear-gradient(to bottom, color-mix(in oklch, var(--color-brand-deep) 15%, transparent), transparent 85%),
+    radial-gradient(60% 80% at 15% 0%, color-mix(in oklch, var(--color-brand-solid) 18%, transparent), transparent 70%);
 }

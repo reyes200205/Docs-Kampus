@@ -15,11 +15,11 @@ export function PostCover({ post, className }: { post: Post; className?: string 
       <div className="hero-grain pointer-events-none absolute inset-0" />
       <div className="dot-sphere pointer-events-none absolute -right-10 -bottom-16 size-56 opacity-70" />
       <div className="relative text-center">
-        <p className="flex items-center justify-center gap-2 text-sm font-medium text-white/70">
+        <p className="flex items-center justify-center gap-2 text-sm font-medium text-fd-muted-foreground">
           <LogoMark className="size-4" />
           Kampus
         </p>
-        <p className="mt-2 text-3xl font-semibold tracking-tight text-white md:text-4xl">
+        <p className="mt-2 text-3xl font-semibold tracking-tight text-fd-foreground md:text-4xl">
           {post.coverText ?? post.title}
         </p>
       </div>
@@ -57,7 +57,7 @@ export function Authors({ authors }: { authors?: Author[] }) {
             <span
               key={author.name}
               title={author.name}
-              className="flex size-8 items-center justify-center rounded-full border-2 border-fd-card bg-brand-solid text-xs font-semibold text-white"
+              className="flex size-8 items-center justify-center rounded-full border-2 border-fd-card bg-brand-solid text-xs font-semibold text-brand-foreground"
             >
               {initials(author.name)}
             </span>

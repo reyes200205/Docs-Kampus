@@ -1,7 +1,14 @@
 {
   "title": "Backend",
-  "description": "Laravel, base de datos y operación",
+  "description": "API REST, Laravel y base de datos",
   "icon": "ServerCog",
   "root": true,
-  "pages": ["index", "installation", "configuration", "commands", "continuous-integration"]
+  "pages": [
+    "index",
+    "installation",
+    "configuration",
+    "commands",
+    "continuous-integration",
+    "api"
+  ]
 }

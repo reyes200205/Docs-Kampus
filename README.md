@@ -15,13 +15,13 @@ Abre http://localhost:3000.
 
 | Ruta | Qué contiene |
 | --- | --- |
-| `content/docs/(general)/` | Introducción, el proyecto, privacidad de la ubicación y equipo |
-| `content/docs/api-docs/` | API REST |
-| `content/docs/backend/` | Backend (Laravel) |
+| `content/docs/(general)/` | Introducción, el proyecto y privacidad de la ubicación |
+| `content/docs/backend/` | Backend (Laravel) y, en `api/`, la API REST |
 | `content/docs/mobile/` | App móvil (Expo) |
 | `content/docs/development/` | Flujo de Git, commits, pull requests y cómo documentar |
 | `content/changelog.json` | Versiones publicadas (página `/changelog`) |
 | `content/blog.json` + `content/blog/*.mdx` | Publicaciones del blog (página `/blog`) |
+| `content/team.json` | Integrantes y lo que hace cada uno (página `/team`) |
 
 Cada carpeta de `content/docs` con `"root": true` en su `meta.json` es una sección del selector del menú lateral. La guía completa está en la página **Desarrollo → Documentación**.
 
