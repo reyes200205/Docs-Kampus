@@ -1,0 +1,7 @@
+{
+  "title": "Proyecto",
+  "description": "Unidad 1 (anteproyecto) y Unidad 2",
+  "icon": "GraduationCap",
+  "root": true,
+  "pages": ["index", "unit-1", "unit-2"]
+}
