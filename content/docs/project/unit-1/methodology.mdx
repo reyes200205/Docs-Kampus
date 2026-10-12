@@ -1,0 +1,55 @@
+---
+title: "Metodología y roles"
+description: "Scrum, roles del equipo y plan de contingencia."
+---
+
+## 9. Metodología de desarrollo y roles del equipo
+
+### 9.1 Metodología: Scrum
+
+Se eligió **Scrum** con sprints de dos semanas por las siguientes razones:
+
+- **Entregas incrementales alineadas a las revisiones.** Las revisiones con el profesor son los lunes y martes; cada sprint termina en lunes (Sprint Review) y arranca en martes (Sprint Planning), de modo que cada revisión evalúa un incremento funcional.
+- **Priorización explícita del MVP.** El Product Backlog ordenado por MoSCoW permite recortar funciones "Should/Could" si un sprint se retrasa, sin comprometer las "Must".
+- **Equipo pequeño y co-localizado.** Cinco integrantes en el mismo grupo (9A) pueden sostener dailies breves y coordinación directa.
+- **Requisitos que pueden ajustarse.** Las pruebas de usabilidad y la retroalimentación de cada revisión pueden cambiar prioridades; Scrum lo absorbe en la siguiente planeación.
+
+#### Eventos
+
+| Evento | Cuándo | Duración | Qué se hace |
+| --- | --- | --- | --- |
+| Sprint | Cada dos semanas | 2 semanas (el Sprint 0 y el Sprint 5 duran una) | Se construye un incremento funcional. |
+| Sprint Planning | Martes, inicio del sprint | 1 hora | Se seleccionan historias del backlog y se desglosan en tareas. |
+| Daily Scrum | Lunes a viernes | 10 minutos | Presencial o en línea. |
+| Sprint Review | Lunes, fin del sprint | Con el profesor | Se demuestra el incremento funcionando. |
+| Retrospectiva | Martes, antes del Planning | 30 minutos | Qué mejorar en el siguiente sprint. |
+
+#### Artefactos y herramientas
+
+- **Product Backlog y Sprint Backlog:** tablero por sprint con las tareas `T-XX`.
+- **Incremento:** versión desplegada en el entorno de pruebas al cierre de cada sprint.
+- **Definition of Done (DoD):** código revisado por PR de otro integrante, pruebas del módulo pasando, funcionalidad verificada en móvil y escritorio, documentación de la API actualizada. Ver [Pull requests](/docs/development/pull-requests).
+
+<Callout title="Herramientas en uso">
+  El anteproyecto proponía GitHub Projects y Discord. El equipo usa [Plane](https://app.plane.so/utt-plane/) para el backlog y los sprints, y Slack para la comunicación. GitHub se mantiene para el código, los pull requests y la integración continua.
+</Callout>
+
+### 9.2 Roles y responsabilidades
+
+| Integrante | Rol Scrum | Área | Responsabilidades |
+| --- | --- | --- | --- |
+| **Jorge Alejandro Rentería Reyes** | Product Owner | Documentación | Mantener y priorizar el Product Backlog; redactar historias de usuario y criterios de aceptación; documentación del proyecto (anteproyecto, manuales, actas de revisión); definición de contenido, textos de la app y de consentimiento de ubicación; diseño y aplicación de las pruebas de usabilidad; QA funcional; contrato inicial de la API (OpenAPI) con apoyo del backend. |
+| **Wilbert Omar Acosta Barrera** | Scrum Master (propuesto) / Desarrollador backend | Backend | Facilitar los eventos Scrum y remover impedimentos; API de autenticación, descubrimiento/match, grupos, bloqueo/reporte; catálogo de zonas y ubicación aproximada (geohash); configuración de repositorios, CI y despliegue; API de la vista "Cerca" y prueba de carga. |
+| **Mario Humberto García Rodríguez** | Desarrollador backend | Backend | Diseño de base de datos y migraciones; API de registro/verificación, perfil y chat (incluidos el envío de imágenes y el mensaje de ubicación); servidor WebSocket (Reverb); integración de LiveKit en el servidor; datos de demostración y API de moderación. |
+| **Luis Carlos Fernández Quiñones** | Desarrollador frontend | Frontend | Pantallas de registro/login, descubrimiento (swipe y perfil expandible), chat con ubicación y videollamada; integración con la API y WebSockets; pruebas en navegadores móviles; pantalla de Ajustes. |
+| **Marcelo Alessandro Sifuentes de la Cruz** | Desarrollador frontend | Frontend | Sistema de diseño y componentes base; estilo del mapa, selección de zona y vista "Cerca"; pantallas de perfil, matches, grupos y moderación; responsividad y accesibilidad; traslado de wireframes a Figma. |
+
+### 9.3 Plan de contingencia
+
+| Situación | Acción |
+| --- | --- |
+| **Baja o ausencia prolongada de un integrante** | Cada área tiene dos responsables que comparten el conocimiento del módulo; el Product Owner absorbe QA y pruebas; se priorizan las historias "Should/Could" en la siguiente planeación. |
+| **Retraso en un sprint** | Se cortan primero las historias "Could", luego las "Should"; nunca las "Must". El Sprint 5 incluye tiempo de amortiguación para el cierre. |
+| **Falla o cambio del proveedor de videollamada** | El patrón Adapter permite sustituir LiveKit por otro proveedor (Daily, Agora) o por la versión autoalojada; mientras tanto, la comunicación continúa por chat. |
+| **Conflictos de integración entre frontend y backend** | Contrato de la API en OpenAPI desde el Sprint 1; datos de prueba (seeders) compartidos; integración continua en `develop` con revisión cruzada. |
+| **Problemas de hosting o costos** | Alternativa de despliegue en el VPS del equipo con Docker; capas gratuitas de servicios; monitoreo del consumo en cada sprint. |
