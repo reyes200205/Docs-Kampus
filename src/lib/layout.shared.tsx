@@ -14,9 +14,8 @@ export function baseOptions(): BaseLayoutProps {
     nav: {
       title: (
         <span className="flex items-center gap-2 font-semibold">
-          <LogoMark className="size-6" />
           {/* "Kam" en el color de acento, igual que el logotipo de la app. */}
-          <span>
+          <span className="text-2xl font-semibold">
             <span className="text-brand">Kam</span>pus
           </span>
         </span>
