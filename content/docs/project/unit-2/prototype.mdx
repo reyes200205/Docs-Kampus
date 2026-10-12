@@ -1,0 +1,57 @@
+---
+title: "Prototipo y maquetado"
+description: "Del wireframe al prototipo navegable y a las pantallas construidas en Expo."
+---
+
+## Prototipo
+
+El prototipo parte de los [wireframes](/docs/project/unit-1/wireframes) del anteproyecto (10 pantallas en móvil y 3 vistas de escritorio) y define el flujo de navegación, la distribución de cada pantalla y la experiencia de usuario.
+
+| Entregable | Estado | Enlace |
+| --- | :---: | --- |
+| Wireframes móvil (360 × 740) y escritorio (1280 × 800) | ✅ | [Wireframes](/docs/project/unit-1/wireframes) |
+| Flujo de navegación | ✅ | [Flujo de navegación](/docs/project/unit-1/wireframes#141-flujo-de-navegación) |
+| Prototipo navegable en Figma | 🟡 | Pendiente: agregar el enlace público de Figma |
+
+<Callout title="Para completar el prototipo">
+  En Figma, conecta las pantallas con **Prototype → Interactions** siguiendo el flujo de navegación (inicio de sesión → registro → verificación → perfil → descubrir → match → chat → videollamada). Comparte el archivo con **Anyone with the link can view** y pega el enlace en la tabla de arriba.
+</Callout>
+
+## Maquetado
+
+Las pantallas se construyen en Expo con Expo Router: cada archivo dentro de `src/app/` es una ruta, y la misma pantalla funciona en web y en móvil.
+
+| Pantalla | Archivo | Requisito | Estado |
+| --- | --- | --- | :---: |
+| Inicio de sesión | `src/app/auth/login/index.tsx` | RF-02 | ✅ |
+| Registro | `src/app/auth/register/index.tsx` | RF-01, RF-04 | ✅ |
+| Revisa tu correo (verificación) | `src/components/auth/check-email-card.tsx` | RF-01 | ✅ |
+| Recuperar contraseña | `src/app/auth/forgot-password/index.tsx` | RF-02 | ✅ |
+| Perfil (crear y editar) | — | RF-03, RF-18 | ⬜ Sprint 2 |
+| Descubrir y perfil expandido | — | RF-05, RF-06, RF-21 | ⬜ Sprint 2 |
+| Matches y chat | — | RF-07, RF-08, RF-09 | ⬜ Sprint 3 |
+| Grupos | — | RF-11, RF-12 | ⬜ Sprint 4 |
+| Vista "Cerca" | — | RF-19 | ⬜ Sprint 4 |
+| Videollamada | — | RF-10 | ⬜ Sprint 4 |
+
+### Componentes base
+
+| Componente | Archivo | Uso |
+| --- | --- | --- |
+| Botón | `src/components/ui/button.tsx` | Acciones primarias y secundarias |
+| Campo de texto | `src/components/ui/text-field.tsx` | Formularios con etiqueta y error |
+| Casilla | `src/components/ui/checkbox.tsx` | Aceptar aviso de privacidad y normas |
+| Logo | `src/components/kampus-logo.tsx` | Encabezado de las pantallas de acceso |
+| Tema | `src/constants/theme.ts` | Colores y tipografía de la marca |
+
+Cómo levantar la app: [Instalación](/docs/mobile/installation).
+
+## Criterios de calidad
+
+- **Semántica y accesibilidad:** cada control tiene etiqueta accesible (`accessibilityLabel`), contraste AA y tamaño táctil mínimo de 44 px (RNF-10).
+- **Responsividad:** usable de 360 px a 1920 px sin desplazamiento horizontal (RNF-01).
+- **Fidelidad al diseño:** colores, tipografía y espaciado del [sistema de marca](/docs/project/unit-1/content#152-imágenes-e-identidad-visual).
+
+<Callout type="info" title="Capturas">
+  Agrega capturas de cada pantalla terminada (web y móvil) en `public/docs/project/screens/` y enlázalas en esta página.
+</Callout>
