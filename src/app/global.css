@@ -2,6 +2,10 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
+/* Turbopack (Lightning CSS) no entiende ::highlight() y avisa en cada arranque. Se quitan estas dos clases de
+   Fumadocs y el mismo estilo se aplica en src/app/layout.tsx. */
+@source not inline('[&_::highlight(fd-search)]:text-fd-primary [&_::highlight(fd-search)]:underline');
+
 /*
  * Colores de fumadocs.dev: tema neutral + naranja (claro) / amarillo (oscuro).
  * Coinciden con el acento de la app: naranja en modo claro y amarillo en oscuro.
