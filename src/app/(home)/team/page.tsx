@@ -28,6 +28,7 @@ export default function TeamPage() {
           <p className="mt-5 max-w-2xl text-lg text-fd-muted-foreground md:text-xl">
             Las personas que construyen Kampus y de qué se encarga cada una.
           </p>
+          <p className="mt-2 text-lg text-fd-muted-foreground">Si tienes alguna duda o sugerencia, no dudes en contactar a cualquiera de nuestros integrantes.</p>
           <div className="mt-8 flex flex-wrap gap-2">
             {areas
               .filter((area) => count(area) > 0)
@@ -41,7 +42,7 @@ export default function TeamPage() {
       </section>
 
       {/* Los 5 en una fila en pantallas anchas (con subgrid para alinear las secciones); en las demás, la última fila se centra. */}
-      <div className="mx-auto flex max-w-400 flex-wrap justify-center gap-5 px-6 pt-12 md:px-12 xl:grid xl:grid-cols-5 xl:gap-y-6">
+      <div className="mx-auto flex max-w-400 flex-wrap justify-center gap-5 px-6 pt-12 md:px-12 xl:grid xl:grid-cols-3 xl:gap-y-6">
         {members.map((member) => (
           <MemberCard key={member.name} member={member} />
         ))}

@@ -18,6 +18,37 @@
       ]
     },
     {
+      "name": "Jorge Alejandro Rentería Reyes",
+      "role": "Product Owner · Documentación",
+      "areas": [
+        "product",
+        "docs",
+        "frontend"
+      ],
+      "github": "reyes200205",
+      "summary": "Define qué se construye y mantiene la documentación.",
+      "responsibilities": [
+        "Prioriza requisitos (RF / RNF) y backlog.",
+        "Valida cada entrega.",
+        "Mantiene este sitio de documentación.",
+        "Creó la base de la app: auth, componentes y tema."
+      ]
+    },
+    {
+      "name": "Marcelo Alessandro Sifuentes de la Cruz",
+      "role": "Frontend",
+      "areas": [
+        "frontend"
+      ],
+      "github": "aless1dz",
+      "summary": "Construye las pantallas de la app móvil.",
+      "responsibilities": [
+        "Pantallas y navegación con Expo Router.",
+        "Componentes de interfaz reutilizables.",
+        "Conecta la app con la API."
+      ]
+    },
+    {
       "name": "Mario Humberto García Rodríguez",
       "role": "Backend",
       "areas": [
@@ -44,37 +75,6 @@
         "Pantallas y navegación con Expo Router.",
         "Componentes de interfaz reutilizables.",
         "Conecta la app con la API."
-      ]
-    },
-    {
-      "name": "Marcelo Alessandro Sifuentes de la Cruz",
-      "role": "Frontend",
-      "areas": [
-        "frontend"
-      ],
-      "github": "aless1dz",
-      "summary": "Construye las pantallas de la app móvil.",
-      "responsibilities": [
-        "Pantallas y navegación con Expo Router.",
-        "Componentes de interfaz reutilizables.",
-        "Conecta la app con la API."
-      ]
-    },
-    {
-      "name": "Jorge Alejandro Rentería Reyes",
-      "role": "Product Owner · Documentación",
-      "areas": [
-        "product",
-        "docs",
-        "frontend"
-      ],
-      "github": "reyes200205",
-      "summary": "Define qué se construye y mantiene la documentación.",
-      "responsibilities": [
-        "Prioriza requisitos (RF / RNF) y backlog.",
-        "Valida cada entrega.",
-        "Mantiene este sitio de documentación.",
-        "Creó la base de la app: auth, componentes y tema."
       ]
     }
   ]
