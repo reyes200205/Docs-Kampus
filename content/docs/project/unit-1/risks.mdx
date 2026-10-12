@@ -1,0 +1,24 @@
+---
+title: "Análisis de riesgos"
+description: "Riesgos del proyecto, su puntaje y el plan para mitigarlos."
+---
+
+## 7. Análisis de riesgos
+
+*Puntaje = Probabilidad × Impacto. Escala de 1 (muy baja / bajo) a 5 (muy alta / alto) en cada eje.*
+
+| # | Riesgo | Prob. | Impacto | Puntaje | Nivel | Consecuencia | Respuesta | Plan de manejo |
+| :---: | --- | :---: | :---: | :---: | :---: | --- | :---: | --- |
+| R1 | Baja adopción inicial de la app ("red vacía", pocos usuarios al lanzar) | 4 | 5 | **20** | 🔴 Alto | Desinterés de los primeros usuarios, abandono rápido de la plataforma y pérdida de tracción inicial. | Mitigar | Lanzamiento piloto focalizado en la semana de inducción, precargar clubes reales y buscar alianzas con coordinadores de tutorías. |
+| R2 | Bloqueo de permisos de hardware (cámara y micrófono) en navegadores móviles | 4 | 4 | **16** | 🔴 Alto | Falla en la videollamada 1 a 1 y experiencia frustrante para el usuario. | Mitigar | Servir la aplicación estrictamente vía HTTPS, desplegar guía interactiva de permisos y permitir alternativa de solo chat o audio. |
+| R3 | Uso indebido de la plataforma (acoso, contenido inapropiado) por falta de moderación automatizada | 3 | 5 | **15** | 🔴 Alto | Deterioro de la seguridad del entorno digital, afectación a usuarios e imagen institucional dañada. | Mitigar | Aceptar normas de comunidad al registrarse, ofrecer bloqueo/reporte directo y operar un panel de moderación con respuesta ≤ 48 h. |
+| R4 | No completar a tiempo el módulo de videollamadas | 4 | 3 | **12** | 🟡 Medio | Retraso en el cronograma o entrega incompleta de funciones importantes. | Mitigar | Usar un SDK administrado (LiveKit) en lugar de WebRTC propio, hacer spike técnico en el Sprint 3 y mantenerlo como función "Should" prescindible para el MVP. |
+| R5 | Falta de apoyo o validación de UTT, UAdeC o Tec Laguna para difundir la app | 3 | 4 | **12** | 🟡 Medio | Dificultad para llegar orgánicamente a la población estudiantil objetivo. | Mitigar | Presentar una demo funcional en el Sprint 3 a coordinadores; la verificación por dominio institucional opera sin requerir convenios. |
+| R6 | Retrasos por la curva de aprendizaje del equipo con el stack tecnológico | 4 | 3 | **12** | 🟡 Medio | Cuellos de botella en la construcción y entregables tardíos. | Mitigar | Elegir tecnologías que el equipo domina (Laravel), capacitación corta en los Sprints 0/1 y programación en pareja. |
+| R7 | Verificación institucional insuficiente (se registran usuarios no estudiantes) | 3 | 3 | **9** | 🟡 Medio | Ingreso de perfiles ajenos a las comunidades universitarias autorizadas. | Mitigar | Lista blanca de dominios de correo institucional, verificación obligatoria por enlace y reportes de la comunidad. |
+| R8 | Filtración o mal manejo de datos personales e imágenes | 2 | 5 | **10** | 🟡 Medio | Vulneración de la privacidad de los alumnos e incumplimiento de la LFPDPPP. | Mitigar | HTTPS, hash de contraseñas, bucket privado con URLs firmadas temporales y recolección mínima de datos. |
+| R9 | Los costos de servicios de terceros (videollamada, hosting) superan el presupuesto | 3 | 3 | **9** | 🟡 Medio | Interrupción del video o del despliegue por limitaciones financieras. | Mitigar | Aprovechar capas gratuitas (LiveKit 5,000 min/mes, hosting educativo o VPS propio) y monitorear el consumo en cada sprint. |
+| R10 | Escalabilidad insuficiente del backend ante picos de uso (inicio de semestre) | 2 | 3 | **6** | 🟢 Bajo | Lentitud o caídas temporales durante alta concurrencia. | Mitigar | Arquitectura desacoplada API / cliente / WebSocket, índices en base de datos, caché Redis y pruebas de carga en el Sprint 5. |
+| R11 | Dependencia de cambios o disponibilidad de APIs de terceros (video, correo, mapas) | 2 | 3 | **6** | 🟢 Bajo | Incompatibilidades o interrupción no planificada de integraciones clave. | Mitigar | Patrón Adapter en servicios externos para reemplazarlos ágilmente y versiones fijas de SDKs y dependencias. |
+
+**Nivel de riesgo:** 🟢 Bajo (1–6) · 🟡 Medio (7–14) · 🔴 Alto (15–25)
