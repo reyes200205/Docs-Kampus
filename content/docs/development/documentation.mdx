@@ -51,6 +51,15 @@ Los nombres de archivo van en inglés y con guiones (`git-workflow.mdx`); los t�
 
 `Callout` acepta `type="info"`, `"warn"`, `"error"` y `"success"`.
 
+Para diagramas (entidad-relación, casos de uso, flujos) usa `Mermaid` con la sintaxis de [Mermaid](https://mermaid.js.org):
+
+```mdx
+<Mermaid chart={`
+erDiagram
+    users ||--o| profiles : "tiene"
+`} />
+```
+
 ## Publicar una versión en el changelog
 
 Las versiones de la documentación se publican solas al mergear `develop` en `main` (ver [Versiones y changelog](/docs/development/releases)). La página también lee `content/changelog.json`, para agregar a mano versiones de otros proyectos mientras no tengan su propio versionado.
