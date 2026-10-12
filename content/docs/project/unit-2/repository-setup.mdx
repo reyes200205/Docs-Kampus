@@ -1,0 +1,73 @@
+---
+title: "Configuración de los repositorios"
+description: "Parámetros iniciales, accesos, archivos de exclusión y manejo de credenciales."
+---
+
+## Repositorios
+
+El proyecto se divide en tres repositorios independientes, uno por aplicación:
+
+| Repositorio | Contenido | Rama por defecto |
+| --- | --- | --- |
+| [`backend-kampus`](https://github.com/WilbertDevMx/backend-kampus) | API REST en Laravel | `develop` |
+| [`Frontend-Kampus`](https://github.com/reyes200205/Frontend-Kampus) | App en Expo (web y móvil) | `main` → cambiar a `develop` |
+| [`Docs-Kampus`](https://github.com/reyes200205/Docs-Kampus) | Este sitio de documentación | `main` → cambiar a `develop` |
+
+Separarlos permite que cada parte tenga su propio CI, sus dependencias y su versionado, y que los permisos se den por área.
+
+## Parámetros iniciales
+
+| Archivo | Repositorio | Para qué |
+| --- | --- | --- |
+| `.gitignore` | Los tres | Excluye dependencias, compilados y credenciales (ver abajo). |
+| `.gitattributes` | Backend | Fuerza saltos de línea `LF` (`* text=auto eol=lf`) para que Windows y Linux no generen diferencias falsas. |
+| `.editorconfig` | Backend | Indentación y codificación comunes en todos los editores. |
+| `.env.example` | Backend | Plantilla de variables de entorno **sin valores secretos**. |
+| `.github/pull_request_template.md` | Backend | Plantilla de PR con tarea, requisito, pasos de prueba y Definition of Done. |
+| `.github/workflows/` | Backend y documentación | Integración continua, revisión de commits, versionado y despliegue. |
+| `commitlint.config.mjs` + `.husky/commit-msg` | Documentación | Rechaza commits que no sigan la convención antes de crearlos. |
+
+## Archivos de exclusión (`.gitignore`)
+
+| Categoría | Patrones | Repositorio |
+| --- | --- | --- |
+| Dependencias | `/vendor`, `node_modules/` | Todos |
+| Compilados y cachés | `/public/build`, `.expo/`, `dist/`, `web-build/`, `/.next/`, `/out/`, `.source` | Según el proyecto |
+| Variables de entorno | `.env`, `.env.backup`, `.env.production`, `.env*.local` | Todos |
+| Llaves y certificados | `*.pem`, `*.key`, `*.jks`, `*.p8`, `*.p12`, `*.mobileprovision`, `/storage/*.key` | App y backend |
+| Archivos del editor y del sistema | `/.idea`, `/.vscode`, `.DS_Store`, `Thumbs.db` | Todos |
+| Registros | `*.log`, `npm-debug.*` | Todos |
+
+## Llaves y credenciales
+
+<Callout type="warn" title="Ningún secreto en el repositorio">
+  Las contraseñas, tokens y llaves nunca se suben. Si alguien sube uno por error, se **revoca y se regenera** de inmediato: borrarlo en un commit nuevo no basta, porque sigue en el historial.
+</Callout>
+
+| Tipo | Dónde vive | Ejemplos |
+| --- | --- | --- |
+| Variables locales | `.env` de cada integrante, copiado de `.env.example` | `APP_KEY`, `DB_PASSWORD`, `MAIL_PASSWORD`, `AWS_SECRET_ACCESS_KEY` |
+| Secretos de CI/CD | GitHub → Settings → Secrets and variables → Actions | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` |
+| Acceso al sitio de documentación | Cloudflare Access | Solo correos autorizados del equipo |
+| Autenticación con GitHub | Llave SSH o token personal de cada integrante | Nunca se comparte entre integrantes |
+
+## Control de accesos
+
+| Rol en GitHub | Quién | Permisos |
+| --- | --- | --- |
+| Owner | Dueño de cada repositorio | Configuración, secretos y reglas de protección |
+| Collaborator (Write) | Resto del equipo | Crear ramas, abrir y revisar PR |
+
+### Protección de ramas
+
+En **Settings → Branches** (o **Rules → Rulesets**) de cada repositorio, `main` y `develop` deben tener:
+
+- [ ] Requerir pull request antes de mergear.
+- [ ] Requerir al menos **1 aprobación**.
+- [ ] Requerir que los checks pasen (CI del backend o *Revisar convención* en la documentación).
+- [ ] Bloquear el push directo y el force push.
+- [ ] Borrar automáticamente la rama al mergear (Settings → General).
+
+<Callout type="info" title="Pendiente de verificar">
+  Marca cada casilla cuando el dueño del repositorio confirme la regla en GitHub y agrega una captura en [Repositorios y evidencias](/docs/project/unit-2/evidence).
+</Callout>

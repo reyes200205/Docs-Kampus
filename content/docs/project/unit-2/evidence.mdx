@@ -1,0 +1,57 @@
+---
+title: "Repositorios y evidencias"
+description: "Enlaces a los repositorios activos y evidencia del flujo de trabajo."
+---
+
+## Repositorios remotos
+
+| Repositorio | Enlace | Integración continua |
+| --- | --- | --- |
+| Backend | [github.com/WilbertDevMx/backend-kampus](https://github.com/WilbertDevMx/backend-kampus) | `ci.yml`: formato (Pint), migraciones en PostgreSQL 16 y pruebas |
+| App | [github.com/reyes200205/Frontend-Kampus](https://github.com/reyes200205/Frontend-Kampus) | Pendiente |
+| Documentación | [github.com/reyes200205/Docs-Kampus](https://github.com/reyes200205/Docs-Kampus) | `commits.yml` (convención) y `release.yml` (versión, changelog y despliegue) |
+
+## Evidencia del flujo
+
+*Corte al 12 de octubre de 2026 (fin del Sprint 1).*
+
+### Backend
+
+| Rama | Tarea | Autor |
+| --- | --- | --- |
+| `docs/T-02-esquema-bd` | T-02 · Esquema de base de datos, DER y diccionario | Wilbert, Mario |
+| `feature/T-04-registro` | T-04 · Registro y verificación por dominio | Mario |
+| `feature/T-05-api-login` | T-05 · Inicio y cierre de sesión con Sanctum | Wilbert |
+| `T-07-API-de-perfil-...` | T-07 · API de perfil y fotos | Mario |
+
+Commits con convención, por ejemplo:
+
+```
+feat: agrega inicio y cierre de sesión con tokens que expiran y bloqueo tras 5 intentos
+feat: agrega registro institucional y verificación de correo
+docs: agrega el esquema de base de datos con DER y diccionario de datos
+chore: inicializa el backend de Kampus
+```
+
+### Documentación
+
+Cinco pull requests `develop` → `main` mergeados (#1 a #5), cada uno con su versión publicada en [/changelog](/changelog) por GitHub Actions.
+
+### App
+
+Pantallas de inicio de sesión, registro y recuperación de contraseña; tema y componentes base.
+
+## Áreas de mejora antes de la revisión
+
+| Hallazgo | Acción |
+| --- | --- |
+| Ramas `garica` y `T-07-API-de-perfil-...` no siguen la nomenclatura | Renombrar a `feature/T-07-profile-api` y borrar las ramas ya integradas |
+| Commits anteriores a la convención (`ADD ...`, `MODIFY ...`, `adicion de migraciones`) | A partir de ahora, solo `tipo: descripción`; se agregará commitlint al backend y a la app |
+| La app no tiene CI ni plantilla de PR, y sus commits son de un solo integrante | Agregar workflow de lint y la plantilla de PR; el equipo de frontend trabaja con ramas `feature/T-XX` y PR |
+| Rama por defecto `main` en la app y la documentación | Cambiarla a `develop` |
+
+## Capturas
+
+<Callout type="info" title="Por agregar">
+  Guarda las capturas en `public/docs/project/evidence/` y enlázalas aquí: grafo de ramas (**Insights → Network**), lista de PR cerrados, checks en verde de un PR y la regla de protección de ramas.
+</Callout>
