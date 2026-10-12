@@ -1,0 +1,95 @@
+---
+title: "Arquitectura y tecnologías"
+description: "Estructura del sistema, mapa de navegación y tecnologías elegidas."
+---
+
+## 12. Estructura de la aplicación y tecnologías utilizadas
+
+### 12.1 Arquitectura del sistema
+
+El sistema adopta un modelo **cliente–servidor desacoplado**: la interfaz con la que interactúa el usuario y la lógica que procesa la información están divididas de forma clara e independiente. Esta estructura facilita el trabajo en paralelo, mejora el mantenimiento y permite escalar o sustituir componentes sin afectar el funcionamiento global.
+
+<Mermaid chart={`
+flowchart TB
+    subgraph Cliente["Cliente · Expo (React Native Web)"]
+        APP["App web hoy · iOS / Android a futuro"]
+    end
+    subgraph Servidor["Servidor"]
+        API["API REST · Laravel 13 + Sanctum"]
+        WS["Tiempo real · Laravel Reverb"]
+    end
+    DB[("PostgreSQL 16")]
+    REDIS[("Redis · caché, colas, presencia")]
+    S3[("Bucket S3 · R2 / MinIO")]
+    LK["Videollamada · LiveKit"]
+    MAP["Mapas · MapLibre + OpenFreeMap"]
+    APP -- "HTTPS / JSON" --> API
+    APP <-- "WebSocket (Echo)" --> WS
+    API -- "eventos" --> WS
+    API --> DB
+    API --> REDIS
+    API -- "URLs firmadas" --> S3
+    API -- "tokens de sala" --> LK
+    APP <-- "WebRTC" --> LK
+    APP -- "teselas" --> MAP
+`} />
+
+*Figura 1. Arquitectura actual del sistema.*
+
+| Módulo | Función |
+| --- | --- |
+| **Presentación (frontend)** | Aplicación en Expo que se ejecuta en el navegador de computadoras y celulares; la misma base de código podrá compilarse como app nativa. Muestra perfiles, chats, mapas y menús, y responde a las acciones del usuario. |
+| **Lógica y procesamiento (backend)** | Núcleo del sistema, construido con Laravel. Recibe las solicitudes del cliente, valida la identidad y el correo institucional, calcula las coincidencias (matches), gestiona los grupos y aplica las reglas de seguridad y moderación. |
+| **Comunicación en tiempo real** | Transmite mensajes de chat y notificaciones de match al instante mediante Laravel Reverb, para que las interacciones ocurran sin demoras perceptibles. |
+| **Persistencia de datos e imágenes** | Base de datos relacional (PostgreSQL) para cuentas, matches, mensajes y grupos, y almacenamiento privado compatible con S3 para fotos de perfil y archivos compartidos. |
+| **Servicio geoespacial y mapas** | Procesa únicamente zonas generales (campus o colonias) y celdas aproximadas, sin guardar ubicaciones exactas ni rastrear en vivo. |
+| **Transmisión de video** | Un proveedor especializado (LiveKit) gestiona las videollamadas 1 a 1 entre usuarios con match. |
+
+<details>
+<summary>Diagrama inicial entregado en el anteproyecto</summary>
+
+![Diagrama inicial de arquitectura: SPA en React, API en Laravel, Reverb, LiveKit, MySQL 8, S3 y MapLibre con geohash](/docs/project/arquitectura-inicial.png)
+
+El diagrama inicial mostraba una SPA en React y MySQL 8. El equipo cambió a Expo para el frontend y a PostgreSQL 16 para la base de datos (ver la tabla 12.3).
+
+</details>
+
+### 12.2 Estructura del sitio (mapa de navegación)
+
+| Ruta | Pantalla | Acceso |
+| --- | --- | --- |
+| `/login` · `/registro` · `/verificar` | Inicio de sesión, registro y verificación de correo | Público |
+| `/perfil/completar` | Asistente de perfil inicial (carrera, intereses, fotos, bio, zona) | Usuario verificado sin perfil |
+| `/descubrir` | Descubrimiento tipo swipe con filtros y perfil expandible (modo "Para ti") | Usuario verificado |
+| `/descubrir/cerca` | Mapa por zonas con avatares y ficha rápida (modo "Cerca") | Usuario verificado |
+| `/matches` · `/chat/:matchId` | Lista de matches y conversación | Usuario verificado |
+| `/llamada/:matchId` | Videollamada 1 a 1 | Usuarios con match |
+| `/grupos` · `/grupos/:id` · `/grupos/nuevo` | Explorar grupos, detalle con actividades, crear grupo | Usuario verificado |
+| `/perfil` · `/perfil/editar` | Perfil propio y edición | Usuario verificado |
+| `/ajustes` | Privacidad, usuarios bloqueados, eliminar cuenta, cerrar sesión | Usuario verificado |
+| `/admin/reportes` | Panel básico de moderación | Administrador |
+
+En móvil la navegación principal es una barra inferior con cuatro secciones: Descubrir, Chats, Grupos y Perfil. En escritorio se convierte en una barra lateral izquierda, y la vista de chat muestra la lista de conversaciones y la conversación en dos columnas. Con Expo Router, cada ruta es un archivo dentro de `src/app/`.
+
+### 12.3 Tecnologías y justificación
+
+| Componente | Tecnología | Justificación con base en los requisitos |
+| --- | --- | --- |
+| **Backend / API** | Laravel 13 (PHP 8.3) | El equipo ya lo domina gracias a un proyecto previo, lo que mitiga el riesgo R6 de curva de aprendizaje; incluye autenticación, validación, colas, eventos, almacenamiento y pruebas integradas (RNF-02, RNF-07). |
+| **Autenticación** | Laravel Sanctum | Autenticación por tokens con expiración y revocación, integrada con Laravel (RF-02, RNF-02). |
+| **Tiempo real** | Laravel Reverb + Laravel Echo | Servidor WebSocket oficial de Laravel, sin costo por mensaje ni dependencia de un servicio externo; canales privados autenticados para el chat (RF-08, RNF-09). |
+| **Base de datos** | PostgreSQL 16 | Modelo relacional adecuado para usuarios, matches, mensajes y grupos. Se eligió sobre MySQL por su soporte geoespacial (PostGIS) para la vista "Cerca", índices parciales, particionado nativo para las tablas que más crecen (swipes y mensajes) y JSONB con índices para atributos de perfil (RF-18, RF-19, RNF-05, RNF-09). |
+| **Caché, colas y presencia** | Redis | Caché de la cola de descubrimiento, sesiones, colas de trabajos, contadores de no leídos, estado "en línea" y límite de peticiones en login y registro (RNF-02, RNF-05). |
+| **Frontend** | Expo SDK 57 + React Native Web + TypeScript | Una sola base de código para la app web de hoy y para iOS/Android a futuro, sin reescribir pantallas; componentes reutilizables; SDK de LiveKit para React Native; trabajo en paralelo con el backend mediante el contrato OpenAPI (RNF-01, RF-10). |
+| **Enrutamiento, datos y estado** | Expo Router; TanStack Query y Zustand | Rutas basadas en archivos que funcionan igual en web y en móvil; caché y sincronización de datos de la API; estado global ligero (sesión, filtros). |
+| **Estilos** | `StyleSheet` de React Native con tema propio | Estilos que se comparten entre web y móvil, con los colores y tipografías de la marca centralizados (RNF-01, RNF-10). |
+| **Videollamada** | LiveKit tras un Adapter | Evita construir WebRTC, señalización, TURN y SFU desde cero; capa gratuita de 5,000 minutos al mes; opción autoalojada; el Adapter permite cambiar de proveedor (RF-10, riesgos R4, R9 y R11). |
+| **Mapa** | MapLibre GL + teselas de OpenFreeMap (alternativa: MapTiler) tras un Adapter | Biblioteca de código abierto sin costo por carga; permite un estilo oscuro propio acorde a la identidad de Kampus; el Adapter permite cambiar de proveedor de teselas (RF-19, RF-20, riesgo R11). |
+| **Geolocalización** | API de ubicación del dispositivo + geohash de precisión 6 calculado en el cliente | El GPS solo se usa si el usuario activa "Cerca de ti"; la coordenada exacta nunca sale del dispositivo salvo en un mensaje de ubicación autorizado; el servidor guarda únicamente la zona o la celda (RF-18, RNF-11). |
+| **Almacenamiento de imágenes** | Bucket compatible con S3 (Cloudflare R2 o MinIO) | Almacenamiento privado con URLs firmadas temporales para fotos de perfil, chat y grupos (RF-09, RNF-03). |
+| **Correo transaccional** | Resend o Mailtrap (en pruebas) | Envío del enlace de verificación institucional (RF-01). |
+| **Control de versiones y gestión** | Git + GitHub (Actions) y Plane | Ramas `main`/`develop`, revisión por PR, integración continua con revisión de formato y pruebas; backlog y sprints en Plane (RNF-07). Ver [Unidad 2](/docs/project/unit-2/version-control). |
+| **Pruebas** | PHPUnit; Jest + React Native Testing Library | Pruebas automatizadas de los módulos críticos del backend y de los componentes clave del frontend (RNF-07). |
+| **Despliegue** | VPS con Docker (Nginx, PHP-FPM, Reverb, PostgreSQL); app web exportada con `expo export` | HTTPS obligatorio para cámara y micrófono (riesgo R2); costo controlado; entorno de pruebas desde el Sprint 3 (RNF-05, RNF-06). |
+| **Diseño** | Figma | Wireframes y prototipo navegable; colaboración del equipo de frontend. |
+| **Documentación** | Fumadocs (Next.js) en Cloudflare | Este sitio: documentación del proyecto versionada junto al código. |
