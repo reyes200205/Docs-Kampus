@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { LogoMark } from '@/components/logo';
-import { AlignLeft, GitBranch, PanelLeft, Rocket, Search, ServerCog, Smartphone } from 'lucide-react';
+import { AlignLeft, GitBranch, PanelLeft, Rocket, Search, ServerCog, Smartphone, FileText } from 'lucide-react';
 
 const sections = [
   {
@@ -21,6 +21,12 @@ const sections = [
     description: 'Flujo de ramas, convención de commits, pull requests y Definition of Done del equipo.',
     href: '/docs/development',
   },
+  {
+    icon: FileText,
+    title: 'Rubricas de Trabajo',
+    description: 'Instrumentos de evaluación del proyecto.',
+    href:'https://drive.google.com/drive/folders/1imB-gA_tdjIHKwbCjUbrPufOmZtypxy1'
+  }
 ];
 
 export default function HomePage() {

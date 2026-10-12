@@ -1,0 +1,53 @@
+---
+title: "Definición de contenido"
+description: "Tono, identidad visual, tipografía y licencias de los recursos."
+---
+
+## 15. Definición de contenido
+
+### 15.1 Textos y tono de comunicación
+
+- **Idioma y tono.** Español de México, con expresiones familiares para la comunidad universitaria de la Comarca Lagunera, sin perder claridad. Tono cercano, empático, inclusivo e informal pero respetuoso. Se usa el tuteo en toda la interfaz para generar confianza con los estudiantes de nuevo ingreso. Se evita el lenguaje burocrático; las llamadas a la acción usan verbos claros ("Descubrir conexiones", "Unirme al club", "Iniciar chat").
+- **Textos de la aplicación (UX writing).** Microtexto para cada etapa del usuario. La bienvenida refuerza el sentido de pertenencia con frases como "Tu campus, tu gente" y "Conecta con tu comunidad universitaria". Los estados vacíos orientan la acción ("Aún no tienes matches activos, ¡sigue explorando perfiles en tu campus!"). Los errores son descriptivos y orientados a la solución ("El correo ingresado no pertenece a los dominios autorizados de UTT, UAdeC o Tec Laguna; verifica tu dirección institucional"). Las acciones irreversibles (bloquear, reportar, eliminar la cuenta) piden confirmación explícita.
+- **Consentimiento de ubicación y privacidad.** Antes de activar la geolocalización se muestra una pantalla de permiso que explica: "Utilizamos tu ubicación únicamente para ubicarte en una celda de área aproximada (~1 km), salvaguardando tu posición exacta". Al compartir la ubicación en el chat se advierte: "Vas a compartir tu ubicación puntual en este mensaje. ¿Deseas continuar?". La opción para desactivar "Cerca de ti" y borrar los datos de ubicación está siempre disponible en Ajustes.
+- **Documentos legales.** Aviso de Privacidad Integral conforme a la LFPDPPP, que detalla la recolección, uso y supresión de datos sensibles (fotos y celdas geográficas). Términos de Uso y Normas de Comunidad que prohíben acoso, suplantación, lenguaje de odio y contenido explícito. Se excluyen de forma permanente las suscripciones de pago, las fotos bloqueadas y el contenido +18.
+- **Catálogos predefinidos.**
+  1. Instituciones participantes (UTT, UAdeC, Tec Laguna) con sus dominios de correo.
+  2. Carreras y programas académicos vigentes por campus.
+  3. Intereses organizados por categoría (deportes, cultura, tecnología, videojuegos, voluntariado, artes, idiomas, etc.).
+  4. Clasificación de grupos y clubes (deportivo, cultural, académico, social).
+  5. Sectores y zonas de la Comarca Lagunera.
+  6. Motivos de reporte (acoso, perfil falso, contenido inapropiado, spam, otro).
+
+### 15.2 Imágenes e identidad visual
+
+- **Fotografías de usuario y grupo.** JPG, WebP o PNG de hasta 5 MB. Recorte automático 1:1 para avatares circulares y 4:5 para las tarjetas de Descubrir. Compresión previa para cargar rápido en redes móviles sin perder nitidez.
+- **Logotipo y marca.** Logotipo vectorial original: un pin de ubicación estilizado con la letra K, sobre la abstracción de un campus universitario. Paleta de tema oscuro:
+
+  | Uso | Color |
+  | --- | --- |
+  | Fondo principal | `#121215` |
+  | Tarjetas y contenedores | `#2C2C33` y `#1A1A1E` |
+  | Texto y elementos neutros | `#FFFFFF` |
+  | Acento de marca (botones primarios, estados activos, match, marcadores) | `#F5C518` |
+
+- **Mapas.** Estilo vectorial JSON personalizado para MapLibre/OpenFreeMap con contraste nocturno: superficies en `#1A1A1E`, calles secundarias en `#2A2A30`, parques y agua en `#22302A`. Los avatares se muestran en pines circulares con borde `#F5C518` y un halo punteado que delimita la zona.
+- **Ilustraciones.** Biblioteca unDraw, personalizada en SVG con el amarillo y los grises de la marca, para onboarding, confirmaciones y estados vacíos.
+- **Iconografía.** Lucide Icons: trazos limpios de 2 px para la navegación (Descubrir, Chats, Grupos, Perfil), llamadas, adjuntos, filtros y ajustes.
+- **Imágenes de demostración.** Solo fotografías libres de derechos (Unsplash, Pexels). Está prohibido usar fotos reales de alumnos sin su consentimiento firmado.
+
+### 15.3 Tipografía
+
+| Uso | Familia | Pesos |
+| --- | --- | --- |
+| Cuerpo e interfaz | **Inter** (Google Fonts) | Regular 400 para descripciones y chats; Medium 500 para etiquetas, menús e insignias |
+| Encabezados e impacto | **Poppins** | SemiBold 600 y Bold 700 para títulos, nombres en tarjetas, botones primarios y "Es un match" |
+
+**Escala y accesibilidad.** Tamaño base de 16 px (1 rem), mínimo de 14 px en móvil. Escala modular 1.25 (Major Third): H1 32 px, H2 25 px, H3 20 px, cuerpo 16 px, microtexto 12–14 px. Todos los pares texto-fondo cumplen el contraste WCAG AA (mínimo 4.5:1).
+
+### 15.4 Criterios de selección y licencias
+
+- **Licencias.** Todo recurso integrado (multimedia, fuentes, bibliotecas, iconos) debe tener licencia permisiva para uso académico y comercial: Open Font License para fuentes, MIT/Apache 2.0 para bibliotecas e iconos, CC0/Unsplash License para imágenes. Se lleva un registro en `ATTRIBUTION.md` en la raíz del repositorio.
+- **Identidad institucional.** No se usan logotipos, escudos ni marcas de las universidades participantes sin autorización por escrito. Las instituciones se mencionan solo por su nombre.
+- **Contenido generado por usuarios.** Las fotos, descripciones, mensajes y publicaciones siguen siendo propiedad de cada alumno, con una licencia de uso limitada a la plataforma para mostrarlos. Kampus puede retirar cualquier contenido que infrinja las normas de comunidad o el aviso de privacidad.
+- **Textos centralizados.** Todo el microtexto vive en archivos de recursos (i18n/JSON) dentro del frontend. Así se mantiene la consistencia, el Product Owner puede revisar estilo y ortografía, y la app queda lista para otros idiomas.

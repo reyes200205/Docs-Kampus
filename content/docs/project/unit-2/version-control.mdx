@@ -1,0 +1,53 @@
+---
+title: "Control de versiones"
+description: "Por qué Git como sistema de versiones y GitHub como plataforma."
+---
+
+## Necesidades del proyecto
+
+Antes de elegir herramientas, el equipo identificó lo que el proyecto exige:
+
+| Necesidad | Origen |
+| --- | --- |
+| Cinco integrantes trabajando en paralelo sobre tres bases de código (backend, app y documentación) | Roles del equipo (9.2) |
+| Revisión obligatoria por otro integrante antes de integrar código | Definition of Done y RNF-07 |
+| Pruebas y revisión de formato automáticas en cada cambio | RNF-07, T-01 |
+| Trazabilidad entre cada cambio y su tarea `T-XX` y requisito | Separación en tareas (10) |
+| Publicar versiones y un changelog sin trabajo manual | Entregas incrementales por sprint |
+| Costo cero | Riesgo R9 (presupuesto) |
+
+## Sistema de control de versiones: Git
+
+| Criterio | Git | Subversion (SVN) | Mercurial |
+| --- | --- | --- | --- |
+| Modelo | Distribuido: cada integrante tiene el historial completo | Centralizado: depende del servidor | Distribuido |
+| Ramas | Ligeras e instantáneas; una por tarea sin costo | Copias de directorio, costosas | Ligeras, pero poco usadas en la práctica |
+| Trabajo sin conexión | Commits, ramas e historial locales | Requiere conexión para casi todo | Sí |
+| Ecosistema | Estándar de la industria; integrado en Laravel, Expo, VS Code y todos los servicios de CI | Soporte decreciente | Pocas plataformas lo alojan |
+| Experiencia del equipo | Todos lo usan desde cuatrimestres anteriores | Ninguna | Ninguna |
+
+**Decisión:** Git. Su modelo distribuido y sus ramas ligeras permiten el flujo de **una rama por tarea**, que es la base de la trazabilidad `T-XX`. Además es la herramienta que el equipo ya domina, lo que reduce el riesgo R6 (curva de aprendizaje).
+
+## Plataforma: GitHub
+
+| Criterio | GitHub | GitLab | Bitbucket |
+| --- | --- | --- | --- |
+| Pull requests y revisión | Revisión por líneas, aprobaciones obligatorias, plantillas de PR | Merge requests equivalentes | Sí, más limitado |
+| CI/CD | GitHub Actions integrado; minutos gratuitos y gratis en repositorios públicos | GitLab CI integrado, con menos minutos gratuitos | Pipelines con pocos minutos gratuitos |
+| Protección de ramas | Reglas por rama (PR obligatorio, checks en verde, sin push directo) | Sí | Sí |
+| Publicación de versiones | Releases con notas generadas a partir de los commits | Sí | No nativo |
+| Beneficio educativo | GitHub Student Developer Pack | GitLab for Education (requiere solicitud institucional) | Sin equivalente |
+| Integraciones del proyecto | Plane (tareas), Cloudflare (despliegue de la documentación) | Plane | Limitadas |
+| Experiencia del equipo | Todos tienen cuenta y portafolio en GitHub | Poca | Ninguna |
+
+**Decisión:** GitHub. Cubre todas las necesidades sin costo: pull requests con revisión obligatoria, GitHub Actions para la integración continua y la publicación de versiones, protección de ramas y Releases para el changelog. Al ser la plataforma que el equipo ya usa, no agrega curva de aprendizaje.
+
+## Cómo se usa en Kampus
+
+| Herramienta | Uso |
+| --- | --- |
+| **Git** | Historial, ramas por tarea y commits con [convención](/docs/development/commits). |
+| **GitHub** | Repositorios remotos, pull requests, revisión y protección de ramas. |
+| **GitHub Actions** | CI del backend (formato, migraciones y pruebas); revisión de commits, versionado y despliegue de la documentación. |
+| **GitHub Releases** | Versiones y changelog automáticos ([/changelog](/changelog)). |
+| **Plane** | Backlog, sprints y tareas `T-XX` que dan nombre a las ramas. |

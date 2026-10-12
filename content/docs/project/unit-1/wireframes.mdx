@@ -1,0 +1,49 @@
+---
+title: "Wireframes"
+description: "Flujo de navegación y pantallas clave en móvil y escritorio."
+---
+
+## 14. Wireframes
+
+Los wireframes iniciales están disponibles como archivos SVG editables que se pueden importar en Figma para ajustar textos y formas. Muestran las pantallas clave del proyecto en celular y en computadora, con notas breves en cada sección. Toda la interfaz usa un estilo oscuro (fondos oscuros, detalles en blanco y acentos en amarillo) acorde a la identidad visual de Kampus.
+
+### 14.1 Flujo de navegación
+
+<Mermaid chart={`
+flowchart LR
+    A[Inicio de sesión] --> B[Registro con correo institucional]
+    B --> C[Verificación de cuenta]
+    C --> D[Configuración del perfil y zona]
+    D --> E{Descubrir}
+    E -->|Para ti| F[Tarjetas swipe y perfil expandido]
+    E -->|Cerca| G[Mapa por zonas]
+    F --> H[Match]
+    G --> H
+    H --> I[Chat con imágenes y ubicación]
+    I --> J[Videollamada 1 a 1]
+`} />
+
+Desde el menú principal se puede navegar en cualquier momento entre **Descubrir**, **Chats**, **Grupos** y **Perfil**.
+
+### 14.2 Pantallas incluidas
+
+| # | Pantalla | Elementos clave | Móvil / escritorio |
+| --- | --- | --- | --- |
+| 1 | Inicio de sesión | Logo de Kampus, correo institucional, contraseña, botón Entrar, enlace a registro | Móvil: formulario a una columna. Escritorio: tarjeta centrada con ilustración lateral. |
+| 2 | Registro y verificación | Correo institucional con validación de dominio, contraseña, aceptación de privacidad y normas, mensaje de "revisa tu correo" | Mismo diseño; en escritorio se muestra la lista de dominios aceptados junto al formulario. |
+| 3 | Perfil (crear o editar) | Fotos (hasta 5), universidad, carrera y semestre, zona (campus y colonia), interruptor "Cerca de ti" con su explicación, chips de intereses y biografía | Móvil: secciones apiladas. Escritorio: fotos a la izquierda y datos a la derecha. |
+| 4 | Descubrir — Para ti | Selector "Para ti / Cerca", tarjeta con foto, nombre e insignia de verificación, universidad y carrera, intereses, indicador de deslizar, botones Pasar / Me interesa e icono de filtros | Móvil: gestos táctiles y tarjeta a pantalla completa. Escritorio: tarjeta centrada con filtros en panel lateral. |
+| 5 | Perfil expandido | Foto principal con nombre e insignia, universidad, carrera y semestre, galería, "Sobre mí", intereses y grupos en común; acciones siempre visibles | Móvil: se abre al deslizar hacia arriba. Escritorio: panel lateral o ventana modal. |
+| 6 | Descubrir — Cerca (mapa) | Mapa oscuro propio, zonas etiquetadas, avatares en el centro de su zona, anillo punteado de zona aproximada, ficha con distancia ("≈ 2 km") y botón para centrar en mi zona | Móvil: mapa a pantalla completa con ficha inferior. Escritorio: mapa amplio con ficha a la derecha. |
+| 7 | Matches y chats | Fila horizontal de nuevos matches y lista de conversaciones con último mensaje y no leídos | Móvil: pantalla propia. Escritorio: columna izquierda fija dentro de la vista de chat. |
+| 8 | Conversación | Encabezado con nombre y botón de videollamada, burbujas de texto e imágenes, mensaje de ubicación como mini-mapa, menú de adjuntar (imagen o ubicación) con confirmación y campo de texto | Móvil: pantalla completa. Escritorio: columna derecha junto a la lista de chats. |
+| 9 | Videollamada 1 a 1 | Video remoto grande, video propio en miniatura, controles de micrófono, cámara y colgar, y guía de permisos | Móvil: vertical con controles inferiores. Escritorio: video centrado y controles flotantes. |
+| 10 | Grupos y clubes | Buscador y filtros por institución y categoría, tarjetas de grupo con miembros y próxima actividad, botón Unirse y botón Crear grupo | Móvil: lista a una columna. Escritorio: cuadrícula de tres columnas. |
+
+### Wireframes móvil (360 × 740)
+
+![Wireframes de las 10 pantallas en móvil con estilo oscuro y acentos amarillos](/docs/project/wireframes-movil.png)
+
+### Wireframes escritorio (1280 × 800)
+
+![Wireframes de escritorio: Descubrir con filtros, vista Cerca con mapa y chat a dos columnas](/docs/project/wireframes-escritorio.png)

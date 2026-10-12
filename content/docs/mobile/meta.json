@@ -1,6 +1,6 @@
 {
-  "title": "App móvil",
-  "description": "Expo, React Native y Expo Router",
+  "title": "App (Expo)",
+  "description": "Web y móvil con Expo y Expo Router",
   "icon": "Smartphone",
   "root": true,
   "pages": ["index", "installation", "device", "troubleshooting"]

@@ -1,0 +1,17 @@
+---
+title: "Patrones de diseño"
+description: "Patrones elegidos y dónde se aplican."
+---
+
+## 13. Selección de patrones de diseño
+
+La elección de los patrones responde a las exigencias de creación, arquitectura y comportamiento de los requisitos. Sobre el esquema **MVC** de Laravel se integran los siguientes patrones:
+
+| Tipo | Patrón | Dónde se aplica | Justificación |
+| --- | --- | --- | --- |
+| Creacional | **Builder** | Búsqueda y descubrimiento de usuarios con filtros | Los filtros son opcionales y combinables (universidad, carrera, intereses, excluir bloqueados y perfiles ya evaluados); el Builder evita condicionales anidados y produce consultas legibles (RF-05, RF-06). |
+| Estructural | **Repository** | Acceso a datos de usuarios, matches, mensajes y grupos | Aísla la lógica de negocio de Eloquent, facilita pruebas unitarias con repositorios simulados y concentra las consultas complejas (RNF-07). |
+| Estructural | **Adapter** | Servicios externos de videollamada y proveedores de mapas | Desacopla el dominio de los proveedores; permite sustituir LiveKit por Daily o Agora, y OpenFreeMap por MapTiler, sin tocar el resto del sistema (riesgos R4, R9 y R11). |
+| De comportamiento | **Observer** | Eventos del sistema (matches, mensajes y reportes) | Un evento dispara varias reacciones (persistir, notificar por WebSocket, registrar) sin acoplar al emisor; es la base del tiempo real (RF-07, RF-08). |
+| De comportamiento | **Strategy** | Cálculo de afinidad y orden de perfiles | Permite intercambiar o combinar criterios de ordenamiento y ajustarlos tras las pruebas de usabilidad sin reescribir el servicio de descubrimiento (RF-05). |
+| Frontend | **Container/Presentational y Custom Hooks** | Interfaz en Expo (React Native) | Separa la lógica de datos de los componentes visuales, favorece la reutilización y permite probarlos de forma aislada (RNF-01, RNF-07). |
