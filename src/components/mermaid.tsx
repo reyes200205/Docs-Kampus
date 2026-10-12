@@ -32,6 +32,8 @@ export function Mermaid({ chart }: { chart: string }) {
         securityLevel: 'loose',
         fontFamily: 'inherit',
         theme: isDark ? 'dark' : 'default',
+        // El DER es muy ancho: a tamaño real con scroll horizontal se lee mejor que encogido.
+        er: { useMaxWidth: false },
       });
       const { svg } = await mermaid.render(`mermaid-${id}`, chart.trim());
       if (!cancelled) setSvg(svg);
@@ -43,7 +45,7 @@ export function Mermaid({ chart }: { chart: string }) {
 
   return (
     <div
-      className="my-6 flex justify-center overflow-x-auto rounded-xl border bg-fd-card p-4 [&_svg]:max-w-full"
+      className="my-6 overflow-x-auto rounded-xl border bg-fd-card p-4 [&_svg]:mx-auto"
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   );
