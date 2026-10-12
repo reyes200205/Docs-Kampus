@@ -1,0 +1,265 @@
+---
+title: "Diagramas del sistema"
+description: "Arquitectura, casos de uso, diagrama entidad-relación y secuencia del match."
+---
+
+## Arquitectura
+
+<Mermaid chart={`
+flowchart TB
+    subgraph Cliente["Cliente · Expo (React Native Web)"]
+        APP["App web hoy · iOS / Android a futuro"]
+    end
+    subgraph Servidor["Servidor"]
+        API["API REST · Laravel 13 + Sanctum"]
+        WS["Tiempo real · Laravel Reverb"]
+    end
+    DB[("PostgreSQL 16")]
+    REDIS[("Redis · caché, colas, presencia")]
+    S3[("Bucket S3 · R2 / MinIO")]
+    LK["Videollamada · LiveKit"]
+    MAP["Mapas · MapLibre + OpenFreeMap"]
+    APP -- "HTTPS / JSON" --> API
+    APP <-- "WebSocket (Echo)" --> WS
+    API -- "eventos" --> WS
+    API --> DB
+    API --> REDIS
+    API -- "URLs firmadas" --> S3
+    API -- "tokens de sala" --> LK
+    APP <-- "WebRTC" --> LK
+    APP -- "teselas" --> MAP
+`} />
+
+La descripción de cada módulo está en [Arquitectura y tecnologías](/docs/project/unit-1/architecture).
+
+## Casos de uso
+
+Actores: **Estudiante** (usuario verificado), **Visitante** (sin cuenta), **Moderador** (administrador) y los servicios externos de correo, video y mapas.
+
+<Mermaid chart={`
+flowchart LR
+    V(["👤 Visitante"])
+    E(["👤 Estudiante"])
+    M(["👤 Moderador"])
+    CORREO(["⚙️ Servicio de correo"])
+    VIDEO(["⚙️ LiveKit"])
+    subgraph Kampus["Sistema Kampus"]
+        UC1(["Registrarse con correo institucional"])
+        UC2(["Verificar correo"])
+        UC3(["Iniciar / cerrar sesión"])
+        UC4(["Gestionar perfil y zona"])
+        UC5(["Descubrir perfiles (swipe)"])
+        UC6(["Ver mapa Cerca"])
+        UC7(["Generar match"])
+        UC8(["Chatear con imágenes y ubicación"])
+        UC9(["Hacer videollamada 1 a 1"])
+        UC10(["Explorar, unirse y crear grupos"])
+        UC11(["Bloquear o reportar usuario"])
+        UC12(["Revisar reportes y suspender cuentas"])
+        UC13(["Eliminar cuenta"])
+    end
+    V --- UC1
+    UC1 -. include .-> UC2
+    UC2 --- CORREO
+    E --- UC3
+    E --- UC4
+    E --- UC5
+    E --- UC6
+    UC5 -. extend .-> UC7
+    E --- UC8
+    E --- UC9
+    UC9 --- VIDEO
+    E --- UC10
+    E --- UC11
+    E --- UC13
+    M --- UC3
+    M --- UC12
+`} />
+
+| Caso de uso | Actor | Requisitos |
+| --- | --- | --- |
+| Registrarse con correo institucional (incluye verificar correo) | Visitante | RF-01, RF-04 |
+| Iniciar / cerrar sesión | Estudiante, Moderador | RF-02 |
+| Gestionar perfil y zona | Estudiante | RF-03, RF-18 |
+| Descubrir perfiles (puede generar un match) | Estudiante | RF-05, RF-06, RF-07, RF-21 |
+| Ver mapa "Cerca" | Estudiante | RF-19 |
+| Chatear con imágenes y ubicación | Estudiante | RF-08, RF-09, RF-20 |
+| Hacer videollamada 1 a 1 | Estudiante | RF-10 |
+| Explorar, unirse y crear grupos | Estudiante | RF-11, RF-12 |
+| Bloquear o reportar usuario | Estudiante | RF-13, RF-14 |
+| Revisar reportes y suspender cuentas | Moderador | RF-15 |
+| Eliminar cuenta | Estudiante | RF-16 |
+
+## Diagrama entidad-relación
+
+Solo se muestran las tablas del dominio. El detalle de cada columna está en el [Diccionario de datos](/docs/project/unit-2/data-dictionary).
+
+<Mermaid chart={`
+erDiagram
+    universities ||--o{ users : "agrupa"
+    universities ||--o{ zones : "tiene campus"
+    universities ||--o{ groups : "aloja"
+    users ||--o| profiles : "tiene"
+    users ||--o| user_locations : "tiene celda"
+    zones ||--o{ profiles : "zona declarada"
+    profiles ||--o{ photos : "tiene"
+    profiles ||--o{ interest_profile : "elige"
+    interests ||--o{ interest_profile : "es elegido"
+    users ||--o{ swipes : "evalúa / es evaluado"
+    users ||--o{ matches : "participa"
+    matches ||--o{ messages : "contiene"
+    users ||--o{ messages : "envía"
+    users |o--o{ groups : "crea"
+    groups ||--o{ group_members : "tiene"
+    users ||--o{ group_members : "pertenece"
+    groups ||--o{ group_activities : "publica"
+    users ||--o{ blocks : "bloquea / es bloqueado"
+    users ||--o{ reports : "reporta / es reportado"
+    matches |o--o{ reports : "evidencia"
+
+    universities {
+        bigint id PK
+        varchar name
+        varchar short_name UK
+        json email_domains
+        boolean is_active
+    }
+    users {
+        bigint id PK
+        bigint university_id FK
+        varchar name
+        varchar email UK
+        timestamp email_verified_at
+        timestamp suspended_at
+        varchar password
+        varchar role
+    }
+    zones {
+        bigint id PK
+        varchar name
+        varchar type
+        bigint university_id FK
+        varchar city
+        numeric center_lat
+        numeric center_lng
+    }
+    profiles {
+        bigint id PK
+        bigint user_id FK
+        varchar career
+        smallint semester
+        date birthdate
+        varchar bio
+        bigint zone_id FK
+        boolean nearby_enabled
+        json discovery_filters
+    }
+    user_locations {
+        bigint id PK
+        bigint user_id FK
+        varchar geohash
+    }
+    interests {
+        bigint id PK
+        varchar name UK
+        varchar category
+    }
+    interest_profile {
+        bigint interest_id PK
+        bigint profile_id PK
+    }
+    photos {
+        bigint id PK
+        bigint profile_id FK
+        varchar path
+        smallint position
+    }
+    swipes {
+        bigint id PK
+        bigint swiper_id FK
+        bigint swiped_id FK
+        boolean liked
+    }
+    matches {
+        bigint id PK
+        bigint user_one_id FK
+        bigint user_two_id FK
+    }
+    messages {
+        bigint id PK
+        bigint match_id FK
+        bigint sender_id FK
+        varchar type
+        text body
+        varchar attachment_path
+        numeric latitude
+        numeric longitude
+        timestamp read_at
+    }
+    groups {
+        bigint id PK
+        bigint university_id FK
+        bigint created_by FK
+        varchar name
+        text description
+        varchar category
+        varchar image_path
+    }
+    group_members {
+        bigint group_id PK
+        bigint user_id PK
+        varchar role
+    }
+    group_activities {
+        bigint id PK
+        bigint group_id FK
+        bigint created_by FK
+        varchar title
+        text description
+        varchar location
+        timestamp starts_at
+    }
+    blocks {
+        bigint blocker_id PK
+        bigint blocked_id PK
+    }
+    reports {
+        bigint id PK
+        bigint reporter_id FK
+        bigint reported_id FK
+        bigint match_id FK
+        varchar reason
+        text description
+        varchar status
+        bigint reviewed_by FK
+        timestamp reviewed_at
+    }
+`} />
+
+## Secuencia: del swipe al match
+
+Muestra cómo colaboran el cliente, la API y el servidor en tiempo real cuando dos estudiantes se dan "Me interesa" (patrón Observer, RF-07).
+
+<Mermaid chart={`
+sequenceDiagram
+    actor A as Estudiante A
+    participant App as App (Expo)
+    participant API as API Laravel
+    participant DB as PostgreSQL
+    participant WS as Reverb
+    actor B as Estudiante B
+    A->>App: Desliza "Me interesa" sobre B
+    App->>API: POST /api/swipes {swiped_id: B, liked: true}
+    API->>DB: Guarda el swipe (A → B)
+    API->>DB: ¿Existe swipe B → A con liked = true?
+    DB-->>API: Sí
+    API->>DB: Crea match (user_one < user_two)
+    API->>WS: Evento MatchCreated
+    API-->>App: 201 {match: true}
+    App-->>A: Pantalla "Es un match"
+    WS-->>B: Notificación en el canal privado
+`} />
+
+<Callout title="Fuente del modelo de datos">
+  El DER y el diccionario vienen de la especificación de la tarea T-02 (`docs/base-de-datos/esquema.md` en `backend-kampus`, rama `docs/T-02-esquema-bd`). Cuando las migraciones se integren a `develop`, ellas son la fuente de verdad y estos diagramas se actualizan en el mismo PR.
+</Callout>
