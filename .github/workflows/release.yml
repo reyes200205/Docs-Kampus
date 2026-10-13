@@ -95,6 +95,13 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: pnpm build
 
+      # Sin los secretos el job debe fallar: antes se saltaba el paso y quedaba en verde sin desplegar.
+      - name: Revisar los secretos de Cloudflare
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::Faltan los secretos CLOUDFLARE_API_TOKEN o CLOUDFLARE_ACCOUNT_ID en Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
       - name: Publicar en Cloudflare Workers
-        if: env.CLOUDFLARE_API_TOKEN != ''
         run: pnpm dlx wrangler@4 deploy
