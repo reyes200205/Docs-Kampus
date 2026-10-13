@@ -66,7 +66,7 @@ export function RiskTable({ items, children }: RiskTableProps) {
   return (
     <div className="my-6 w-full overflow-hidden rounded-xl border border-fd-border bg-fd-card shadow-xs">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-212.5 border-collapse text-left text-sm">
+        <table className="w-full min-w-212 border-collapse text-left text-sm">
           <thead>
             <tr className="border-b border-fd-border bg-fd-muted/50 text-xs font-semibold uppercase tracking-wider text-fd-muted-foreground">
               <th scope="col" className="px-3 py-3 text-center w-14">#</th>
