@@ -17,9 +17,8 @@ jobs:
           fetch-depth: 0
 
       - name: Preparar pnpm
+        # Toma la versión de pnpm del campo packageManager de package.json.
         uses: pnpm/action-setup@v4
-        with:
-          version: 12.5.1
 
       - name: Preparar Node.js
         uses: actions/setup-node@v4
