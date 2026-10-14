@@ -1,0 +1,121 @@
+---
+title: "Sistema de diseño"
+description: "Colores, tipografía, espaciados, componentes base y navegación de la app (T-03)."
+---
+
+El sistema de diseño concentra en un solo lugar la identidad visual de Kampus para que todas las pantallas se vean igual en web, iOS y Android. Corresponde a la tarea **T-03** (RNF-01, RNF-10) y sigue la [identidad visual del anteproyecto](/docs/project/unit-1/content#152-imágenes-e-identidad-visual).
+
+<Callout title="Regla">
+  Las pantallas no escriben colores a mano: los toman del tema con `useTheme()`. Los tamaños de letra salen de las variantes de `ThemedText`, y los espaciados y radios de `src/constants/theme.ts`.
+</Callout>
+
+## Colores
+
+Tema oscuro con acento amarillo (`ActiveTheme = "dark-yellow"`). Se leen con el hook `useTheme()`.
+
+| Token | Color | Uso | Contraste |
+| --- | --- | --- | --- |
+| `background` | `#121215` | Fondo de las pantallas | — |
+| `backgroundElement` | `#1A1A1E` | Tarjetas, campos de texto, barras de navegación | — |
+| `backgroundSelected` | `#2C2C33` | Chips, pestaña activa, elementos elevados | — |
+| `border` | `#2C2C33` | Bordes de tarjetas y campos | — |
+| `text` | `#FFFFFF` | Texto principal | 18.7:1 |
+| `textSecondary` | `#A1A1AA` | Subtítulos y texto de apoyo | 7.3:1 |
+| `placeholder` | `#8B8B94` | Placeholder de los campos | 5.1:1 |
+| `accent` | `#F5C518` | Botón primario, casillas, pestaña activa, marcadores del mapa | 11.5:1 |
+| `onAccent` | `#121215` | Texto encima de `accent` | 11.5:1 |
+| `accentText` | `#F5C518` | Enlaces y texto con color de marca | 11.5:1 |
+| `danger` | `#FF6B6B` | Errores de validación | 6.7:1 |
+
+El contraste se mide contra `background` (o contra `accent` en el caso de `onAccent`). Todos cumplen WCAG AA (4.5:1). Los temas `light-*`, `*-blue` y `*-green` siguen disponibles para pruebas, pero la identidad oficial es `dark-yellow`.
+
+```tsx
+const theme = useTheme();
+<View style={{ backgroundColor: theme.backgroundElement }} />
+```
+
+## Tipografía
+
+Familia **Sora** (`@expo-google-fonts/sora`), con escala modular 1.25 sobre una base de 16 px. Se usa con las variantes de `ThemedText`:
+
+| Variante | Tamaño | Peso | Uso |
+| --- | --- | --- | --- |
+| `title` | 32 | Bold | Título de cada pantalla (H1) |
+| `subtitle` | 25 | SemiBold | Encabezado de las pantallas de acceso (H2) |
+| `heading` | 20 | SemiBold | Títulos de tarjetas y estados vacíos (H3) |
+| `default` | 16 | Regular | Cuerpo de texto |
+| `small` / `smallBold` | 14 | Regular / SemiBold | Texto de apoyo, etiquetas |
+| `caption` | 12 | Regular | Ayudas y errores debajo de los campos |
+| `link` | 14 | SemiBold | Enlaces (color `accentText`) |
+
+<Callout type="warn" title="Pendiente de decidir">
+  El anteproyecto propone Inter + Poppins; la app usa Sora desde su primera versión. Si el equipo cambia de fuente, solo se modifica `FontFamily` en `theme.ts` y la carga en `src/app/_layout.tsx`.
+</Callout>
+
+## Espaciado, radios y tamaños
+
+| Constante | Valores |
+| --- | --- |
+| `Spacing` | `half` 2 · `one` 4 · `two` 8 · `three` 16 · `four` 24 · `five` 32 · `six` 64 |
+| `Radius` | `small` 8 · `medium` 12 (campos) · `large` 24 (tarjetas) · `full` (botones, chips, avatares) |
+| `MinTouchSize` | 44 px: altura mínima de cualquier control táctil (RNF-10) |
+| `MaxContentWidth` | 800 px: ancho máximo del contenido en escritorio |
+| `MaxFormWidth` | 440 px: ancho máximo de formularios |
+
+## Layout responsivo
+
+`useBreakpoint()` devuelve `isTablet` (≥ 768 px) e `isDesktop` (≥ 1024 px).
+
+| Ancho | Navegación | Contenido |
+| --- | --- | --- |
+| < 1024 px | Barra inferior con 4 pestañas | Ocupa todo el ancho |
+| ≥ 1024 px (web) | Barra lateral izquierda de 240 px | Centrado, máximo 800 px |
+| Pantallas de acceso ≥ 768 px | — | Tarjeta centrada de 440 px |
+
+## Componentes base
+
+| Componente | Archivo | Cuándo usarlo |
+| --- | --- | --- |
+| `Button` | `ui/button.tsx` | Variantes `primary` (una por pantalla), `secondary` y `ghost`; ícono y estado `loading` opcionales. |
+| `TextField` | `ui/text-field.tsx` | Campo con etiqueta, ícono, ayuda y error; `password` agrega el botón para mostrar u ocultar. |
+| `Checkbox` | `ui/checkbox.tsx` | Aceptar documentos; admite un enlace al final de la etiqueta. |
+| `Card` | `ui/card.tsx` | Agrupar contenido; con `onPress` toda la tarjeta es tocable; `highlighted` usa el borde amarillo. |
+| `Chip` | `ui/chip.tsx` | Intereses, categorías y filtros; `selected` lo pinta de amarillo. |
+| `EmptyState` | `ui/empty-state.tsx` | Listas vacías: ícono, título, mensaje que orienta y acción opcional. |
+| `Screen` | `layout/screen.tsx` | Contenedor de las pantallas con pestañas: título, safe area, scroll y ancho máximo. |
+| `AuthScreen` | `auth/auth-screen.tsx` | Contenedor de las pantallas de acceso. |
+| `KampusLogo` | `kampus-logo.tsx` | Logo en vertical (`stacked`) o en línea (`inline`, barra lateral). |
+| `ThemedText` / `ThemedView` | `themed-text.tsx` / `themed-view.tsx` | Texto y vistas con colores del tema. |
+
+```tsx
+<Screen title="Grupos" action={<Button title="Crear" variant="secondary" />}>
+  <Card highlighted onPress={openGroup} accessibilityLabel="Club de fútbol UTT">
+    <ThemedText type="heading">Club de fútbol UTT</ThemedText>
+    <Chip label="Deportivo" />
+  </Card>
+</Screen>
+```
+
+## Navegación
+
+Las cuatro secciones viven en `src/constants/navigation.ts` y se comparten entre la barra nativa y la web:
+
+| Pestaña | Ruta | Archivo | Tarea que la completa |
+| --- | --- | --- | --- |
+| Descubrir | `/` | `src/app/(tabs)/index.tsx` | T-11, T-30 |
+| Chats | `/chats` | `src/app/(tabs)/chats.tsx` | T-12, T-16 |
+| Grupos | `/groups` | `src/app/(tabs)/groups.tsx` | T-18 |
+| Perfil | `/profile` | `src/app/(tabs)/profile.tsx` | T-08 |
+
+- **iOS y Android:** `NativeTabs` (`src/components/app-tabs.tsx`) con íconos SF Symbols y Material Symbols.
+- **Web:** `src/components/app-tabs.web.tsx`, con barra inferior o lateral según el ancho.
+
+<Callout type="info" title="Sesión temporal">
+  Mientras no hay backend, `src/hooks/use-session.ts` guarda la sesión en memoria: iniciar sesión con cualquier correo y contraseña abre las pestañas, y "Cerrar sesión" regresa al login. T-06 lo reemplaza por el token de Sanctum.
+</Callout>
+
+## Accesibilidad
+
+- Cada control tiene `accessibilityRole` y `accessibilityLabel`; los campos usan su etiqueta como nombre accesible.
+- Área táctil mínima de 44 px (`MinTouchSize`), con `hitSlop` en los controles pequeños.
+- Los encabezados de pantalla usan `accessibilityRole="header"`.

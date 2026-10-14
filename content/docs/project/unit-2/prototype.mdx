@@ -10,11 +10,44 @@ El prototipo parte de los [wireframes](/docs/project/unit-1/wireframes) del ante
 | Entregable | Estado | Enlace |
 | --- | :---: | --- |
 | Wireframes móvil (360 × 740) y escritorio (1280 × 800) | ✅ | [Wireframes](/docs/project/unit-1/wireframes) |
+| Wireframes editables (SVG) y guía de estilo | ✅ | [Archivos SVG](/docs/project/unit-1/wireframes#archivos-editables) |
 | Flujo de navegación | ✅ | [Flujo de navegación](/docs/project/unit-1/wireframes#141-flujo-de-navegación) |
-| Prototipo navegable en Figma | 🟡 | Pendiente: agregar el enlace público de Figma |
+| Prototipo navegable en Figma | ✅ | [Abrir el prototipo](https://www.figma.com/proto/1l4aKYvdrpLcIa8OO8JcD2/Kampus-%E2%80%94-Prototipo?page-id=1%3A2&node-id=1-592&starting-point-node-id=1%3A592&scaling=min-zoom&content-scaling=fixed) (empieza en el inicio de sesión) |
+| Archivo de diseño en Figma (pantallas, estilos y componentes) | ✅ | [Abrir el archivo](https://www.figma.com/design/1l4aKYvdrpLcIa8OO8JcD2/Kampus-%E2%80%94-Prototipo?node-id=1-2) |
 
-<Callout title="Para completar el prototipo">
-  En Figma, conecta las pantallas con **Prototype → Interactions** siguiendo el flujo de navegación (inicio de sesión → registro → verificación → perfil → descubrir → match → chat → videollamada). Comparte el archivo con **Anyone with the link can view** y pega el enlace en la tabla de arriba.
+### Cómo armar el prototipo en Figma
+
+1. **Crea el archivo.** En Figma: **Drafts → New design file**. Nómbralo `Kampus — Prototipo` y muévelo al proyecto del equipo para que todos puedan editarlo.
+2. **Crea tres páginas** en el panel izquierdo: `Guía de estilo`, `Móvil` y `Escritorio`.
+3. **Importa los SVG.** Descarga los [archivos editables](/docs/project/unit-1/wireframes#archivos-editables) y arrástralos al lienzo: `00-guia-de-estilo` a su página, los `movil-*` a *Móvil* y los `escritorio-*` a *Escritorio*. Cada capa conserva su nombre (`Botón Iniciar sesión`, `Campo Correo institucional`, `Pestaña Chats`…), y los textos se pueden editar.
+4. **Conviértelos en frames.** Si un SVG entra como grupo, selecciónalo y usa **Frame selection** (`Ctrl + Alt + G`). Ponle al frame el nombre de la pantalla (por ejemplo `01 Inicio de sesión`) y acomoda los frames en fila siguiendo el flujo.
+5. **Fuente.** Los textos usan **Sora**, que ya viene en Figma (Google Fonts). Si aparece un aviso de fuente faltante, elige *Replace fonts → Sora*.
+6. **Estilos y componentes (sistema de diseño).** En la guía de estilo, selecciona cada muestra de color y, en *Fill*, crea un estilo con su nombre (`accent`, `background`…). Haz lo mismo con los textos de la escala tipográfica. Convierte en componente (`Ctrl + Alt + K`) el botón, el campo, el chip, la tarjeta y la barra de navegación.
+7. **Conecta las pantallas.** Cambia a la pestaña **Prototype** (`Shift + E`), selecciona la capa que se toca y arrastra el círculo azul hasta el frame destino. Usa *On tap → Navigate to* con *Smart animate* (300 ms). Las conexiones están en la tabla de abajo.
+8. **Punto de inicio.** Selecciona el frame `01 Inicio de sesión` y, en el panel derecho, agrega un **Flow starting point** llamado `Flujo principal`. Para escritorio, crea otro desde `Escritorio 01`.
+9. **Pruébalo** con **Present** (`Ctrl + Alt + Enter`) y recorre el flujo completo.
+10. **Compártelo.** Da clic en **Share → Anyone with the link → can view → Copy link**. Pega el enlace en la tabla de arriba y cambia el estado a ✅.
+
+#### Conexiones del prototipo
+
+| Desde | Capa | Hacia |
+| --- | --- | --- |
+| 01 Inicio de sesión | `Botón Iniciar sesión` | 04 Descubrir — Para ti |
+| 01 Inicio de sesión | texto `Regístrate` | 02 Registro |
+| 02 Registro | `Botón Registrarse` | 03 Perfil (crear) |
+| 03 Perfil | texto `Guardar` | 04 Descubrir — Para ti |
+| 04 Descubrir — Para ti | `Tarjeta de perfil` (*On drag* hacia arriba) | 05 Perfil expandido |
+| 04 Descubrir — Para ti | `Selector Para ti / Cerca` | 06 Descubrir — Cerca |
+| 04 Descubrir — Para ti | `Botón Me interesa` | 07 Chats |
+| 05 Perfil expandido | `Botón contraer` | 04 Descubrir — Para ti |
+| 06 Descubrir — Cerca | `Botón Ver perfil` | 05 Perfil expandido |
+| 07 Chats | `Conversación Ana` | 08 Conversación |
+| 08 Conversación | `Botón videollamada` | 09 Videollamada |
+| 09 Videollamada | `Colgar` | 08 Conversación |
+| Cualquier pantalla con barra | `Pestaña Descubrir` · `Chats` · `Grupos` · `Perfil` | 04 · 07 · 10 · 03 |
+
+<Callout type="info" title="Atajo para la barra de navegación">
+  Convierte la `Barra de navegación` en componente y conecta sus pestañas una sola vez dentro del componente: todas las pantallas que lo usen heredan las conexiones.
 </Callout>
 
 ## Maquetado
@@ -27,6 +60,7 @@ Las pantallas se construyen en Expo con Expo Router: cada archivo dentro de `src
 | Registro | `src/app/auth/register/index.tsx` | RF-01, RF-04 | ✅ |
 | Revisa tu correo (verificación) | `src/components/auth/check-email-card.tsx` | RF-01 | ✅ |
 | Recuperar contraseña | `src/app/auth/forgot-password/index.tsx` | RF-02 | ✅ |
+| Navegación principal (Descubrir, Chats, Grupos, Perfil) | `src/app/(tabs)/` | RNF-01 | ✅ |
 | Perfil (crear y editar) | — | RF-03, RF-18 | ⬜ Sprint 2 |
 | Descubrir y perfil expandido | — | RF-05, RF-06, RF-21 | ⬜ Sprint 2 |
 | Matches y chat | — | RF-07, RF-08, RF-09 | ⬜ Sprint 3 |
@@ -38,11 +72,18 @@ Las pantallas se construyen en Expo con Expo Router: cada archivo dentro de `src
 
 | Componente | Archivo | Uso |
 | --- | --- | --- |
-| Botón | `src/components/ui/button.tsx` | Acciones primarias y secundarias |
-| Campo de texto | `src/components/ui/text-field.tsx` | Formularios con etiqueta y error |
+| Botón | `src/components/ui/button.tsx` | Acciones primarias, secundarias y de menor peso |
+| Campo de texto | `src/components/ui/text-field.tsx` | Formularios con etiqueta, ayuda y error |
 | Casilla | `src/components/ui/checkbox.tsx` | Aceptar aviso de privacidad y normas |
-| Logo | `src/components/kampus-logo.tsx` | Encabezado de las pantallas de acceso |
-| Tema | `src/constants/theme.ts` | Colores y tipografía de la marca |
+| Tarjeta | `src/components/ui/card.tsx` | Agrupar contenido (perfiles, grupos, ajustes) |
+| Chip | `src/components/ui/chip.tsx` | Intereses, categorías y filtros |
+| Estado vacío | `src/components/ui/empty-state.tsx` | Listas sin contenido, con mensaje que orienta |
+| Pantalla | `src/components/layout/screen.tsx` | Layout responsivo de las pantallas con pestañas |
+| Navegación | `src/components/app-tabs.tsx` · `app-tabs.web.tsx` | Barra inferior en celular, barra lateral en escritorio |
+| Logo | `src/components/kampus-logo.tsx` | Encabezado de acceso y barra lateral |
+| Tema | `src/constants/theme.ts` | Colores, tipografía, espaciado y breakpoints de la marca |
+
+Detalle de cada token y componente: [Sistema de diseño](/docs/mobile/design-system).
 
 Cómo levantar la app: [Instalación](/docs/mobile/installation).
 
