@@ -3,5 +3,5 @@
   "description": "Web y móvil con Expo y Expo Router",
   "icon": "Smartphone",
   "root": true,
-  "pages": ["index", "installation", "device", "troubleshooting"]
+  "pages": ["index", "installation", "device", "design-system", "troubleshooting"]
 }
