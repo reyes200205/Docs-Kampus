@@ -1,9 +1,55 @@
 ---
 title: "Autenticación"
-description: "Cómo se autentica la app contra la API con Laravel Sanctum."
+description: "Cómo se autentica la app contra la API con Laravel Sanctum: inicio de sesión, token, cierre de sesión y registro."
 ---
 
-La API usa **Laravel Sanctum** con tokens personales. La app obtiene un token al iniciar sesión y lo envía en cada petición protegida.
+La API usa **Laravel Sanctum** con tokens personales (Bearer). La app obtiene un token al iniciar sesión y lo envía en cada petición protegida. Los tokens **expiran a los 7 días** (RNF-02).
+
+<Callout title="Estado">
+  El inicio y el cierre de sesión están en el [PR #7](https://github.com/WilbertDevMx/backend-kampus/pull/7) (T-05). El formato de `/api/user` y las cabeceras de seguridad están en el [PR #10](https://github.com/WilbertDevMx/backend-kampus/pull/10). Los dos están en revisión; esta página describe cómo quedan al fusionarse.
+</Callout>
+
+## Iniciar sesión
+
+```http
+POST /api/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "ana.lopez@utt.edu.mx",
+  "password": "********",
+  "device_name": "iphone-ana"
+}
+```
+
+`device_name` es opcional y sirve para identificar la sesión (por defecto, `api`). El correo se compara sin importar mayúsculas ni espacios.
+
+### Respuesta `201`
+
+```json
+{
+  "token": "kampus_1|Xk3...",
+  "token_type": "Bearer",
+  "expires_at": "2026-10-22T18:00:00+00:00",
+  "user": {
+    "id": 1,
+    "name": "Ana López",
+    "email": "ana.lopez@utt.edu.mx",
+    "email_verified_at": "2026-10-01T18:00:00+00:00"
+  }
+}
+```
+
+### Errores
+
+| Código | Cuándo | Mensaje |
+| --- | --- | --- |
+| `422` | Faltan campos, la contraseña es incorrecta o el correo no existe. Los dos últimos casos dan **el mismo mensaje**, para no revelar qué correos están registrados. | `Las credenciales no son correctas.` |
+| `403` | El correo todavía no se verifica (RF-01). | `Verifica tu correo institucional antes de iniciar sesión.` |
+| `429` | Hubo **5 intentos fallidos** con el mismo correo desde la misma IP. El bloqueo dura **15 minutos**, aunque luego se ponga la contraseña correcta. Un inicio de sesión correcto reinicia el contador. | `Demasiados intentos fallidos. Intenta de nuevo en 15 minutos.` |
+
+Cada intento fallido y cada bloqueo se registran en `storage/logs/security.log`, con el correo enmascarado (`an****@utt.edu.mx`).
 
 ## Enviar el token
 
@@ -15,20 +61,22 @@ Authorization: Bearer <token>
 
 ### Respuesta `200`
 
+Solo trae los campos públicos del usuario (`UserResource`):
+
 ```json
 {
-  "id": 1,
-  "name": "Ana López",
-  "email": "ana.lopez@utt.edu.mx",
-  "email_verified_at": "2026-10-01T18:00:00.000000Z",
-  "created_at": "2026-10-01T17:55:00.000000Z",
-  "updated_at": "2026-10-01T18:00:00.000000Z"
+  "data": {
+    "id": 1,
+    "name": "Ana López",
+    "email": "ana.lopez@utt.edu.mx",
+    "email_verified_at": "2026-10-01T18:00:00+00:00"
+  }
 }
 ```
 
 ### Respuesta `401`
 
-Sin token, o con un token inválido:
+Sin token, con un token inválido o con uno que ya expiró:
 
 ```json
 {
@@ -36,10 +84,22 @@ Sin token, o con un token inválido:
 }
 ```
 
+Las rutas de usuario requieren `auth:sanctum` y `verified`. Además, la API limita a **120 peticiones por minuto** por usuario (`429` si se pasa).
+
+## Cerrar sesión
+
+```http
+POST /api/logout
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+Responde `204` sin contenido. Revoca **solo el token de esa petición**: las sesiones en otros dispositivos siguen activas.
+
 ## Registro
 
-Solo se aceptan correos institucionales (RF-01). El backend toma la lista de dominios de la variable `KAMPUS_ALLOWED_EMAIL_DOMAINS`; ver [El proyecto](/docs/project#instituciones).
+Solo se aceptan correos institucionales (RF-01). En T-04 (rama `feature/T-04-registro`, en preparación), los dominios aceptados salen de la tabla `universities` (columna `email_domains`), ya no de la variable `KAMPUS_ALLOWED_EMAIL_DOMAINS`. Ver [El proyecto](/docs/project#instituciones).
 
 <Callout title="Pendiente">
-  Los endpoints de registro, inicio y cierre de sesión se documentarán aquí cuando se implementen.
+  Los endpoints de registro (`POST /api/register`) y de verificación de correo se documentarán aquí cuando se integre T-04.
 </Callout>
