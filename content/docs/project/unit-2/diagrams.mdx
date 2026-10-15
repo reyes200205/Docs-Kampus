@@ -1,6 +1,6 @@
 ---
 title: "Diagramas del sistema"
-description: "Arquitectura, casos de uso, diagrama entidad-relación y secuencia del match."
+description: "Arquitectura, casos de uso, diagrama entidad-relación y secuencias de inicio de sesión y del match."
 ---
 
 ## Arquitectura
@@ -15,66 +15,32 @@ flowchart TB
         WS["Tiempo real · Laravel Reverb"]
     end
     DB[("PostgreSQL 16")]
-    REDIS[("Redis · caché, colas, presencia")]
+    COLA[("Cola de trabajos · driver database")]
     S3[("Bucket S3 · R2 / MinIO")]
+    MAIL["Correo · Resend / Mailtrap"]
     LK["Videollamada · LiveKit"]
     MAP["Mapas · MapLibre + OpenFreeMap"]
     APP -- "HTTPS / JSON" --> API
     APP <-- "WebSocket (Echo)" --> WS
     API -- "eventos" --> WS
     API --> DB
-    API --> REDIS
+    API -- "trabajos en segundo plano" --> COLA
+    COLA -- "correo de verificación" --> MAIL
     API -- "URLs firmadas" --> S3
     API -- "tokens de sala" --> LK
     APP <-- "WebRTC" --> LK
     APP -- "teselas" --> MAP
 `} />
 
-La descripción de cada módulo está en [Arquitectura y tecnologías](/docs/project/unit-1/architecture).
+La caché, las sesiones y la cola usan el driver `database` de Laravel. Redis, que menciona el anteproyecto, se agregará solo si Reverb necesita varios servidores. La descripción de cada módulo está en [Arquitectura y tecnologías](/docs/project/unit-1/architecture), y la versión con módulos de la API y tabla de componentes está en [`docs/diagramas/arquitectura.md`](https://github.com/WilbertDevMx/backend-kampus/pull/9) del backend.
 
 ## Casos de uso
 
-Actores: **Estudiante** (usuario verificado), **Visitante** (sin cuenta), **Moderador** (administrador) y los servicios externos de correo, video y mapas.
+Diagrama en notación **UML**. Actores: **Visitante** (sin sesión), **Estudiante verificado**, que hereda los casos del Visitante, y **Administrador** (moderador), que hereda los del Estudiante. También aparecen los sistemas externos **Servicio de correo** y **LiveKit**. Cada caso de uso indica su requisito, y las relaciones `include` y `extend` siguen la notación estándar.
 
-<Mermaid chart={`
-flowchart LR
-    V(["👤 Visitante"])
-    E(["👤 Estudiante"])
-    M(["👤 Moderador"])
-    CORREO(["⚙️ Servicio de correo"])
-    VIDEO(["⚙️ LiveKit"])
-    subgraph Kampus["Sistema Kampus"]
-        UC1(["Registrarse con correo institucional"])
-        UC2(["Verificar correo"])
-        UC3(["Iniciar / cerrar sesión"])
-        UC4(["Gestionar perfil y zona"])
-        UC5(["Descubrir perfiles (swipe)"])
-        UC6(["Ver mapa Cerca"])
-        UC7(["Generar match"])
-        UC8(["Chatear con imágenes y ubicación"])
-        UC9(["Hacer videollamada 1 a 1"])
-        UC10(["Explorar, unirse y crear grupos"])
-        UC11(["Bloquear o reportar usuario"])
-        UC12(["Revisar reportes y suspender cuentas"])
-        UC13(["Eliminar cuenta"])
-    end
-    V --- UC1
-    UC1 -. include .-> UC2
-    UC2 --- CORREO
-    E --- UC3
-    E --- UC4
-    E --- UC5
-    E --- UC6
-    UC5 -. extend .-> UC7
-    E --- UC8
-    E --- UC9
-    UC9 --- VIDEO
-    E --- UC10
-    E --- UC11
-    E --- UC13
-    M --- UC3
-    M --- UC12
-`} />
+![Diagrama UML de casos de uso de Kampus: actores Visitante, Estudiante verificado y Administrador; sistemas externos Servicio de correo y LiveKit; paquetes Cuenta, Perfil, Descubrimiento, Comunicación, Grupos y Seguridad y moderación](/docs/project/unit-2/casos-de-uso.svg)
+
+La fuente editable (PlantUML) está en `docs/diagramas/casos-de-uso.puml` del backend ([PR #9](https://github.com/WilbertDevMx/backend-kampus/pull/9)). Si cambias el `.puml`, vuelve a generar el SVG y reemplázalo en `public/docs/project/unit-2/`.
 
 | Caso de uso | Actor | Requisitos |
 | --- | --- | --- |
@@ -236,6 +202,44 @@ erDiagram
     }
 `} />
 
+## Secuencia: registro, verificación e inicio de sesión
+
+Es el primer flujo del MVP (Sprint 1, tareas T-04 y T-05): cómo se crea una cuenta institucional y cómo se obtiene el token para usar la API.
+
+<Mermaid chart={`
+sequenceDiagram
+    autonumber
+    actor E as Estudiante
+    participant App as App (Expo)
+    participant API as API Laravel
+    participant DB as PostgreSQL
+    participant MAIL as Correo
+    E->>App: Captura nombre, correo institucional y contraseña
+    App->>API: POST /api/register
+    API->>DB: Busca la universidad por el dominio del correo
+    alt Dominio no aceptado
+        API-->>App: 422 "El dominio del correo no está permitido"
+    else Dominio aceptado
+        API->>DB: Crea el usuario sin verificar, con su universidad
+        API->>MAIL: Envía el enlace firmado de verificación
+        API-->>App: 201 "Revisa tu correo"
+    end
+    E->>API: Abre el enlace del correo (GET /api/email/verify/{id}/{hash})
+    API->>DB: Marca email_verified_at
+    E->>App: Inicia sesión
+    App->>API: POST /api/login
+    alt 5 intentos fallidos con el mismo correo e IP
+        API-->>App: 429 Bloqueo temporal de 15 minutos
+    else Credenciales incorrectas
+        API-->>App: 422 "Las credenciales no son correctas"
+    else Correo sin verificar
+        API-->>App: 403 "Verifica tu correo institucional"
+    else Correcto
+        API->>DB: Guarda un token de Sanctum que expira en 7 días
+        API-->>App: 201 token Bearer
+    end
+`} />
+
 ## Secuencia: del swipe al match
 
 Muestra cómo colaboran el cliente, la API y el servidor en tiempo real cuando dos estudiantes se dan "Me interesa" (patrón Observer, RF-07).
@@ -261,5 +265,5 @@ sequenceDiagram
 `} />
 
 <Callout title="Fuente del modelo de datos">
-  El DER y el diccionario vienen de la especificación de la tarea T-02 (`docs/base-de-datos/esquema.md` en `backend-kampus`, rama `docs/T-02-esquema-bd`). Cuando las migraciones se integren a `develop`, ellas son la fuente de verdad y estos diagramas se actualizan en el mismo PR.
+  El DER y el diccionario vienen de la especificación de la tarea T-02: `docs/base-de-datos/esquema.md` en `backend-kampus`, que entra a `develop` con el [PR #9](https://github.com/WilbertDevMx/backend-kampus/pull/9). Las migraciones de T-02 la implementan; cuando se integren a `develop`, ellas son la fuente de verdad y estos diagramas se actualizan en el mismo PR.
 </Callout>
