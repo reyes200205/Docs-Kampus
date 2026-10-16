@@ -11,9 +11,13 @@ La configuración vive en `.env`, que se crea a partir de `.env.example`. **Nunc
 | --- | --- | --- |
 | `APP_NAME` | `Kampus` | Nombre de la aplicación |
 | `APP_URL` | `http://localhost:8000` | URL de la API |
-| `FRONTEND_URL` | `http://localhost:5173` | URL del cliente que consume la API |
+| `FRONTEND_URLS` | `http://localhost:8081` | Orígenes del frontend (Expo) que CORS deja llamar a la API desde el navegador, separados por comas |
 | `APP_LOCALE` | `es` | Idioma de mensajes y validaciones |
 | `APP_FAKER_LOCALE` | `es_MX` | Datos de prueba en español de México |
+
+<Callout title="FRONTEND_URL">
+  El `.env.example` también trae `FRONTEND_URL=http://localhost:5173`, que ningún código usa: es un resto de la plantilla de Vite. Para CORS cuenta `FRONTEND_URLS`.
+</Callout>
 
 ## Base de datos
 
@@ -30,7 +34,22 @@ La configuración vive en `.env`, que se crea a partir de `.env.example`. **Nunc
 
 | Variable | Para qué sirve |
 | --- | --- |
-| `KAMPUS_ALLOWED_EMAIL_DOMAINS` | Dominios institucionales aceptados en el registro (RF-01), separados por comas |
+| `KAMPUS_ALLOWED_EMAIL_DOMAINS` | Dominios institucionales aceptados en el registro (RF-01), separados por comas. Con T-04 se reemplaza por la tabla `universities` (columna `email_domains`). |
+
+## Seguridad y autenticación
+
+| Variable | Valor local | Para qué sirve |
+| --- | --- | --- |
+| `SANCTUM_TOKEN_EXPIRATION` | `10080` | Minutos de vida de los tokens de la API (7 días) |
+| `SANCTUM_TOKEN_PREFIX` | `kampus_` | Prefijo de los tokens, para que los escáneres de secretos los detecten si se filtran |
+| `TRUSTED_PROXIES` | `127.0.0.1` | IPs de los proxies de confianza (Nginx), separadas por comas, para leer la IP real y el esquema HTTPS |
+| `LOG_SECURITY_DAYS` | `90` | Días que se conserva `storage/logs/security.log` (intentos fallidos, bloqueos, registros y verificaciones) |
+
+<Callout type="warn" title="En producción">
+  Usa `APP_ENV=production`, `APP_DEBUG=false` y `LOG_LEVEL=warning`, y pon en `FRONTEND_URLS` y `TRUSTED_PROXIES` los valores reales del servidor. Con `APP_ENV=production`, la API fuerza HTTPS y revisa que las contraseñas nuevas no aparezcan en filtraciones conocidas.
+</Callout>
+
+Estas variables llegan con el [PR #7](https://github.com/WilbertDevMx/backend-kampus/pull/7) y el [PR #10](https://github.com/WilbertDevMx/backend-kampus/pull/10).
 
 ## Servicios
 
