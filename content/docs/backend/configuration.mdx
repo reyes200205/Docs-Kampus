@@ -16,7 +16,7 @@ La configuración vive en `.env`, que se crea a partir de `.env.example`. **Nunc
 | `APP_FAKER_LOCALE` | `es_MX` | Datos de prueba en español de México |
 
 <Callout title="FRONTEND_URL">
-  El `.env.example` también trae `FRONTEND_URL=http://localhost:5173`, que ningún código usa: es un resto de la plantilla de Vite. Para CORS cuenta `FRONTEND_URLS`.
+  La variable anterior `FRONTEND_URL=http://localhost:5173` se quitó del `.env.example` en el [PR #10](https://github.com/WilbertDevMx/backend-kampus/pull/10): ningún código la usaba (era un resto de la plantilla de Vite). Si la tienes en tu `.env`, puedes borrarla; para CORS cuenta `FRONTEND_URLS`.
 </Callout>
 
 ## Base de datos
