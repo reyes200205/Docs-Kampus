@@ -2,6 +2,7 @@
   "title": "Unidad 2 · Versionamiento y diseño",
   "pages": [
     "index",
+    "presentation",
     "version-control",
     "workflow",
     "repository-setup",

@@ -1,0 +1,105 @@
+---
+title: "Guion de la revisión"
+description: "Qué criterio de la rúbrica presenta cada integrante, qué decir y dónde mostrarlo."
+---
+
+Guion para la revisión de la Unidad 2 (20 de octubre de 2026). No hay presentación con diapositivas: cada integrante explica sus criterios y muestra la página del sitio donde están. El reparto lo propuso Luis en Slack.
+
+| # | Criterio | Presenta | Dónde mostrarlo |
+| --- | --- | --- | --- |
+| 1 | Definición de contenido | Jorge | [Contenido](/docs/project/unit-1/content) |
+| 2 | Prototipado | Luis | [Prototipo](/docs/project/unit-2/prototype#prototipo) · [Wireframes](/docs/project/unit-1/wireframes) |
+| 3 | Diagramas del sistema | Mario | [Diagramas](/docs/project/unit-2/diagrams) |
+| 4 | Diccionario de datos | Mario | [Diccionario de datos](/docs/project/unit-2/data-dictionary) |
+| 5 | Control de versiones | Wilbert | [Control de versiones](/docs/project/unit-2/version-control) |
+| 6 | Flujo de trabajo | Wilbert | [Flujo de trabajo](/docs/project/unit-2/workflow) |
+| 7 | Configuración del entorno de versiones | Wilbert | [Configuración](/docs/project/unit-2/repository-setup) |
+| 8 | Maquetado | Marcelo | [Maquetado](/docs/project/unit-2/prototype#maquetado) · [Capturas](/docs/project/unit-2/prototype#capturas) |
+| 9 | Repositorio y evidencias | Marcelo | [Evidencias](/docs/project/unit-2/evidence) · [Changelog](/changelog) |
+| 10 | Documentación en el README | Jorge | [README](https://github.com/reyes200205/Docs-Kampus#readme) · [Rúbrica y avance](/docs/project/unit-2) |
+
+## 1. Definición de contenido · Jorge
+
+Antes de diseñar o programar definimos la **identidad del proyecto**: el **tono** de comunicación, la **identidad visual**, la **tipografía** y las **licencias** de los recursos que usamos, como imágenes, íconos y fuentes. Así evitamos problemas de derechos de autor y mantenemos coherencia en toda la app.
+
+Como Product Owner, esta definición sirvió de guía para que backend y frontend trabajaran con los mismos requerimientos desde el inicio.
+
+## 2. Prototipado · Luis
+
+Con esa base elaboramos los **wireframes** (10 pantallas en móvil y 3 vistas de escritorio) y el **prototipo navegable en Figma**. El prototipo no es solo dibujar pantallas: define con claridad tres cosas.
+
+1. El **flujo de navegación**, es decir, cómo pasa el usuario de una pantalla a otra.
+2. La **distribución de cada pantalla**: dónde va el menú, el contenido y los botones.
+3. La **experiencia de usuario**: que sea intuitiva y consistente.
+
+Hacerlo antes del código nos permitió detectar errores de diseño cuando corregirlos todavía era barato. Además, el prototipo es la referencia directa del maquetado.
+
+## 3. Diagramas del sistema · Mario
+
+Para documentar la estructura y el comportamiento del sistema elaboramos tres diagramas:
+
+- **Arquitectura:** los componentes y cómo se comunican. La app en Expo, la API REST en Laravel, la base de datos PostgreSQL y los servicios de tiempo real (Reverb), videollamada (LiveKit), almacenamiento y mapas.
+- **Casos de uso (UML):** los actores (Visitante, Estudiante, Moderador y Administrador) y lo que puede hacer cada uno.
+- **Entidad-relación (DER):** las entidades, sus atributos, sus relaciones y su cardinalidad.
+
+Usamos notación normalizada para que cualquier persona con conocimientos técnicos pueda interpretarlos, y los alineamos a los requerimientos. Lo que agregó el módulo de Administración del Sprint 2 está resaltado en amarillo.
+
+## 4. Diccionario de datos · Mario
+
+El diccionario documenta las 17 tablas del dominio. Por cada campo indicamos su **nombre, tipo de dato, restricciones** (NOT NULL, UNIQUE o valor por defecto), si es **llave primaria o foránea** y una **descripción clara**. También incluye los catálogos de valores y la trazabilidad de cada tabla con los requisitos.
+
+Lo revisamos contra el DER para que sean **consistentes**: cada entidad del diagrama tiene su tabla en el diccionario y cada relación aparece como llave foránea. Esa consistencia es donde más suelen fallar estas entregas, por eso la verificamos.
+
+## 5. Control de versiones: Git y GitHub · Wilbert
+
+Elegimos **Git** porque es un sistema **distribuido**: cada integrante tiene una copia completa del historial, puede trabajar sin conexión y crear ramas de forma rápida. Eso encaja con nuestro equipo, donde backend y frontend desarrollan partes distintas al mismo tiempo. Además es gratuito y es el estándar de la industria.
+
+Elegimos **GitHub** porque ofrece repositorios remotos gratuitos, **pull requests** con revisión de código, control de colaboradores y permisos, **protección de ramas**, GitHub Actions para la integración continua y Releases para publicar versiones. En la página comparamos Git con SVN y Mercurial, y GitHub con GitLab y Bitbucket.
+
+## 6. Flujo de trabajo · Wilbert
+
+Como Scrum Master definí un **Git Flow simplificado**. Sus reglas son:
+
+- **`main`** solo tiene código estable y publicado; nadie trabaja directamente sobre ella.
+- **`develop`** es la rama de integración y el destino de todos los PR de tarea.
+- Cada tarea se desarrolla en una **rama propia** con el número de la tarea: `feature/T-02-migraciones`, `fix/dependencias-t44` o `docs/T-40-modulo-administracion`.
+- Los cambios entran por **pull request**, que otro integrante revisa antes del merge.
+- Los **commits** siguen la convención `tipo: descripción` (`feat:`, `fix:`, `docs:`). Un check de CI la revisa en los tres repositorios.
+- Al pasar `develop` a `main` se publica una **versión automática** con su changelog.
+- Cada rama y PR lleva el número `T-XX` de su tarea en Plane.
+
+Así cada cambio queda trazado: quién lo hizo, por qué y quién lo revisó.
+
+## 7. Configuración del entorno de versiones · Wilbert
+
+- **Identidad:** cada integrante configuró su nombre y correo en Git, para que los commits se le atribuyan.
+- **Exclusiones:** un `.gitignore` por repositorio excluye dependencias, compilados, archivos del editor, registros y variables de entorno. El `.env.example` sirve de plantilla sin valores secretos.
+- **Control de accesos:** el dueño de cada repositorio es administrador y el resto del equipo es colaborador con permiso de escritura.
+- **Protección de ramas:** `main` y `develop` están protegidas en los tres repositorios. Piden pull request y bloquean el force push y el borrado. En el backend y en la app, además, piden una aprobación de otro integrante, y en el backend también que pase el check *Formato y pruebas*.
+- **Credenciales:** cada integrante se autentica con su llave SSH o su token personal. Las contraseñas y llaves nunca se suben; los secretos de CI viven en *GitHub Secrets*.
+
+Todo está documentado en la página de Configuración y en el README.
+
+## 8. Maquetado · Marcelo
+
+El maquetado traduce el prototipo de Figma a código. La app usa **Expo con React Native Web** y Expo Router: cada archivo de `src/app/` es una ruta, y la misma pantalla funciona en web y en móvil.
+
+- **Semántica y accesibilidad:** cada control tiene su etiqueta accesible (`accessibilityLabel`), los títulos usan `accessibilityRole="header"` y en web se convierten en encabezados reales. Además: contraste AA y áreas táctiles de al menos 44 px.
+- **Estilos:** un tema propio con los colores, la tipografía y el espaciado de la marca, compartido entre web y móvil.
+- **Responsividad:** funciona de 360 px a 1920 px. En celular la navegación es una barra inferior y en escritorio se convierte en barra lateral.
+
+**Avance:** están maquetados el inicio de sesión, el registro con verificación, la recuperación de contraseña, el aviso de privacidad, las normas y la navegación principal. Perfil, Descubrir, Chats y Grupos tienen su estructura; su contenido completo y las demás pantallas siguen en los Sprints 2 a 4, según el cronograma.
+
+## 9. Repositorio y evidencias · Marcelo
+
+Los tres repositorios están activos y son públicos:
+
+- [backend-kampus](https://github.com/WilbertDevMx/backend-kampus)
+- [Frontend-Kampus](https://github.com/reyes200205/Frontend-Kampus)
+- [Docs-Kampus](https://github.com/reyes200205/Docs-Kampus)
+
+Su historial muestra el flujo de trabajo aplicado en la práctica: ramas por tarea, pull requests revisados, commits con mensajes estructurados y versiones publicadas (backend v0.1.0, app v0.2.0, documentación v0.4.x). La aportación de cada integrante está en la tabla de participación de [Evidencias](/docs/project/unit-2/evidence#participación-del-equipo).
+
+## 10. Documentación en el README · Jorge
+
+El `README.md` integra el documento de la Unidad 1 y toda la documentación de la Unidad 2 en un solo lugar, dentro del repositorio remoto. Tiene índice, secciones ordenadas y formato consistente. Incluye la rúbrica de avance, el control de versiones, el flujo de trabajo, la configuración, los repositorios y evidencias, los diagramas y el diccionario de datos. El mismo contenido se publica en este sitio.
