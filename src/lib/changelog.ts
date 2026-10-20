@@ -46,7 +46,6 @@ export function isProjectId(value: string): value is ProjectId {
  * Repositorios cuyos GitHub Releases aparecen en /changelog. Los crea el workflow `Versión`
  * al mergear un PR a main. Para un repo privado, el build necesita `GITHUB_TOKEN` con acceso de lectura.
  */
-// La API todavía no publica releases: cada PR integrado en develop está a mano en content/changelog.json.
 const releaseSources = projectIds.map((project) => ({ repo: projects[project].repo, project }));
 
 export interface ChangelogItem {
