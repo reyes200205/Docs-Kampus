@@ -1,6 +1,6 @@
 # docs-kampus
 
-Documentación interna de **Kampus**, hecha con [Fumadocs](https://fumadocs.dev) (Next.js) y publicada como sitio estático en Cloudflare Workers con acceso restringido por Cloudflare Access.
+Documentación interna de **Kampus**, hecha con [Fumadocs](https://fumadocs.dev) (Next.js) y publicada como sitio estático en Cloudflare Workers. El sitio es público, igual que los repositorios.
 
 **Sitio publicado:** https://doc.kodev.online/
 

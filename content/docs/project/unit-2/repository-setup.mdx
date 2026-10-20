@@ -25,9 +25,10 @@ Separarlos permite que cada parte tenga su propio CI, sus dependencias y su vers
 | `.env.example` | Backend | Plantilla de variables de entorno **sin valores secretos**. |
 | `.github/pull_request_template.md` | Backend y app | Plantilla de PR con tarea, requisito, pasos de prueba, capturas y Definition of Done. |
 | `.github/workflows/ci.yml` | Backend y app | Backend: formato (Pint), migraciones en PostgreSQL 16 y pruebas. App: revisión de tipos con TypeScript. |
-| `.github/workflows/commits.yml` | App y documentación | Revisa que cada commit del PR siga la convención. |
-| `.github/workflows/release.yml` + `scripts/release.mjs` | App y documentación | Calcula la versión con los commits, crea el tag y el GitHub Release; en la documentación, además, despliega en Cloudflare. |
-| `commitlint.config.mjs` + `.husky/commit-msg` | App y documentación | Rechaza commits que no sigan la convención antes de crearlos. |
+| `.github/workflows/commits.yml` | Los tres | Revisa que cada commit del PR siga la convención. |
+| `.github/workflows/release.yml` + `scripts/release.mjs` | Los tres | Calcula la versión con los commits, crea el tag y el GitHub Release; en la documentación, además, despliega en Cloudflare. |
+| `commitlint.config.mjs` | Los tres | Reglas de la convención de commits y excepciones para los commits anteriores a ella. |
+| `.husky/commit-msg` | App y documentación | Rechaza en la computadora los commits que no siguen la convención, antes de crearlos. En el backend solo los revisa CI. |
 | `AGENTS.md` / `CLAUDE.md` | Backend y app | Reglas del proyecto para los asistentes de código (convenciones, estructura y comandos). |
 
 ## Archivos de exclusión (`.gitignore`)
@@ -51,7 +52,7 @@ Separarlos permite que cada parte tenga su propio CI, sus dependencias y su vers
 | --- | --- | --- |
 | Variables locales | `.env` de cada integrante, copiado de `.env.example` | `APP_KEY`, `DB_PASSWORD`, `MAIL_PASSWORD`, `AWS_SECRET_ACCESS_KEY` |
 | Secretos de CI/CD | GitHub → Settings → Secrets and variables → Actions | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` |
-| Acceso al sitio de documentación | Cloudflare Access | Solo correos autorizados del equipo |
+| Acceso al sitio de documentación | Público, igual que los tres repositorios | Por eso en el sitio no va ningún secreto ni dato personal |
 | Autenticación con GitHub | Llave SSH o token personal de cada integrante | Nunca se comparte entre integrantes |
 
 ## Control de accesos

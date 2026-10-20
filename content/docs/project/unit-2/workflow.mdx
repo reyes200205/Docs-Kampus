@@ -16,12 +16,12 @@ gitGraph
     commit id: "feat: registro"
     commit id: "test: registro"
     checkout develop
-    merge feature/T-04-register-api id: "squash T-04"
+    merge feature/T-04-register-api id: "merge T-04"
     branch feature/T-05-login-api
     checkout feature/T-05-login-api
     commit id: "feat: login"
     checkout develop
-    merge feature/T-05-login-api id: "squash T-05"
+    merge feature/T-05-login-api id: "merge T-05"
     checkout main
     merge develop id: "v0.2.0"
 `} />
@@ -34,10 +34,12 @@ gitGraph
 | `develop` | Integración; rama por defecto y destino de todos los PR de tarea. | Solo PR de tarea |
 | `feature/T-XX-descripcion` | Una rama por tarea del cronograma. | Responsable de la tarea |
 | `fix/descripcion` | Corrección de un error. | Quien lo corrige |
+| `docs/T-XX-descripcion` | Documentación de una tarea (esquema, diagramas, páginas). | Responsable de la tarea |
+| `chore/descripcion` · `ci/descripcion` | Configuración, dependencias y workflows. | Quien lo configura |
 
 ## Nomenclatura
 
-- **Ramas:** en inglés, en minúsculas y con guiones, con el número de la tarea: `feature/T-05-login-api`, `fix/token-expiration`.
+- **Ramas:** prefijo del tipo de cambio, en minúsculas y con guiones, con el número de la tarea cuando la hay: `feature/T-02-migraciones`, `docs/T-40-modulo-administracion`, `fix/dependencias-t44`. La descripción va en español, como los commits.
 - **Commits:** `tipo: descripción en presente`, en español (`feat: agrega el endpoint de registro`). Ver [Commits](/docs/development/commits).
 - **Pull requests:** el título sigue la misma convención; la plantilla pide la tarea `T-XX` y el requisito `RF-XX`.
 
@@ -48,7 +50,7 @@ gitGraph
 | Sin push directo | Nadie hace push a `main` ni a `develop`; todo entra por pull request. |
 | Revisión obligatoria | Al menos una aprobación de otro integrante. |
 | Checks en verde | CI del backend (formato, migraciones y pruebas) o revisión de commits en la documentación. |
-| PR de tarea → `develop` | **Squash and merge**: un commit por tarea, con el título del PR. |
+| PR de tarea → `develop` | **Create a merge commit**: se conservan los commits de la tarea, que CI revisa uno por uno y que alimentan el changelog. |
 | PR de publicación `develop` → `main` | **Create a merge commit**: se conservan los commits para generar el changelog. |
 | Después del merge | Se borra la rama de la tarea y se cierra la tarea en Plane. |
 
@@ -58,6 +60,6 @@ gitGraph
 2. Trabaja con commits pequeños que sigan la convención.
 3. Sube la rama y abre el PR hacia `develop` con la plantilla llena.
 4. Espera los checks y la aprobación; atiende los comentarios.
-5. Mergea con *squash*, borra la rama y cierra la tarea.
+5. Mergea con *Create a merge commit*, borra la rama y cierra la tarea.
 
 Las guías paso a paso están en [Flujo de Git](/docs/development/git-workflow), [Pull requests](/docs/development/pull-requests) y [Versiones y changelog](/docs/development/releases).
