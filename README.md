@@ -1,6 +1,6 @@
 # docs-kampus
 
-Documentación interna de **Kampus**, hecha con [Fumadocs](https://fumadocs.dev) (Next.js) y publicada como sitio estático en Cloudflare Workers. El sitio es público, igual que los repositorios.
+Documentación interna de **Kampus**, hecha con [Fumadocs](https://fumadocs.dev) (Next.js) y publicada como sitio estático. El sitio es público, igual que los repositorios.
 
 **Sitio publicado:** https://doc.kodev.online/
 
@@ -121,10 +121,9 @@ Cada carpeta de `content/docs` con `"root": true` en su `meta.json` es una secci
 
 ```bash
 pnpm build                      # genera el sitio estático en out/
-npx wrangler deploy             # publica out/ en Cloudflare Workers
 ```
 
-La configuración del Worker está en `wrangler.jsonc`. El sitio queda en https://doc.kodev.online/.
+El despliegue es automático: al publicar una versión en `main`, GitHub Actions (`.github/workflows/release.yml`) construye y publica el sitio en https://doc.kodev.online/. El proceso completo está en **Desarrollo → Versiones y changelog**.
 
 ## Código
 
