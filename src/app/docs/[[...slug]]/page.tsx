@@ -7,7 +7,7 @@ import {
   MarkdownCopyButton,
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
@@ -15,6 +15,8 @@ import { getPageImageUrl, getPageMarkdownUrl, gitConfig } from '@/lib/shared';
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params;
+  // `/docs` no tiene página propia: la primera sección del selector es Proyecto.
+  if (!params.slug?.length) redirect('/docs/project');
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
@@ -45,11 +47,12 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 }
 
 export async function generateStaticParams() {
-  return source.generateParams();
+  return [{ slug: [] }, ...source.generateParams()];
 }
 
 export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): Promise<Metadata> {
   const params = await props.params;
+  if (!params.slug?.length) return {};
   const page = source.getPage(params.slug);
   if (!page) notFound();
 

@@ -1,7 +1,0 @@
-{
-  "title": "General",
-  "description": "El proyecto, el equipo y sus reglas",
-  "icon": "BookOpen",
-  "root": true,
-  "pages": ["index", "kampus", "location-privacy"]
-}

@@ -104,9 +104,8 @@ Lo que el historial muestra y cómo se corrige:
 | --- | --- | :---: |
 | La app y la documentación no tenían CI ni plantilla de PR | Se agregaron CI, commitlint con husky, versionado automático y plantilla de PR (app PR #1) | ✅ |
 | Commits anteriores a la convención (`ADD ...`, `MODIFY ...`, `adicion de migraciones`) | Se dejaron como excepción en `commitlint.config.mjs` de la app y del backend ([PR #18](https://github.com/WilbertDevMx/backend-kampus/pull/18)); los commits nuevos siguen `tipo: descripción` y CI los revisa en los tres repositorios | ✅ |
-| Ramas `garica` y `T-07-API-de-perfil-...` fuera de la nomenclatura | El PR #1 del backend ya se cerró. Falta que @MGarciaRdz borre las dos ramas; el trabajo sigue en `feature/T-04-registro` y `feature/T-07-api-perfil` | 🟡 |
-| La app y la documentación no tienen protección de ramas | Activar las mismas reglas del backend en `main` y `develop` ([Configuración](/docs/project/unit-2/repository-setup#protección-de-ramas)) | ⬜ |
-| Rama por defecto `main` en la app y la documentación | Cambiarla a `develop` (Settings → General → Default branch) | ⬜ |
+| La app y la documentación no tenían protección de ramas | Se activó un ruleset en `main` y `develop`: PR obligatorio, sin force push y sin borrado ([Configuración](/docs/project/unit-2/repository-setup#protección-de-ramas)) | ✅ |
+| Rama por defecto `main` en la documentación | Se cambió a `develop` (Settings → General → Default branch) | ✅ |
 | PR #10 del backend se mergeó a una rama de tarea ya integrada | Se abrió el #11 hacia `develop` y ya se mergeó; la rama `feature/T-05-api-login` se borró. En adelante, todo PR de tarea apunta a `develop` | ✅ |
 
 ## Capturas

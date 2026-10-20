@@ -79,7 +79,7 @@ export async function ChangelogView({ project }: { project?: ProjectId }) {
           </nav>
 
           <div className="mt-8 flex gap-6 text-sm font-medium">
-            <Link href="/docs" className="inline-flex items-center gap-2 hover:text-brand">
+            <Link href="/docs/project" className="inline-flex items-center gap-2 hover:text-brand">
               <BookOpen className="size-4" /> Documentación
             </Link>
             {project && (
