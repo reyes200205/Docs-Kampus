@@ -10,7 +10,7 @@ El proyecto se divide en tres repositorios independientes, uno por aplicación:
 | Repositorio | Contenido | Rama por defecto |
 | --- | --- | --- |
 | [`backend-kampus`](https://github.com/WilbertDevMx/backend-kampus) | API REST en Laravel | `develop` |
-| [`Frontend-Kampus`](https://github.com/reyes200205/Frontend-Kampus) | App en Expo (web y móvil) | `main` (pendiente cambiar a `develop`) |
+| [`Frontend-Kampus`](https://github.com/reyes200205/Frontend-Kampus) | App en Expo (web y móvil) | `main` |
 | [`Docs-Kampus`](https://github.com/reyes200205/Docs-Kampus) | Este sitio de documentación | `develop` |
 
 Separarlos permite que cada parte tenga su propio CI, sus dependencias y su versionado, y que los permisos se den por área.
@@ -69,9 +69,10 @@ Reglas activas en `main` y `develop` de cada repositorio (**Settings → Rules �
 | Regla | Backend | App | Documentación |
 | --- | :---: | :---: | :---: |
 | Requerir pull request antes de mergear | ✅ (1 aprobación) | ✅ (1 aprobación) | ✅ (sin aprobación obligatoria) |
-| Requerir que los checks pasen | ✅ | ⬜ | ⬜ |
 | Bloquear el force push | ✅ | ✅ | ✅ |
 | Bloquear el borrado de la rama | ✅ | ✅ | ✅ |
+
+En el backend, además, el PR solo se puede mergear si pasa el check *Formato y pruebas*.
 
 *Estado consultado en la API pública de GitHub (`/repos/{dueño}/{repo}/rules/branches/{rama}`) el 20 de octubre de 2026.*
 
@@ -83,6 +84,4 @@ Lo hace el dueño del repositorio ([@reyes200205](https://github.com/reyes200205
 2. Nombre: `ramas-principales`. **Enforcement status:** *Active*.
 3. **Target branches → Add target → Include by pattern:** `main` y `develop`.
 4. Marca **Restrict deletions**, **Block force pushes** y **Require a pull request before merging** (*Required approvals*: 1 en la app).
-5. **Create.** Después, en **Settings → General**, cambia la rama por defecto a `develop` y activa **Automatically delete head branches**.
-
-Falta agregar al mismo ruleset **Require status checks to pass** con los checks *Tipos* y *Convención de commits* en la app, y *Convención de commits* en la documentación.
+5. **Create.** En la documentación, además, **Settings → General** tiene `develop` como rama por defecto.

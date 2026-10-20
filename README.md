@@ -16,12 +16,11 @@ Documentación interna de **Kampus**, hecha con [Fumadocs](https://fumadocs.dev)
 
 ## Secciones del sitio
 
-El menú lateral tiene un selector con cinco secciones:
+El menú lateral tiene un selector con cuatro secciones. `/docs` abre en **Proyecto**:
 
 | Sección | Qué contiene | Carpeta |
 | --- | --- | --- |
-| **General** | Introducción, el proyecto y privacidad de la ubicación (RNF-11) | `content/docs/(general)/` |
-| **Proyecto** | Documentación formal: Unidad 1 (anteproyecto) y Unidad 2 | `content/docs/project/` |
+| **Proyecto** | El proyecto, privacidad de la ubicación (RNF-11) y la documentación formal: Unidad 1 (anteproyecto) y Unidad 2 | `content/docs/project/` |
 | **Backend** | API REST con Laravel: instalación, configuración, comandos, CI y endpoints | `content/docs/backend/` |
 | **App (Expo)** | Web y móvil con Expo y Expo Router: instalación, dispositivo, sistema de diseño y problemas comunes | `content/docs/mobile/` |
 | **Desarrollo** | Flujo de Git, commits, pull requests, versiones y cómo documentar | `content/docs/development/` |
@@ -29,6 +28,12 @@ El menú lateral tiene un selector con cinco secciones:
 Además del contenido de `/docs`, el sitio tiene las páginas `/blog`, `/changelog` y `/team`.
 
 ## Documentación del proyecto (Unidades 1 y 2)
+
+| Página | Archivo |
+| --- | --- |
+| Portada de Proyecto (datos, equipo y repositorios) | [index.mdx](content/docs/project/index.mdx) |
+| El proyecto | [kampus.mdx](content/docs/project/kampus.mdx) |
+| Privacidad de la ubicación (RNF-11) | [location-privacy.mdx](content/docs/project/location-privacy.mdx) |
 
 ### Unidad 1 · Anteproyecto
 
