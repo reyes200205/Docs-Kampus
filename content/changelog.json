@@ -2,49 +2,6 @@
   "$schema": "./changelog.schema.json",
   "releases": [
     {
-      "date": "2026-10-19",
-      "project": "api",
-      "version": "PR #9",
-      "summary": "Esquema de base de datos y diagramas de arquitectura y casos de uso (UTTC-47).",
-      "link": "https://github.com/WilbertDevMx/backend-kampus/pull/9",
-      "sections": [
-        {
-          "type": "docs",
-          "items": [
-            {
-              "text": "agrega diagramas de arquitectura y casos de uso",
-              "author": "WilbertACDX",
-              "link": "https://github.com/WilbertDevMx/backend-kampus/commit/79a43ad56e94a2d1a85d0a5ee850c6fa191eec62"
-            },
-            {
-              "text": "agrega el esquema de base de datos con DER y diccionario de datos",
-              "author": "WilbertACDX",
-              "link": "https://github.com/WilbertDevMx/backend-kampus/commit/f2349b7b25543c52007deb99d34e0cb9fa88ceea"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "date": "2026-10-19",
-      "project": "api",
-      "version": "PR #7",
-      "summary": "API de inicio y cierre de sesión con Sanctum (T-05).",
-      "link": "https://github.com/WilbertDevMx/backend-kampus/pull/7",
-      "sections": [
-        {
-          "type": "features",
-          "items": [
-            {
-              "text": "agrega inicio y cierre de sesión con tokens que expiran y bloqueo tras 5 intentos",
-              "author": "WilbertACDX",
-              "link": "https://github.com/WilbertDevMx/backend-kampus/commit/c27cfe7aec0b33f8bbe1d678539ebe2b82c6112a"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "date": "2026-10-09",
       "project": "docs",
       "version": "v0.1.0",
