@@ -2,19 +2,18 @@
   "$schema": "./team.schema.json",
   "members": [
     {
-      "name": "Wilbert Omar Acosta Barrera",
-      "role": "Scrum Master · Backend",
+      "name": "Jesus Del Toro Robledo",
+      "role": "Gerente del proyecto",
       "areas": [
-        "scrum",
-        "backend"
+        "docs",
+        "product"
       ],
-      "github": "WilbertACDX",
-      "summary": "Coordina al equipo y construye la base de la API.",
+      "github": "JesusDelToroRobledoUTT",
+      "summary": "Gestiona el proyecto.",
       "responsibilities": [
-        "Organiza sprints y el cronograma (T-XX).",
-        "Da seguimiento a los bloqueos.",
-        "Configuró Laravel, Sanctum y CI.",
-        "Desarrolla y revisa la API."
+        "Validaciones.",
+        "Gestion de tiempo y recursos.",
+        "Coordinacion con el equipo."
       ]
     },
     {
@@ -32,6 +31,22 @@
         "Valida cada entrega.",
         "Mantiene este sitio de documentación.",
         "Creó la base de la app: auth, componentes y tema."
+      ]
+    },
+    {
+      "name": "Wilbert Omar Acosta Barrera",
+      "role": "Scrum Master · Backend",
+      "areas": [
+        "scrum",
+        "backend"
+      ],
+      "github": "WilbertACDX",
+      "summary": "Coordina al equipo y construye la base de la API.",
+      "responsibilities": [
+        "Organiza sprints y el cronograma (T-XX).",
+        "Da seguimiento a los bloqueos.",
+        "Configuró Laravel, Sanctum y CI.",
+        "Desarrolla y revisa la API."
       ]
     },
     {

@@ -39,10 +39,10 @@ Se eligió **Scrum** con sprints de dos semanas por las siguientes razones:
 | Integrante | Rol Scrum | Área | Responsabilidades |
 | --- | --- | --- | --- |
 | **Jorge Alejandro Rentería Reyes** | Product Owner | Documentación | Mantener y priorizar el Product Backlog; redactar historias de usuario y criterios de aceptación; documentación del proyecto (anteproyecto, manuales, actas de revisión); definición de contenido, textos de la app y de consentimiento de ubicación; diseño y aplicación de las pruebas de usabilidad; QA funcional; contrato inicial de la API (OpenAPI) con apoyo del backend. |
-| **Wilbert Omar Acosta Barrera** | Scrum Master (propuesto) / Desarrollador backend | Backend | Facilitar los eventos Scrum y remover impedimentos; API de autenticación, descubrimiento/match, grupos, bloqueo/reporte; catálogo de zonas y ubicación aproximada (geohash); configuración de repositorios, CI y despliegue; API de la vista "Cerca" y prueba de carga. |
-| **Mario Humberto García Rodríguez** | Desarrollador backend | Backend | Diseño de base de datos y migraciones; API de registro/verificación, perfil y chat (incluidos el envío de imágenes y el mensaje de ubicación); servidor WebSocket (Reverb); integración de LiveKit en el servidor; datos de demostración y API de moderación. |
-| **Luis Carlos Fernández Quiñones** | Desarrollador frontend | Frontend | Pantallas de registro/login, descubrimiento (swipe y perfil expandible), chat con ubicación y videollamada; integración con la API y WebSockets; pruebas en navegadores móviles; pantalla de Ajustes. |
-| **Marcelo Alessandro Sifuentes de la Cruz** | Desarrollador frontend | Frontend | Sistema de diseño y componentes base; estilo del mapa, selección de zona y vista "Cerca"; pantallas de perfil, matches, grupos y moderación; responsividad y accesibilidad; traslado de wireframes a Figma. |
+| **Wilbert Omar Acosta Barrera** | Scrum Master (propuesto) / Desarrollador backend | Backend | Facilitar los eventos Scrum y remover impedimentos; API de autenticación, descubrimiento/match, grupos, bloqueo/reporte; catálogo de zonas y ubicación aproximada (geohash); configuración de repositorios, CI y despliegue; API de la vista "Cerca" y prueba de carga. **[Nuevo]** Roles y permisos, gestión de cuentas de staff y aprobación de grupos (T-40 a T-42). |
+| **Mario Humberto García Rodríguez** | Desarrollador backend | Backend | Diseño de base de datos y migraciones; API de registro/verificación, perfil y chat (incluidos el envío de imágenes y el mensaje de ubicación); servidor WebSocket (Reverb); integración de LiveKit en el servidor; datos de demostración y API de moderación. **[Nuevo]** Consulta de usuarios y suspensión de cuentas reportadas (T-43). |
+| **Luis Carlos Fernández Quiñones** | Desarrollador frontend | Frontend | Pantallas de registro/login, descubrimiento (swipe y perfil expandible), chat y videollamada; integración con la API y WebSockets; pruebas en navegadores móviles; pantalla de Ajustes. |
+| **Marcelo Alessandro Sifuentes de la Cruz** | Desarrollador frontend | Frontend | Sistema de diseño y componentes base; estilo del mapa, selección de zona y vista "Cerca"; pantallas de perfil, matches, grupos y moderación; responsividad y accesibilidad; traslado de wireframes a Figma. **[Nuevo]** Panel de administración (T-44), con apoyo de Luis. |
 
 ### 9.3 Plan de contingencia
 
@@ -53,3 +53,20 @@ Se eligió **Scrum** con sprints de dos semanas por las siguientes razones:
 | **Falla o cambio del proveedor de videollamada** | El patrón Adapter permite sustituir LiveKit por otro proveedor (Daily, Agora) o por la versión autoalojada; mientras tanto, la comunicación continúa por chat. |
 | **Conflictos de integración entre frontend y backend** | Contrato de la API en OpenAPI desde el Sprint 1; datos de prueba (seeders) compartidos; integración continua en `develop` con revisión cruzada. |
 | **Problemas de hosting o costos** | Alternativa de despliegue en el VPS del equipo con Docker; capas gratuitas de servicios; monitoreo del consumo en cada sprint. |
+
+### 9.4 Cambios de alcance
+
+Un cambio de alcance se propone en Slack, lo aprueban el Product Owner y el profesor, y se registra aquí. Después se actualizan los documentos afectados, marcando lo nuevo con **[Nuevo]**.
+
+| Fecha | Cambio | Aprobado por | Compensación | Impacto |
+| --- | --- | --- | --- | --- |
+| 19 oct 2026 | **Módulo de Administración.** Tres roles: estudiante, moderador (una sola universidad) y administrador (todas). El staff solo usa el panel de administración. Incluye aprobación de grupos, consulta de usuarios, suspensión de cuentas reportadas con motivo obligatorio y una bitácora de moderación. Requisitos RF-22 a RF-24; tareas T-40 a T-44. | Jorge Alejandro Rentería (Product Owner) y el profesor | T-32 (ubicación en el chat, 10 h) pasa a fase 2. | Unas 48 h más, 38 h netas; unas 10 h más por integrante. |
+
+Reglas acordadas para el módulo:
+
+- **El staff solo usa el panel.** No tiene perfil, no hace swipe, match ni chat, y no aparece en el descubrimiento.
+- **Alta del staff.** Solo un administrador crea moderadores y otros administradores, con correo institucional del dominio de su universidad.
+- **Una universidad por moderador.** Una universidad puede tener varios moderadores.
+- **Suspensiones con justificación.** El moderador solo puede suspender o eliminar cuentas que tengan un reporte. Toda acción queda en la bitácora con quién la hizo, a quién y el motivo.
+- **Reportes entre universidades.** Los atiende la universidad del usuario reportado.
+- **Grupos.** Los que crean los alumnos quedan pendientes hasta que los aprueba un moderador de su universidad o un administrador. Por ahora, editar un grupo aprobado no lo regresa a revisión.

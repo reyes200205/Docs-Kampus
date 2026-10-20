@@ -9,6 +9,10 @@ Los wireframes iniciales están disponibles como archivos SVG editables que se p
 
 ### 14.1 Flujo de navegación
 
+<Callout type="warn" title="Nuevo · Sprint 2: Módulo de Administración">
+  Se agrega la rama del **staff** al flujo y la especificación de las pantallas del panel de administración (sección 14.3), **pendientes de diseño** en Figma ([cambio de alcance del 19 de octubre de 2026](/docs/project/unit-1/methodology#94-cambios-de-alcance)).
+</Callout>
+
 <Mermaid chart={`
 flowchart LR
     A[Inicio de sesión] --> B[Registro con correo institucional]
@@ -21,9 +25,16 @@ flowchart LR
     G --> H
     H --> I[Chat con imágenes y ubicación]
     I --> J[Videollamada 1 a 1]
+    A -->|staff| P[Panel de administración]
+    P --> P1[Usuarios]
+    P --> P2[Reportes]
+    P --> P3[Grupos pendientes y oficiales]
+    P -->|solo administrador| P4[Staff]
+    classDef nuevo fill:#F5C518,stroke:#8A6D00,color:#121215
+    class P,P1,P2,P3,P4 nuevo
 `} />
 
-Desde el menú principal se puede navegar en cualquier momento entre **Descubrir**, **Chats**, **Grupos** y **Perfil**.
+Desde el menú principal se puede navegar en cualquier momento entre **Descubrir**, **Chats**, **Grupos** y **Perfil**. **[Nuevo]** Moderadores y administradores no tienen ese menú: después de iniciar sesión entran al panel de administración.
 
 ### 14.2 Pantallas incluidas
 
@@ -39,6 +50,20 @@ Desde el menú principal se puede navegar en cualquier momento entre **Descubrir
 | 8 | Conversación | Encabezado con nombre y botón de videollamada, burbujas de texto e imágenes, mensaje de ubicación como mini-mapa, menú de adjuntar (imagen o ubicación) con confirmación y campo de texto | Móvil: pantalla completa. Escritorio: columna derecha junto a la lista de chats. |
 | 9 | Videollamada 1 a 1 | Video remoto grande, video propio en miniatura, controles de micrófono, cámara y colgar, y guía de permisos | Móvil: vertical con controles inferiores. Escritorio: video centrado y controles flotantes. |
 | 10 | Grupos y clubes | Buscador y filtros por institución y categoría, tarjetas de grupo con miembros y próxima actividad, botón Unirse y botón Crear grupo | Móvil: lista a una columna. Escritorio: cuadrícula de tres columnas. |
+
+### 14.3 Pantallas del panel de administración (pendiente de diseño)
+
+Especificación para que el equipo de frontend diseñe estas pantallas en Figma (T-44). Usan el mismo estilo oscuro y los componentes de la guía de estilo.
+
+| # | Pantalla | Elementos clave | Móvil / escritorio |
+| --- | --- | --- | --- |
+| A1 | Panel · Usuarios | Buscador por nombre o correo, filtro por estado (activa / suspendida), lista con nombre, carrera, universidad y número de reportes. El moderador solo ve su universidad; el administrador tiene además un selector de universidad. | Móvil: lista a una columna. Escritorio: tabla con barra lateral del panel. |
+| A2 | Detalle de usuario | Datos de la cuenta y del perfil, reportes recibidos y historial de la bitácora. Botones Suspender, Reactivar y Eliminar; el moderador solo los ve si la cuenta tiene un reporte. Al confirmar, pide el motivo (obligatorio). | Móvil: pantalla completa. Escritorio: panel derecho junto a la lista. |
+| A3 | Reportes | Pestañas Pendientes / Revisados / Descartados; cada reporte con motivo, fecha, quién reporta y a quién, y acceso a la conversación que sirve como evidencia. Acciones: descartar, o resolver y suspender, con motivo. | Móvil: lista con ficha inferior. Escritorio: lista y detalle en dos columnas. |
+| A4 | Grupos | Pestañas Pendientes / Oficiales; tarjeta con nombre, categoría, creador e imagen; botones Aprobar y Rechazar (el rechazo pide motivo) y Crear grupo oficial. | Móvil: lista a una columna. Escritorio: cuadrícula. |
+| A5 | Staff (solo administrador) | Lista de moderadores y administradores con universidad y estado; formulario para crear una cuenta (nombre, correo institucional, rol, universidad) y botón Desactivar. | Móvil: lista y formulario en pantalla aparte. Escritorio: lista con formulario lateral. |
+
+Del lado del estudiante cambia la pantalla 10 (Grupos): el grupo que crea muestra el estado "En revisión" o el motivo del rechazo, y los grupos oficiales llevan una insignia.
 
 ### Wireframes móvil (360 × 740)
 

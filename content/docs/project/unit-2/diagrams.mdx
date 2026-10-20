@@ -5,10 +5,15 @@ description: "Arquitectura, casos de uso, diagrama entidad-relación y secuencia
 
 ## Arquitectura
 
+<Callout type="warn" title="Nuevo · Sprint 2: Módulo de Administración">
+  Se agregan el **panel de administración**, el actor **Moderador** en los casos de uso y, en el DER, las columnas de aprobación de grupos, `reports.university_id` y la tabla `moderation_actions`. Lo nuevo va en amarillo ([cambio de alcance del 19 de octubre de 2026](/docs/project/unit-1/methodology#94-cambios-de-alcance)).
+</Callout>
+
 <Mermaid chart={`
 flowchart TB
     subgraph Cliente["Cliente · Expo (React Native Web)"]
         APP["App web hoy · iOS / Android a futuro"]
+        PANEL["Panel de administración · solo staff"]
     end
     subgraph Servidor["Servidor"]
         API["API REST · Laravel 13 + Sanctum"]
@@ -30,35 +35,42 @@ flowchart TB
     API -- "tokens de sala" --> LK
     APP <-- "WebRTC" --> LK
     APP -- "teselas" --> MAP
+    PANEL -- "HTTPS / JSON · rol staff" --> API
+    classDef nuevo fill:#F5C518,stroke:#8A6D00,color:#121215
+    class PANEL nuevo
 `} />
 
-La caché, las sesiones y la cola usan el driver `database` de Laravel. Redis, que menciona el anteproyecto, se agregará solo si Reverb necesita varios servidores. La descripción de cada módulo está en [Arquitectura y tecnologías](/docs/project/unit-1/architecture), y la versión con módulos de la API y tabla de componentes está en [`docs/diagramas/arquitectura.md`](https://github.com/WilbertDevMx/backend-kampus/pull/9) del backend.
+La caché, las sesiones y la cola usan el driver `database` de Laravel. Redis, que menciona el anteproyecto, se agregará solo si Reverb necesita varios servidores. La descripción de cada módulo está en [Arquitectura y tecnologías](/docs/project/unit-1/architecture), y la versión con módulos de la API y tabla de componentes está en [`docs/diagramas/arquitectura.md`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/docs/diagramas/arquitectura.md) del backend. **[Nuevo]** Esa versión ya incluye los módulos **Roles y permisos** (T-40) y **Administración** (T-41 a T-43), en el [PR #13](https://github.com/WilbertDevMx/backend-kampus/pull/13).
 
 ## Casos de uso
 
-Diagrama en notación **UML**. Actores: **Visitante** (sin sesión), **Estudiante verificado**, que hereda los casos del Visitante, y **Administrador** (moderador), que hereda los del Estudiante. También aparecen los sistemas externos **Servicio de correo** y **LiveKit**. Cada caso de uso indica su requisito, y las relaciones `include` y `extend` siguen la notación estándar.
+Diagrama en notación **UML**. Actores: **Visitante** (sin sesión), **Estudiante verificado**, que hereda los casos del Visitante, **[Nuevo]** **Moderador** (una universidad) y **Administrador** (todas), que hereda los casos del Moderador y además gestiona las cuentas de staff. **[Nuevo]** El staff ya no hereda del Estudiante, porque no usa las funciones sociales. También aparecen los sistemas externos **Servicio de correo** y **LiveKit**. Cada caso de uso indica su requisito, y las relaciones `include` y `extend` siguen la notación estándar. **[Nuevo]** Colores: amarillo = caso o actor nuevo; amarillo claro = caso modificado; gris = pasa a fase 2.
 
-![Diagrama UML de casos de uso de Kampus: actores Visitante, Estudiante verificado y Administrador; sistemas externos Servicio de correo y LiveKit; paquetes Cuenta, Perfil, Descubrimiento, Comunicación, Grupos y Seguridad y moderación](/docs/project/unit-2/casos-de-uso.svg)
+![Diagrama UML de casos de uso de Kampus: actores Visitante, Estudiante verificado, Moderador y Administrador; sistemas externos Servicio de correo y LiveKit; paquetes Cuenta, Perfil, Descubrimiento, Comunicación, Grupos, Seguridad y Administración](/docs/project/unit-2/casos-de-uso.svg)
 
-La fuente editable (PlantUML) está en `docs/diagramas/casos-de-uso.puml` del backend ([PR #9](https://github.com/WilbertDevMx/backend-kampus/pull/9)). Si cambias el `.puml`, vuelve a generar el SVG y reemplázalo en `public/docs/project/unit-2/`.
+La fuente editable (PlantUML) está en `docs/diagramas/casos-de-uso.puml` del backend ([PR #9](https://github.com/WilbertDevMx/backend-kampus/pull/9); **[Nuevo]** versión con el módulo de Administración en el [PR #13](https://github.com/WilbertDevMx/backend-kampus/pull/13)). Si cambias el `.puml`, vuelve a generar el SVG y reemplázalo en `public/docs/project/unit-2/`.
 
 | Caso de uso | Actor | Requisitos |
 | --- | --- | --- |
 | Registrarse con correo institucional (incluye verificar correo) | Visitante | RF-01, RF-04 |
-| Iniciar / cerrar sesión | Estudiante, Moderador | RF-02 |
+| Iniciar / cerrar sesión | Estudiante, **[Nuevo]** Moderador, Administrador | RF-02 |
 | Gestionar perfil y zona | Estudiante | RF-03, RF-18 |
-| Descubrir perfiles (puede generar un match) | Estudiante | RF-05, RF-06, RF-07, RF-21 |
+| Descubrir perfiles (puede generar un match) **[Nuevo]** · solo entre estudiantes | Estudiante | RF-05, RF-06, RF-07, RF-21 |
 | Ver mapa "Cerca" | Estudiante | RF-19 |
-| Chatear con imágenes y ubicación | Estudiante | RF-08, RF-09, RF-20 |
+| Chatear con imágenes (**[Nuevo]** la ubicación pasa a fase 2) | Estudiante | RF-08, RF-09, RF-20 |
 | Hacer videollamada 1 a 1 | Estudiante | RF-10 |
-| Explorar, unirse y crear grupos | Estudiante | RF-11, RF-12 |
+| Explorar **[Nuevo]** grupos aprobados, unirse y crear grupos **[Nuevo]** (quedan pendientes) | Estudiante | RF-11, RF-12 |
 | Bloquear o reportar usuario | Estudiante | RF-13, RF-14 |
-| Revisar reportes y suspender cuentas | Moderador | RF-15 |
+| Revisar reportes **[Nuevo]** de su universidad y suspender cuentas **[Nuevo]** reportadas (incluye registrar el motivo) | **[Nuevo]** Moderador, Administrador | RF-15 |
+| **[Nuevo]** Consultar usuarios de su universidad | Moderador, Administrador | RF-24 |
+| **[Nuevo]** Aprobar o rechazar grupos (incluye registrar el motivo) | Moderador, Administrador | RF-23 |
+| **[Nuevo]** Crear grupo oficial | Moderador, Administrador | RF-12 |
+| **[Nuevo]** Gestionar cuentas de staff (incluye registrar la acción) | Administrador | RF-22 |
 | Eliminar cuenta | Estudiante | RF-16 |
 
 ## Diagrama entidad-relación
 
-Solo se muestran las tablas del dominio. El detalle de cada columna está en el [Diccionario de datos](/docs/project/unit-2/data-dictionary).
+Solo se muestran las tablas del dominio. El detalle de cada columna está en el [Diccionario de datos](/docs/project/unit-2/data-dictionary). **[Nuevo]** Lo nuevo del módulo de Administración lleva el comentario `NUEVO S2`, y la tabla nueva `moderation_actions` va en amarillo.
 
 <Mermaid chart={`
 erDiagram
@@ -82,6 +94,11 @@ erDiagram
     users ||--o{ blocks : "bloquea / es bloqueado"
     users ||--o{ reports : "reporta / es reportado"
     matches |o--o{ reports : "evidencia"
+    users |o--o{ groups : "NUEVO S2 revisa"
+    universities ||--o{ reports : "NUEVO S2 atiende"
+    users ||--o{ moderation_actions : "NUEVO S2 realiza"
+    reports |o--o{ moderation_actions : "NUEVO S2 justifica"
+    universities |o--o{ moderation_actions : "NUEVO S2 ambito"
 
     universities {
         bigint id PK
@@ -98,7 +115,7 @@ erDiagram
         timestamp email_verified_at
         timestamp suspended_at
         varchar password
-        varchar role
+        varchar role "NUEVO S2: student, moderator, admin"
     }
     zones {
         bigint id PK
@@ -170,6 +187,11 @@ erDiagram
         text description
         varchar category
         varchar image_path
+        varchar status "NUEVO S2"
+        boolean is_official "NUEVO S2"
+        bigint reviewed_by FK "NUEVO S2"
+        timestamp reviewed_at "NUEVO S2"
+        varchar rejection_reason "NUEVO S2"
     }
     group_members {
         bigint group_id PK
@@ -199,7 +221,22 @@ erDiagram
         varchar status
         bigint reviewed_by FK
         timestamp reviewed_at
+        bigint university_id FK "NUEVO S2"
     }
+    moderation_actions {
+        bigint id PK "NUEVO S2"
+        bigint actor_id FK
+        varchar action
+        varchar target_type
+        bigint target_id
+        bigint report_id FK
+        bigint university_id FK
+        text reason
+        timestamp created_at
+    }
+
+    classDef nuevo fill:#F5C518,stroke:#8A6D00,color:#121215
+    class moderation_actions nuevo
 `} />
 
 ## Secuencia: registro, verificación e inicio de sesión
@@ -265,5 +302,5 @@ sequenceDiagram
 `} />
 
 <Callout title="Fuente del modelo de datos">
-  El DER y el diccionario vienen de la especificación de la tarea T-02: `docs/base-de-datos/esquema.md` en `backend-kampus`, que entra a `develop` con el [PR #9](https://github.com/WilbertDevMx/backend-kampus/pull/9). Las migraciones de T-02 la implementan; cuando se integren a `develop`, ellas son la fuente de verdad y estos diagramas se actualizan en el mismo PR.
+  El DER y el diccionario vienen de la especificación de la tarea T-02: `docs/base-de-datos/esquema.md` en `backend-kampus`, que entró a `develop` con el [PR #9](https://github.com/WilbertDevMx/backend-kampus/pull/9). **[Nuevo]** Los cambios del módulo de Administración están en el [PR #13](https://github.com/WilbertDevMx/backend-kampus/pull/13). Las migraciones de T-02 la implementan; cuando se integren a `develop`, ellas son la fuente de verdad y estos diagramas se actualizan en el mismo PR.
 </Callout>

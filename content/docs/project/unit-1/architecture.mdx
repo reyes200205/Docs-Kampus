@@ -9,10 +9,15 @@ description: "Estructura del sistema, mapa de navegación y tecnologías elegida
 
 El sistema adopta un modelo **cliente–servidor desacoplado**: la interfaz con la que interactúa el usuario y la lógica que procesa la información están divididas de forma clara e independiente. Esta estructura facilita el trabajo en paralelo, mejora el mantenimiento y permite escalar o sustituir componentes sin afectar el funcionamiento global.
 
+<Callout type="warn" title="Nuevo · Sprint 2: Módulo de Administración">
+  El cliente incluye un **panel de administración** para moderadores y administradores, y el backend agrega permisos por rol y por universidad. Las rutas nuevas están en la tabla 12.2 ([cambio de alcance del 19 de octubre de 2026](/docs/project/unit-1/methodology#94-cambios-de-alcance)).
+</Callout>
+
 <Mermaid chart={`
 flowchart TB
     subgraph Cliente["Cliente · Expo (React Native Web)"]
         APP["App web hoy · iOS / Android a futuro"]
+        PANEL["Panel de administración · solo staff"]
     end
     subgraph Servidor["Servidor"]
         API["API REST · Laravel 13 + Sanctum"]
@@ -32,6 +37,9 @@ flowchart TB
     API -- "tokens de sala" --> LK
     APP <-- "WebRTC" --> LK
     APP -- "teselas" --> MAP
+    PANEL -- "HTTPS / JSON · rol staff" --> API
+    classDef nuevo fill:#F5C518,stroke:#8A6D00,color:#121215
+    class PANEL nuevo
 `} />
 
 *Figura 1. Arquitectura actual del sistema.*
@@ -39,7 +47,7 @@ flowchart TB
 | Módulo | Función |
 | --- | --- |
 | **Presentación (frontend)** | Aplicación en Expo que se ejecuta en el navegador de computadoras y celulares; la misma base de código podrá compilarse como app nativa. Muestra perfiles, chats, mapas y menús, y responde a las acciones del usuario. |
-| **Lógica y procesamiento (backend)** | Núcleo del sistema, construido con Laravel. Recibe las solicitudes del cliente, valida la identidad y el correo institucional, calcula las coincidencias (matches), gestiona los grupos y aplica las reglas de seguridad y moderación. |
+| **Lógica y procesamiento (backend)** | Núcleo del sistema, construido con Laravel. Recibe las solicitudes del cliente, valida la identidad y el correo institucional, calcula las coincidencias (matches), gestiona los grupos y aplica las reglas de seguridad y moderación. **[Nuevo]** Valida los permisos de cada rol (estudiante, moderador y administrador) y limita a cada moderador a su universidad. |
 | **Comunicación en tiempo real** | Transmite mensajes de chat y notificaciones de match al instante mediante Laravel Reverb, para que las interacciones ocurran sin demoras perceptibles. |
 | **Persistencia de datos e imágenes** | Base de datos relacional (PostgreSQL) para cuentas, matches, mensajes y grupos, y almacenamiento privado compatible con S3 para fotos de perfil y archivos compartidos. |
 | **Servicio geoespacial y mapas** | Procesa únicamente zonas generales (campus o colonias) y celdas aproximadas, sin guardar ubicaciones exactas ni rastrear en vivo. |
@@ -67,9 +75,14 @@ El diagrama inicial mostraba una SPA en React y MySQL 8. El equipo cambió a Exp
 | `/grupos` · `/grupos/:id` · `/grupos/nuevo` | Explorar grupos, detalle con actividades, crear grupo | Usuario verificado |
 | `/perfil` · `/perfil/editar` | Perfil propio y edición | Usuario verificado |
 | `/ajustes` | Privacidad, usuarios bloqueados, eliminar cuenta, cerrar sesión | Usuario verificado |
-| `/admin/reportes` | Panel básico de moderación | Administrador |
+| `/admin/reportes` | Panel ~~básico~~ de moderación: **[Nuevo]** reportes de su universidad | **[Nuevo]** Moderador o administrador |
+| **[Nuevo]** `/admin/usuarios` · `/admin/usuarios/:id` | Lista, búsqueda y detalle de usuarios; suspender o eliminar una cuenta reportada | Moderador (su universidad) o administrador |
+| **[Nuevo]** `/admin/grupos` | Grupos pendientes de aprobación y grupos oficiales | Moderador (su universidad) o administrador |
+| **[Nuevo]** `/admin/staff` | Crear, asignar y desactivar moderadores y administradores | Solo administrador |
 
 En móvil la navegación principal es una barra inferior con cuatro secciones: Descubrir, Chats, Grupos y Perfil. En escritorio se convierte en una barra lateral izquierda, y la vista de chat muestra la lista de conversaciones y la conversación en dos columnas. Con Expo Router, cada ruta es un archivo dentro de `src/app/`.
+
+**[Nuevo]** Las cuentas de staff entran directo al panel de administración. Su menú solo muestra Usuarios, Reportes y Grupos, y además Staff en el caso del administrador. No ven Descubrir, Cerca ni Chat.
 
 ### 12.3 Tecnologías y justificación
 
@@ -77,6 +90,7 @@ En móvil la navegación principal es una barra inferior con cuatro secciones: D
 | --- | --- | --- |
 | **Backend / API** | Laravel 13 (PHP 8.3) | El equipo ya lo domina gracias a un proyecto previo, lo que mitiga el riesgo R6 de curva de aprendizaje; incluye autenticación, validación, colas, eventos, almacenamiento y pruebas integradas (RNF-02, RNF-07). |
 | **Autenticación** | Laravel Sanctum | Autenticación por tokens con expiración y revocación, integrada con Laravel (RF-02, RNF-02). |
+| **[Nuevo]** **Permisos** | Policies de Laravel | Cada acción del staff se autoriza en el servidor según el rol y la universidad; la app solo oculta lo que el usuario no puede usar (RF-15, RF-22 a RF-24, riesgo R12). |
 | **Tiempo real** | Laravel Reverb + Laravel Echo | Servidor WebSocket oficial de Laravel, sin costo por mensaje ni dependencia de un servicio externo; canales privados autenticados para el chat (RF-08, RNF-09). |
 | **Base de datos** | PostgreSQL 16 | Modelo relacional adecuado para usuarios, matches, mensajes y grupos. Se eligió sobre MySQL por su soporte geoespacial (PostGIS) para la vista "Cerca", índices parciales, particionado nativo para las tablas que más crecen (swipes y mensajes) y JSONB con índices para atributos de perfil (RF-18, RF-19, RNF-05, RNF-09). |
 | **Caché, colas y presencia** | Redis | Caché de la cola de descubrimiento, sesiones, colas de trabajos, contadores de no leídos, estado "en línea" y límite de peticiones en login y registro (RNF-02, RNF-05). |

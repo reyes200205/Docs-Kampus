@@ -9,6 +9,10 @@ description: "Riesgos del proyecto, su puntaje y el plan para mitigarlos."
 
 **Nivel de riesgo:** 🟢 Bajo (1–6) · 🟡 Medio (7–14) · 🔴 Alto (15–25)
 
+<Callout type="warn" title="Nuevo · Sprint 2: Módulo de Administración">
+  Se agregan los riesgos **R12** (escalada de privilegios del staff) y **R13** (cambio de alcance a mitad del proyecto), y se ajusta el plan de R3 ([cambio de alcance del 19 de octubre de 2026](/docs/project/unit-1/methodology#94-cambios-de-alcance)).
+</Callout>
+
 <RiskTable
   items={[
     {
@@ -36,7 +40,7 @@ description: "Riesgos del proyecto, su puntaje y el plan para mitigarlos."
       impacto: 5,
       consecuencia: "Deterioro de la seguridad del entorno digital, afectación a usuarios e imagen institucional dañada.",
       respuesta: "Mitigar",
-      plan: "Aceptar normas de comunidad al registrarse, ofrecer bloqueo/reporte directo y operar un panel de moderación con respuesta ≤ 48 h.",
+      plan: "Aceptar normas de comunidad al registrarse, ofrecer bloqueo/reporte directo y operar un panel de moderación con respuesta ≤ 48 h. [Nuevo] Cada universidad tiene sus moderadores, que atienden los reportes de sus alumnos.",
     },
     {
       id: "R4",
@@ -109,6 +113,24 @@ description: "Riesgos del proyecto, su puntaje y el plan para mitigarlos."
       consecuencia: "Incompatibilidades o interrupción no planificada de integraciones clave.",
       respuesta: "Mitigar",
       plan: "Patrón Adapter en servicios externos para reemplazarlos ágilmente y versiones fijas de SDKs y dependencias.",
+    },
+    {
+      id: "R12",
+      riesgo: "[Nuevo] Escalada de privilegios o abuso del rol de staff (un moderador actúa sobre otra universidad o suspende cuentas sin motivo)",
+      prob: 2,
+      impacto: 5,
+      consecuencia: "Suspensiones injustas, exposición de datos de alumnos de otra universidad y pérdida de confianza en la plataforma.",
+      respuesta: "Mitigar",
+      plan: "Permisos validados en el servidor con Policies y filtro por universidad; solo un administrador crea cuentas de staff; un moderador solo suspende cuentas con un reporte; motivo obligatorio en una bitácora que no se edita; pruebas automatizadas de escalada de privilegios.",
+    },
+    {
+      id: "R13",
+      riesgo: "[Nuevo] Cambio de alcance a mitad del proyecto (módulo de Administración, unas 48 h)",
+      prob: 3,
+      impacto: 3,
+      consecuencia: "Retraso en los sprints 3 y 4 y menos tiempo para pruebas y correcciones.",
+      respuesta: "Mitigar",
+      plan: "Cambio aprobado por el Product Owner y el profesor; T-32 (ubicación en el chat, 10 h) pasa a fase 2; el trabajo se reparte entre backend y frontend; si hay retraso se recortan primero las funciones Could.",
     },
   ]}
 />

@@ -13,11 +13,41 @@ export const sectionLabel: Record<SectionType, string> = {
   docs: 'Documentación',
 };
 
+/** Proyectos con changelog propio: cada uno tiene su página en /changelog/<id> y su color. */
+export const projects = {
+  app: {
+    name: 'App',
+    title: 'Changelog de la app',
+    description: 'Versiones de la app de Kampus para web y móvil, hecha con Expo.',
+    repo: 'reyes200205/Frontend-Kampus',
+  },
+  api: {
+    name: 'API',
+    title: 'Changelog de la API',
+    description: 'Cambios del backend en Laravel: endpoints, base de datos y seguridad.',
+    repo: 'WilbertDevMx/backend-kampus',
+  },
+  docs: {
+    name: 'Documentación',
+    title: 'Changelog de la documentación',
+    description: 'Versiones de este sitio: páginas nuevas, diagramas y mejoras.',
+    repo: 'reyes200205/Docs-Kampus',
+  },
+} as const;
+
+export type ProjectId = keyof typeof projects;
+export const projectIds = Object.keys(projects) as ProjectId[];
+
+export function isProjectId(value: string): value is ProjectId {
+  return value in projects;
+}
+
 /**
  * Repositorios cuyos GitHub Releases aparecen en /changelog. Los crea el workflow `Versión`
  * al mergear un PR a main. Para un repo privado, el build necesita `GITHUB_TOKEN` con acceso de lectura.
  */
-const releaseSources = [{ repo: 'reyes200205/Docs-Kampus', project: 'docs' }];
+// La API todavía no publica releases: cada PR integrado en develop está a mano en content/changelog.json.
+const releaseSources = projectIds.map((project) => ({ repo: projects[project].repo, project }));
 
 export interface ChangelogItem {
   text: string;
