@@ -63,7 +63,7 @@ erDiagram
 
 ## Publicar una versión en el changelog
 
-Las versiones se publican solas al mergear `develop` en `main` (ver [Versiones y changelog](/docs/development/releases)). La página lee los GitHub Releases de los tres repositorios (`releaseSources` en `src/lib/changelog.ts`): documentación (`docs`), app (`app`) y backend (`api`). También lee `content/changelog.json`, para agregar a mano lo de un proyecto que todavía no publica versiones, como el backend.
+Las versiones se publican solas al mergear `develop` en `main` (ver [Versiones y changelog](/docs/development/releases)). La página lee los GitHub Releases de los tres repositorios (`projects` en `src/lib/changelog.ts`): documentación (`docs`), app (`app`) y backend (`api`). Cada proyecto tiene su propio changelog en [/changelog/app](/changelog/app), [/changelog/api](/changelog/api) y [/changelog/docs](/changelog/docs); [/changelog](/changelog) los muestra todos juntos. También lee `content/changelog.json`, para agregar a mano lo de un proyecto que todavía no publica versiones, como el backend.
 
 Para agregar una a mano, edita `content/changelog.json`. VS Code autocompleta y marca errores gracias a `changelog.schema.json`. Si algo está mal, el build falla con un mensaje claro.
 
