@@ -11,9 +11,9 @@ Los tres repositorios son públicos.
 
 | Repositorio | Enlace | Integración continua | Versiones |
 | --- | --- | --- | --- |
-| Backend | [WilbertDevMx/backend-kampus](https://github.com/WilbertDevMx/backend-kampus) | [`ci.yml`](https://github.com/WilbertDevMx/backend-kampus/actions): formato (Pint), migraciones en PostgreSQL 16 y pruebas; `commits.yml` (convención) y `release.yml` (versión) | v0.1.0 al fusionar el [PR #19](https://github.com/WilbertDevMx/backend-kampus/pull/19) (`develop` → `main`) |
+| Backend | [WilbertDevMx/backend-kampus](https://github.com/WilbertDevMx/backend-kampus) | [`ci.yml`](https://github.com/WilbertDevMx/backend-kampus/actions): formato (Pint), migraciones en PostgreSQL 16 y pruebas; `commits.yml` (convención) y `release.yml` (versión) | [v0.1.0](https://github.com/WilbertDevMx/backend-kampus/releases/tag/v0.1.0) · [/changelog](/changelog) |
 | App | [reyes200205/Frontend-Kampus](https://github.com/reyes200205/Frontend-Kampus) | [`ci.yml`](https://github.com/reyes200205/Frontend-Kampus/actions) (tipos), `commits.yml` (convención) y `release.yml` (versión) | [v0.1.0 y v0.2.0](https://github.com/reyes200205/Frontend-Kampus/releases) |
-| Documentación | [reyes200205/Docs-Kampus](https://github.com/reyes200205/Docs-Kampus) | [`commits.yml`](https://github.com/reyes200205/Docs-Kampus/actions) (convención) y `release.yml` (versión, changelog y despliegue) | [v0.1.0 a v0.4.0](https://github.com/reyes200205/Docs-Kampus/releases) (10 versiones) · [/changelog](/changelog) |
+| Documentación | [reyes200205/Docs-Kampus](https://github.com/reyes200205/Docs-Kampus) | [`commits.yml`](https://github.com/reyes200205/Docs-Kampus/actions) (convención) y `release.yml` (versión, changelog y despliegue) | [v0.1.0 a v0.4.1](https://github.com/reyes200205/Docs-Kampus/releases) (11 versiones) · [/changelog](/changelog) |
 
 ## Participación del equipo
 
@@ -41,7 +41,7 @@ Los tres repositorios son públicos.
 | [#14](https://github.com/WilbertDevMx/backend-kampus/pull/14) | `ci/publicador-releases` → `develop` | Publicación de versiones y revisión de commits | @WilbertACDX | Mergeado |
 | [#15](https://github.com/WilbertDevMx/backend-kampus/pull/15) a [#17](https://github.com/WilbertDevMx/backend-kampus/pull/17) | `dependabot/*` → `develop` | Actualización de dependencias (Laravel 13.37 y acciones de GitHub) | Dependabot | Mergeado |
 | [#18](https://github.com/WilbertDevMx/backend-kampus/pull/18) | `chore/commitlint-y-readme` → `develop` | Excepciones de commitlint y enlaces a la documentación en el README | @WilbertACDX | Mergeado |
-| [#19](https://github.com/WilbertDevMx/backend-kampus/pull/19) | `develop` → `main` | Publicación de la primera versión (v0.1.0) | @reyes200205 | Aprobado |
+| [#19](https://github.com/WilbertDevMx/backend-kampus/pull/19) | `develop` → `main` | Publicación de la primera versión | @reyes200205 | [v0.1.0](https://github.com/WilbertDevMx/backend-kampus/releases/tag/v0.1.0) |
 | [#1](https://github.com/WilbertDevMx/backend-kampus/pull/1) | `garica` → `develop` | Primer intento de T-04; lo reemplaza `feature/T-04-registro` | @MGarciaRdz | Cerrado |
 
 Ramas de trabajo sin PR todavía: `feature/T-04-registro` (registro y verificación por dominio) y `feature/T-07-api-perfil` (API de perfil y fotos en bucket privado).
@@ -78,7 +78,7 @@ chore: configura commitlint y husky para revisar la convención de commits
 
 ### Documentación
 
-Veintidós pull requests: los de tarea (`fix/*`, `feature/*`) entran a `develop` y los de publicación (`develop` → `main`) generan una versión con su changelog.
+Veinticinco pull requests: los de tarea (`fix/*`, `feature/*`) entran a `develop` y los de publicación (`develop` → `main`) generan una versión con su changelog.
 
 | PR | Rama → destino | Qué integró | Autor |
 | --- | --- | --- | --- |
@@ -90,7 +90,9 @@ Veintidós pull requests: los de tarea (`fix/*`, `feature/*`) entran a `develop`
 | [#18](https://github.com/reyes200205/Docs-Kampus/pull/18) | `fix/dependencias-t44` → `develop` | Corrige las dependencias de T-44 | @WilbertACDX |
 | [#19](https://github.com/reyes200205/Docs-Kampus/pull/19) y [#21](https://github.com/reyes200205/Docs-Kampus/pull/21) | `docs/unidad-2-cierre` → `develop` | Cierre de la Unidad 2: evidencias, configuración, maquetado, capturas y changelog | @reyes200205 |
 | [#20](https://github.com/reyes200205/Docs-Kampus/pull/20) | `feature/T-26-changelog-repos` → `develop` | El changelog junta los releases de los tres repositorios | @WilbertACDX |
-| #1 a #6, #9, #11, #13, #15, #16, #22 | `develop` → `main` | Publicaciones v0.1.0 a v0.4.0 | @reyes200205 |
+| [#23](https://github.com/reyes200205/Docs-Kampus/pull/23) | `docs/cierre-unidad-2` → `develop` | Evidencias y pendientes actualizados; la portada de Proyecto vuelve a abrir | @WilbertACDX |
+| [#25](https://github.com/reyes200205/Docs-Kampus/pull/25) | `fix/changelog-sin-duplicados` → `develop` | Quita del changelog las entradas a mano del backend, que ya tiene su v0.1.0 | @WilbertACDX |
+| #1 a #6, #9, #11, #13, #15, #16, #22, #24 | `develop` → `main` | Publicaciones v0.1.0 a v0.4.1 | @reyes200205 |
 
 El sitio se despliega solo en Cloudflare al publicar cada versión: https://doc.kodev.online/
 
