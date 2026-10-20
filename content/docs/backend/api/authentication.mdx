@@ -9,8 +9,8 @@ La API usa **Laravel Sanctum** con tokens personales (Bearer). La app obtiene un
   El inicio y el cierre de sesión ya están en `develop` ([PR #7](https://github.com/WilbertDevMx/backend-kampus/pull/7), T-05). El formato de `/api/user` y las cabeceras de seguridad llegan con el [PR #11](https://github.com/WilbertDevMx/backend-kampus/pull/11), que está en revisión; esta página describe cómo queda al fusionarse.
 </Callout>
 
-<Callout type="warn" title="🆕 Nuevo · Sprint 2: Módulo de Administración">
-  Kampus tendrá tres roles: `student`, `moderator` y `admin`. Con T-40, el objeto `user` de las respuestas incluye `role` para que la app muestre la vista correcta. Ver [Roles](#roles) ([cambio de alcance del 19 de octubre de 2026](/docs/project/unit-1/methodology#94--cambios-de-alcance)).
+<Callout type="warn" title="Nuevo · Sprint 2: Módulo de Administración">
+  Kampus tendrá tres roles: `student`, `moderator` y `admin`. Con T-40, el objeto `user` de las respuestas incluye `role` para que la app muestre la vista correcta. Ver [Roles](#roles) ([cambio de alcance del 19 de octubre de 2026](/docs/project/unit-1/methodology#94-cambios-de-alcance)).
 </Callout>
 
 ## Iniciar sesión
@@ -46,7 +46,7 @@ Content-Type: application/json
 }
 ```
 
-🆕 El campo `role` se agrega con T-40.
+**[Nuevo]** El campo `role` se agrega con T-40.
 
 ### Errores
 
@@ -104,7 +104,7 @@ Authorization: Bearer <token>
 
 Responde `204` sin contenido. Revoca **solo el token de esa petición**: las sesiones en otros dispositivos siguen activas.
 
-## 🆕 Roles
+## Roles
 
 | Rol | Quién es | Qué ve en la app |
 | --- | --- | --- |
@@ -116,7 +116,7 @@ Los permisos se validan en la API con *Policies*: si un moderador pide datos de 
 
 ## Registro
 
-Solo se aceptan correos institucionales (RF-01). En T-04 (rama `feature/T-04-registro`, en preparación), los dominios aceptados salen de la tabla `universities` (columna `email_domains`), ya no de la variable `KAMPUS_ALLOWED_EMAIL_DOMAINS`. Ver [El proyecto](/docs/project#instituciones). 🆕 El registro público siempre crea cuentas `student`; las cuentas de staff solo las crea un administrador (T-41).
+Solo se aceptan correos institucionales (RF-01). En T-04 (rama `feature/T-04-registro`, en preparación), los dominios aceptados salen de la tabla `universities` (columna `email_domains`), ya no de la variable `KAMPUS_ALLOWED_EMAIL_DOMAINS`. Ver [El proyecto](/docs/project#instituciones). **[Nuevo]** El registro público siempre crea cuentas `student`; las cuentas de staff solo las crea un administrador (T-41).
 
 <Callout title="Pendiente">
   Los endpoints de registro (`POST /api/register`) y de verificación de correo se documentarán aquí cuando se integre T-04.

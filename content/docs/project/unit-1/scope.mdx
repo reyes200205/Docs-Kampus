@@ -19,24 +19,24 @@ El presente proyecto contempla una solución integral de vinculación estudianti
 
 **Población estudiantil meta:** alumnos matriculados en los primeros ciclos escolares (del primer al tercer periodo) de la UTT, la UAdeC y el Tecnológico de La Laguna que cuenten con una cuenta de correo institucional activa.
 
-<Callout type="warn" title="🆕 Nuevo · Sprint 2: Módulo de Administración">
-  Entra el **módulo de Administración** como función importante y la ubicación en el chat pasa a una fase 2 para compensar el tiempo ([cambio de alcance del 19 de octubre de 2026](/docs/project/unit-1/methodology#94--cambios-de-alcance)).
+<Callout type="warn" title="Nuevo · Sprint 2: Módulo de Administración">
+  Entra el **módulo de Administración** como función importante y la ubicación en el chat pasa a una fase 2 para compensar el tiempo ([cambio de alcance del 19 de octubre de 2026](/docs/project/unit-1/methodology#94-cambios-de-alcance)).
 </Callout>
 
 | Prioridad | Funciones incluidas | Criterio |
 | --- | --- | --- |
 | **Indispensable** | Registro y verificación por correo institucional; inicio de sesión; perfil (carrera, intereses, fotos, bio, zona declarada); descubrimiento tipo swipe con filtros y perfil expandible; generación de match; chat de texto en tiempo real entre matches; bloqueo y reporte de usuarios; aviso de privacidad y normas de comunidad. | Sin esto la aplicación no cumple su propósito. Se entrega completo en el Sprint 3. |
-| **Importante** | Envío de imágenes en el chat; módulo de grupos/clubes (explorar, unirse, crear, publicar actividades); vista "Cerca" con mapa por zonas (zona declarada + GPS aproximado opcional); videollamada 1 a 1; ~~panel básico de moderación~~ 🆕 **módulo de Administración**: moderadores por universidad, administradores, aprobación de grupos, consulta de usuarios, gestión de cuentas de staff y bitácora de moderación. | Aporta gran valor, pero el producto funciona sin ello. Sprints 2 a 4. |
-| **Deseable** | ~~Compartir ubicación estática en el chat~~ (🆕 pasa a fase 2); notificaciones dentro de la app; filtros avanzados de descubrimiento; eliminación de cuenta desde la app. | Se implementa solo si el tiempo lo permite (Sprint 5). |
-| **Fuera de alcance** | 🆕 Compartir ubicación en el chat (fase 2, RF-20); ubicación en vivo; videollamada grupal; publicación en tiendas de iOS/Android; moderación automática con IA; monetización; integración con sistemas oficiales de control escolar; cualquier tipo de contenido para adultos (+18) o fotos bloqueadas de pago. | Fuera del alcance del MVP. El contenido para adultos queda excluido de forma permanente por el contexto universitario. |
+| **Importante** | Envío de imágenes en el chat; módulo de grupos/clubes (explorar, unirse, crear, publicar actividades); vista "Cerca" con mapa por zonas (zona declarada + GPS aproximado opcional); videollamada 1 a 1; ~~panel básico de moderación~~ **[Nuevo]** **módulo de Administración**: moderadores por universidad, administradores, aprobación de grupos, consulta de usuarios, gestión de cuentas de staff y bitácora de moderación. | Aporta gran valor, pero el producto funciona sin ello. Sprints 2 a 4. |
+| **Deseable** | ~~Compartir ubicación estática en el chat~~ (**[Nuevo]** pasa a fase 2); notificaciones dentro de la app; filtros avanzados de descubrimiento; eliminación de cuenta desde la app. | Se implementa solo si el tiempo lo permite (Sprint 5). |
+| **Fuera de alcance** | **[Nuevo]** Compartir ubicación en el chat (fase 2, RF-20); ubicación en vivo; videollamada grupal; publicación en tiendas de iOS/Android; moderación automática con IA; monetización; integración con sistemas oficiales de control escolar; cualquier tipo de contenido para adultos (+18) o fotos bloqueadas de pago. | Fuera del alcance del MVP. El contenido para adultos queda excluido de forma permanente por el contexto universitario. |
 
 ## 6. Limitaciones
 
 - **Plataforma de despliegue.** El MVP se entrega como aplicación web responsiva (acceso vía navegador). La publicación de aplicaciones nativas en las tiendas de iOS y Android queda fuera del alcance; al estar construida con Expo, la misma base de código podrá compilarse para móvil en una fase posterior.
 - La **videollamada grupal** (varios participantes simultáneos) queda fuera del alcance inicial; se considera una función de segunda fase, dado que su complejidad técnica es considerablemente mayor a la de una llamada 1 a 1.
 - La **verificación de pertenencia institucional** se limita a un mecanismo básico (dominio de correo institucional); no se integra con los sistemas internos oficiales de control escolar de las tres instituciones, por no tener acceso a ellos.
-- La **moderación** de contenido y comportamiento será reactiva (basada en reportes de la comunidad); no se implementa un sistema automatizado de detección de contenido inapropiado (p. ej. IA de moderación de imágenes). 🆕 La hacen moderadores asignados a una sola universidad y administradores, desde un panel propio. Un moderador solo puede suspender cuentas que tengan un reporte, y cada acción exige un motivo.
-- 🆕 Las **cuentas de staff** (moderadores y administradores) no usan las funciones sociales: no tienen perfil, no hacen swipe ni chatean, y no aparecen en el descubrimiento. Solo un administrador puede crearlas.
+- La **moderación** de contenido y comportamiento será reactiva (basada en reportes de la comunidad); no se implementa un sistema automatizado de detección de contenido inapropiado (p. ej. IA de moderación de imágenes). **[Nuevo]** La hacen moderadores asignados a una sola universidad y administradores, desde un panel propio. Un moderador solo puede suspender cuentas que tengan un reporte, y cada acción exige un motivo.
+- **[Nuevo]** Las **cuentas de staff** (moderadores y administradores) no usan las funciones sociales: no tienen perfil, no hacen swipe ni chatean, y no aparecen en el descubrimiento. Solo un administrador puede crearlas.
 - No se contempla un **modelo de monetización** ni funciones de pago en esta primera versión.
 - El alcance de **instituciones participantes** se limita a las tres mencionadas; no se incluye a otras universidades de la región ni de otras ciudades en esta primera etapa.
 - Las **pruebas de usabilidad** se realizarán con una muestra reducida de estudiantes voluntarios, por lo que los resultados no necesariamente serán representativos del total de la población estudiantil.
@@ -44,7 +44,7 @@ El presente proyecto contempla una solución integral de vinculación estudianti
 ### 6.1 Restricciones de geolocalización y cartografía
 
 - **Ubicación aproximada por diseño.** La función "Cerca" organiza perfiles por áreas (instalaciones del plantel, sector seleccionado o cuadrantes cercanos a 1 km al encender el GPS); la aplicación no almacena ni exhibe la posición geográfica puntual del alumno en el mapa.
-- **Sin rastreo continuo.** La mensajería privada solo permite el envío puntual y consciente de una coordenada entre usuarios con match (🆕 función que pasa a la fase 2); el monitoreo geográfico constante se pospone para etapas posteriores.
+- **Sin rastreo continuo.** La mensajería privada solo permite el envío puntual y consciente de una coordenada entre usuarios con match (**[Nuevo]** función que pasa a la fase 2); el monitoreo geográfico constante se pospone para etapas posteriores.
 - **Dependencia de plataformas cartográficas externas.** El mapa usa un proveedor externo (OpenFreeMap/MapTiler); si el servicio falla, la sección "Cerca" muestra automáticamente un listado por sectores.
 - **Alcance de los sectores registrados.** El catálogo de ubicaciones contempla únicamente los planteles de las tres instituciones y colonias de la Comarca Lagunera; quienes no estén en ese catálogo deberán usar la geolocalización aproximada.
 
