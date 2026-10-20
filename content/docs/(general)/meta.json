@@ -3,5 +3,5 @@
   "description": "El proyecto, el equipo y sus reglas",
   "icon": "BookOpen",
   "root": true,
-  "pages": ["index", "project", "location-privacy"]
+  "pages": ["index", "kampus", "location-privacy"]
 }

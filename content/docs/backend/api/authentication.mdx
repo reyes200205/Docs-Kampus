@@ -116,7 +116,7 @@ Los permisos se validan en la API con *Policies*: si un moderador pide datos de 
 
 ## Registro
 
-Solo se aceptan correos institucionales (RF-01). En T-04 (rama `feature/T-04-registro`, en preparación), los dominios aceptados salen de la tabla `universities` (columna `email_domains`), ya no de la variable `KAMPUS_ALLOWED_EMAIL_DOMAINS`. Ver [El proyecto](/docs/project#instituciones). **[Nuevo]** El registro público siempre crea cuentas `student`; las cuentas de staff solo las crea un administrador (T-41).
+Solo se aceptan correos institucionales (RF-01). En T-04 (rama `feature/T-04-registro`, en preparación), los dominios aceptados salen de la tabla `universities` (columna `email_domains`), ya no de la variable `KAMPUS_ALLOWED_EMAIL_DOMAINS`. Ver [El proyecto](/docs/kampus#instituciones). **[Nuevo]** El registro público siempre crea cuentas `student`; las cuentas de staff solo las crea un administrador (T-41).
 
 <Callout title="Pendiente">
   Los endpoints de registro (`POST /api/register`) y de verificación de correo se documentarán aquí cuando se integre T-04.
