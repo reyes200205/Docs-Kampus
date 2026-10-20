@@ -3,7 +3,7 @@ title: "Repositorios y evidencias"
 description: "Enlaces a los repositorios activos y evidencia del flujo de trabajo."
 ---
 
-*Corte al 19 de octubre de 2026 (Sprint 2). Todo lo de esta página se puede comprobar en los enlaces de GitHub.*
+*Corte al 20 de octubre de 2026 (Sprint 2). Todo lo de esta página se puede comprobar en los enlaces de GitHub.*
 
 ## Repositorios remotos
 
@@ -11,16 +11,16 @@ Los tres repositorios son públicos.
 
 | Repositorio | Enlace | Integración continua | Versiones |
 | --- | --- | --- | --- |
-| Backend | [WilbertDevMx/backend-kampus](https://github.com/WilbertDevMx/backend-kampus) | [`ci.yml`](https://github.com/WilbertDevMx/backend-kampus/actions): formato (Pint), migraciones en PostgreSQL 16 y pruebas | Pendiente (sin merge a `main` todavía) |
+| Backend | [WilbertDevMx/backend-kampus](https://github.com/WilbertDevMx/backend-kampus) | [`ci.yml`](https://github.com/WilbertDevMx/backend-kampus/actions): formato (Pint), migraciones en PostgreSQL 16 y pruebas; `commits.yml` (convención) y `release.yml` (versión) | v0.1.0 al fusionar el [PR #19](https://github.com/WilbertDevMx/backend-kampus/pull/19) (`develop` → `main`) |
 | App | [reyes200205/Frontend-Kampus](https://github.com/reyes200205/Frontend-Kampus) | [`ci.yml`](https://github.com/reyes200205/Frontend-Kampus/actions) (tipos), `commits.yml` (convención) y `release.yml` (versión) | [v0.1.0 y v0.2.0](https://github.com/reyes200205/Frontend-Kampus/releases) |
-| Documentación | [reyes200205/Docs-Kampus](https://github.com/reyes200205/Docs-Kampus) | [`commits.yml`](https://github.com/reyes200205/Docs-Kampus/actions) (convención) y `release.yml` (versión, changelog y despliegue) | [v0.1.0 a v0.3.3](https://github.com/reyes200205/Docs-Kampus/releases) (9 versiones) · [/changelog](/changelog) |
+| Documentación | [reyes200205/Docs-Kampus](https://github.com/reyes200205/Docs-Kampus) | [`commits.yml`](https://github.com/reyes200205/Docs-Kampus/actions) (convención) y `release.yml` (versión, changelog y despliegue) | [v0.1.0 a v0.4.0](https://github.com/reyes200205/Docs-Kampus/releases) (10 versiones) · [/changelog](/changelog) |
 
 ## Participación del equipo
 
 | Integrante | GitHub | Rol | Aportaciones |
 | --- | --- | --- | --- |
 | Jorge Alejandro Rentería Reyes | [@reyes200205](https://github.com/reyes200205) | Product Owner · Documentación | Documentación (45 commits), app (22 commits), revisión y merge de los PR |
-| Wilbert Omar Acosta Barrera | [@WilbertACDX](https://github.com/WilbertACDX) | Scrum Master · Backend | Backend: inicio de sesión, seguridad, esquema y diagramas (PR #7, #9, #10, #11, #13) |
+| Wilbert Omar Acosta Barrera | [@WilbertACDX](https://github.com/WilbertACDX) | Scrum Master · Backend | Backend: inicio de sesión, seguridad, esquema, diagramas y publicación de versiones (PR #7, #9, #10, #11, #13, #14, #18) |
 | Mario Humberto García Rodríguez | [@MGarciaRdz](https://github.com/MGarciaRdz) | Backend | Backend: migraciones (PR #12), registro y API de perfil |
 | Marcelo Alessandro Sifuentes de la Cruz | [@aless1dz](https://github.com/aless1dz) | Frontend | App: sistema de diseño y navegación (PR #3); documentación del sistema de diseño (PR #12) |
 | Luis Carlos Fernández Quiñones | [@tiogilipollas21](https://github.com/tiogilipollas21) | Frontend | Sin commits en los repositorios al corte |
@@ -35,9 +35,14 @@ Los tres repositorios son públicos.
 | [#9](https://github.com/WilbertDevMx/backend-kampus/pull/9) | `docs/UTTC-47-diagramas` → `develop` | UTTC-47 · Esquema de base de datos y diagramas | @WilbertACDX | Mergeado |
 | [#8](https://github.com/WilbertDevMx/backend-kampus/pull/8) | `docs/diagramas-unidad-2` → `develop` | Primer intento de los diagramas; lo reemplazó el #9 | @WilbertACDX | Cerrado |
 | [#10](https://github.com/WilbertDevMx/backend-kampus/pull/10) | `fix/seguridad-endurecimiento` → `feature/T-05-api-login` | Endurecimiento de seguridad sobre el login | @WilbertACDX | Mergeado |
-| [#11](https://github.com/WilbertDevMx/backend-kampus/pull/11) | `fix/seguridad-endurecimiento` → `develop` | Lleva el endurecimiento a `develop` | @WilbertACDX | En revisión |
-| [#12](https://github.com/WilbertDevMx/backend-kampus/pull/12) | `feature/T-02-migraciones` → `develop` | T-02 · Migraciones del esquema completo | @MGarciaRdz | En revisión |
-| [#13](https://github.com/WilbertDevMx/backend-kampus/pull/13) | `docs/T-40-modulo-administracion` → `develop` | T-40 · Módulo de Administración en el esquema y los diagramas | @WilbertACDX | En revisión |
+| [#11](https://github.com/WilbertDevMx/backend-kampus/pull/11) | `fix/seguridad-endurecimiento` → `develop` | Lleva el endurecimiento a `develop` | @WilbertACDX | Mergeado |
+| [#12](https://github.com/WilbertDevMx/backend-kampus/pull/12) | `feature/T-02-migraciones` → `develop` | T-02 · Migraciones del esquema completo | @MGarciaRdz | Mergeado |
+| [#13](https://github.com/WilbertDevMx/backend-kampus/pull/13) | `docs/T-40-modulo-administracion` → `develop` | T-40 · Módulo de Administración en el esquema y los diagramas | @WilbertACDX | Mergeado |
+| [#14](https://github.com/WilbertDevMx/backend-kampus/pull/14) | `ci/publicador-releases` → `develop` | Publicación de versiones y revisión de commits | @WilbertACDX | Mergeado |
+| [#15](https://github.com/WilbertDevMx/backend-kampus/pull/15) a [#17](https://github.com/WilbertDevMx/backend-kampus/pull/17) | `dependabot/*` → `develop` | Actualización de dependencias (Laravel 13.37 y acciones de GitHub) | Dependabot | Mergeado |
+| [#18](https://github.com/WilbertDevMx/backend-kampus/pull/18) | `chore/commitlint-y-readme` → `develop` | Excepciones de commitlint y enlaces a la documentación en el README | @WilbertACDX | Mergeado |
+| [#19](https://github.com/WilbertDevMx/backend-kampus/pull/19) | `develop` → `main` | Publicación de la primera versión (v0.1.0) | @reyes200205 | Aprobado |
+| [#1](https://github.com/WilbertDevMx/backend-kampus/pull/1) | `garica` → `develop` | Primer intento de T-04; lo reemplaza `feature/T-04-registro` | @MGarciaRdz | Cerrado |
 
 Ramas de trabajo sin PR todavía: `feature/T-04-registro` (registro y verificación por dominio) y `feature/T-07-api-perfil` (API de perfil y fotos en bucket privado).
 
@@ -73,7 +78,7 @@ chore: configura commitlint y husky para revisar la convención de commits
 
 ### Documentación
 
-Diecisiete pull requests: los de tarea (`fix/*`, `feature/*`) entran a `develop` y los de publicación (`develop` → `main`) generan una versión con su changelog.
+Veintidós pull requests: los de tarea (`fix/*`, `feature/*`) entran a `develop` y los de publicación (`develop` → `main`) generan una versión con su changelog.
 
 | PR | Rama → destino | Qué integró | Autor |
 | --- | --- | --- | --- |
@@ -81,8 +86,11 @@ Diecisiete pull requests: los de tarea (`fix/*`, `feature/*`) entran a `develop`
 | [#10](https://github.com/reyes200205/Docs-Kampus/pull/10) | `fix/require-cloudflare-secret` → `develop` | El despliegue falla si faltan los secretos | @reyes200205 |
 | [#12](https://github.com/reyes200205/Docs-Kampus/pull/12) | `feature/T-03-design-system` → `develop` | Sistema de diseño y wireframes editables | @aless1dz |
 | [#14](https://github.com/reyes200205/Docs-Kampus/pull/14) | `fix/actualiza-docs-backend` → `develop` | Documentación del backend y diagramas de la Unidad 2 | @WilbertACDX |
-| [#17](https://github.com/reyes200205/Docs-Kampus/pull/17) | `fix/modulo-administracion-docs` → `develop` | Módulo de Administración (Sprint 2), en revisión | @WilbertACDX |
-| #1 a #6, #9, #11, #13, #15, #16 | `develop` → `main` | Publicaciones v0.1.0 a v0.3.3 | @reyes200205 |
+| [#17](https://github.com/reyes200205/Docs-Kampus/pull/17) | `fix/modulo-administracion-docs` → `develop` | Módulo de Administración (Sprint 2), con lo nuevo resaltado | @WilbertACDX |
+| [#18](https://github.com/reyes200205/Docs-Kampus/pull/18) | `fix/dependencias-t44` → `develop` | Corrige las dependencias de T-44 | @WilbertACDX |
+| [#19](https://github.com/reyes200205/Docs-Kampus/pull/19) y [#21](https://github.com/reyes200205/Docs-Kampus/pull/21) | `docs/unidad-2-cierre` → `develop` | Cierre de la Unidad 2: evidencias, configuración, maquetado, capturas y changelog | @reyes200205 |
+| [#20](https://github.com/reyes200205/Docs-Kampus/pull/20) | `feature/T-26-changelog-repos` → `develop` | El changelog junta los releases de los tres repositorios | @WilbertACDX |
+| #1 a #6, #9, #11, #13, #15, #16, #22 | `develop` → `main` | Publicaciones v0.1.0 a v0.4.0 | @reyes200205 |
 
 El sitio se despliega solo en Cloudflare al publicar cada versión: https://doc.kodev.online/
 
@@ -93,11 +101,11 @@ Lo que el historial muestra y cómo se corrige:
 | Hallazgo | Acción | Estado |
 | --- | --- | :---: |
 | La app y la documentación no tenían CI ni plantilla de PR | Se agregaron CI, commitlint con husky, versionado automático y plantilla de PR (app PR #1) | ✅ |
-| Commits anteriores a la convención (`ADD ...`, `MODIFY ...`, `adicion de migraciones`) | Se dejaron como excepción en `commitlint.config.mjs` de la app; desde el 12 de octubre todos siguen `tipo: descripción` | ✅ |
-| Ramas `garica` y `T-07-API-de-perfil-...` fuera de la nomenclatura | Cerrar el PR #1 del backend (lo reemplaza el #12) y borrar ambas ramas; el trabajo sigue en `feature/T-07-api-perfil` | ⬜ |
+| Commits anteriores a la convención (`ADD ...`, `MODIFY ...`, `adicion de migraciones`) | Se dejaron como excepción en `commitlint.config.mjs` de la app y del backend ([PR #18](https://github.com/WilbertDevMx/backend-kampus/pull/18)); los commits nuevos siguen `tipo: descripción` y CI los revisa en los tres repositorios | ✅ |
+| Ramas `garica` y `T-07-API-de-perfil-...` fuera de la nomenclatura | El PR #1 del backend ya se cerró. Falta que @MGarciaRdz borre las dos ramas; el trabajo sigue en `feature/T-04-registro` y `feature/T-07-api-perfil` | 🟡 |
 | La app y la documentación no tienen protección de ramas | Activar las mismas reglas del backend en `main` y `develop` ([Configuración](/docs/project/unit-2/repository-setup#protección-de-ramas)) | ⬜ |
 | Rama por defecto `main` en la app y la documentación | Cambiarla a `develop` (Settings → General → Default branch) | ⬜ |
-| PR #10 del backend se mergeó a una rama de tarea ya integrada | Se abrió el #11 hacia `develop`; en adelante, todo PR de tarea apunta a `develop` | 🟡 |
+| PR #10 del backend se mergeó a una rama de tarea ya integrada | Se abrió el #11 hacia `develop` y ya se mergeó; la rama `feature/T-05-api-login` se borró. En adelante, todo PR de tarea apunta a `develop` | ✅ |
 
 ## Capturas
 
