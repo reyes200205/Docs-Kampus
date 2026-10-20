@@ -33,6 +33,24 @@ Responde `200` cuando la aplicación está arriba. Útil para monitoreo.
 | --- | --- | --- | --- |
 | `GET` | `/api/user` | Sí | Usuario autenticado |
 
+### Módulo de Administración (planeado)
+
+Rutas propuestas para T-41 a T-43. Todas requieren token de una cuenta de staff; el moderador solo recibe datos de su universidad. Cada ruta se confirma y se documenta en su PR.
+
+| Método | Ruta | Rol | Descripción | Tarea |
+| --- | --- | --- | --- | --- |
+| `GET` | `/api/admin/users` | Moderador, admin | Lista y busca usuarios | T-43 |
+| `GET` | `/api/admin/users/{id}` | Moderador, admin | Detalle de un usuario, con sus reportes | T-43 |
+| `POST` | `/api/admin/users/{id}/suspend` | Moderador, admin | Suspende una cuenta; pide `reason` y, si es moderador, `report_id` | T-43 |
+| `POST` | `/api/admin/users/{id}/reactivate` | Moderador, admin | Reactiva una cuenta suspendida, con `reason` | T-43 |
+| `GET` | `/api/admin/reports` | Moderador, admin | Reportes por estado | T-37 |
+| `PATCH` | `/api/admin/reports/{id}` | Moderador, admin | Resuelve o descarta un reporte | T-37 |
+| `GET` | `/api/admin/groups?status=pending` | Moderador, admin | Grupos pendientes de aprobación | T-42 |
+| `POST` | `/api/admin/groups/{id}/approve` | Moderador, admin | Aprueba un grupo | T-42 |
+| `POST` | `/api/admin/groups/{id}/reject` | Moderador, admin | Rechaza un grupo, con `reason` | T-42 |
+| `GET` · `POST` | `/api/admin/staff` | Admin | Lista o crea cuentas de staff | T-41 |
+| `PATCH` | `/api/admin/staff/{id}` | Admin | Cambia la universidad o desactiva una cuenta de staff | T-41 |
+
 <Callout title="En construcción">
   La API está en sus primeras tareas. Cada endpoint nuevo se documenta aquí como parte de la [Definition of Done](/docs/development/pull-requests#definition-of-done).
 </Callout>

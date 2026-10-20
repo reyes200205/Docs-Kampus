@@ -6,7 +6,11 @@ description: "Cómo se autentica la app contra la API con Laravel Sanctum: inici
 La API usa **Laravel Sanctum** con tokens personales (Bearer). La app obtiene un token al iniciar sesión y lo envía en cada petición protegida. Los tokens **expiran a los 7 días** (RNF-02).
 
 <Callout title="Estado">
-  El inicio y el cierre de sesión están en el [PR #7](https://github.com/WilbertDevMx/backend-kampus/pull/7) (T-05). El formato de `/api/user` y las cabeceras de seguridad están en el [PR #10](https://github.com/WilbertDevMx/backend-kampus/pull/10). Los dos están en revisión; esta página describe cómo quedan al fusionarse.
+  El inicio y el cierre de sesión ya están en `develop` ([PR #7](https://github.com/WilbertDevMx/backend-kampus/pull/7), T-05). El formato de `/api/user` y las cabeceras de seguridad llegan con el [PR #11](https://github.com/WilbertDevMx/backend-kampus/pull/11), que está en revisión; esta página describe cómo queda al fusionarse.
+</Callout>
+
+<Callout type="warn" title="Nuevo · Sprint 2: Módulo de Administración">
+  Kampus tendrá tres roles: `student`, `moderator` y `admin`. Con T-40, el objeto `user` de las respuestas incluye `role` para que la app muestre la vista correcta. Ver [Roles](#roles) ([cambio de alcance del 19 de octubre de 2026](/docs/project/unit-1/methodology#94-cambios-de-alcance)).
 </Callout>
 
 ## Iniciar sesión
@@ -36,10 +40,13 @@ Content-Type: application/json
     "id": 1,
     "name": "Ana López",
     "email": "ana.lopez@utt.edu.mx",
-    "email_verified_at": "2026-10-01T18:00:00+00:00"
+    "email_verified_at": "2026-10-01T18:00:00+00:00",
+    "role": "student"
   }
 }
 ```
+
+**[Nuevo]** El campo `role` se agrega con T-40.
 
 ### Errores
 
@@ -69,7 +76,8 @@ Solo trae los campos públicos del usuario (`UserResource`):
     "id": 1,
     "name": "Ana López",
     "email": "ana.lopez@utt.edu.mx",
-    "email_verified_at": "2026-10-01T18:00:00+00:00"
+    "email_verified_at": "2026-10-01T18:00:00+00:00",
+    "role": "student"
   }
 }
 ```
@@ -96,9 +104,19 @@ Authorization: Bearer <token>
 
 Responde `204` sin contenido. Revoca **solo el token de esa petición**: las sesiones en otros dispositivos siguen activas.
 
+## Roles
+
+| Rol | Quién es | Qué ve en la app |
+| --- | --- | --- |
+| `student` | Alumno que se registra con su correo institucional. | Descubrir, Cerca, Chats, Grupos y Perfil. |
+| `moderator` | Staff de **una sola** universidad. Lo crea un administrador. | Solo el panel de administración: usuarios, reportes y grupos de su universidad. |
+| `admin` | Staff con acceso a todas las universidades. Lo crea otro administrador. | El panel completo, incluida la gestión de staff. |
+
+Los permisos se validan en la API con *Policies*: si un moderador pide datos de otra universidad, la API responde `403`, aunque la app no muestre esa opción. El staff no puede usar las rutas sociales (swipe, match, chat). El primer administrador se crea en el servidor con `php artisan kampus:create-admin` (T-40).
+
 ## Registro
 
-Solo se aceptan correos institucionales (RF-01). En T-04 (rama `feature/T-04-registro`, en preparación), los dominios aceptados salen de la tabla `universities` (columna `email_domains`), ya no de la variable `KAMPUS_ALLOWED_EMAIL_DOMAINS`. Ver [El proyecto](/docs/project#instituciones).
+Solo se aceptan correos institucionales (RF-01). En T-04 (rama `feature/T-04-registro`, en preparación), los dominios aceptados salen de la tabla `universities` (columna `email_domains`), ya no de la variable `KAMPUS_ALLOWED_EMAIL_DOMAINS`. Ver [El proyecto](/docs/project#instituciones). **[Nuevo]** El registro público siempre crea cuentas `student`; las cuentas de staff solo las crea un administrador (T-41).
 
 <Callout title="Pendiente">
   Los endpoints de registro (`POST /api/register`) y de verificación de correo se documentarán aquí cuando se integre T-04.
