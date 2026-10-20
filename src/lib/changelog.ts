@@ -19,8 +19,9 @@ export const sectionLabel: Record<SectionType, string> = {
  */
 const releaseSources = [
   { repo: 'reyes200205/Docs-Kampus', project: 'docs' },
-  { repo: 'WilbertDevMx/backend-kampus', project: 'backend' },
   { repo: 'reyes200205/Frontend-Kampus', project: 'app' },
+  // Todavía sin releases: cada PR integrado en develop está a mano en content/changelog.json.
+  { repo: 'WilbertDevMx/backend-kampus', project: 'api' },
 ];
 
 export interface ChangelogItem {

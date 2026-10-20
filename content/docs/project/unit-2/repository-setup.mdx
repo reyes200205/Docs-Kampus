@@ -10,8 +10,8 @@ El proyecto se divide en tres repositorios independientes, uno por aplicación:
 | Repositorio | Contenido | Rama por defecto |
 | --- | --- | --- |
 | [`backend-kampus`](https://github.com/WilbertDevMx/backend-kampus) | API REST en Laravel | `develop` |
-| [`Frontend-Kampus`](https://github.com/reyes200205/Frontend-Kampus) | App en Expo (web y móvil) | `main` → cambiar a `develop` |
-| [`Docs-Kampus`](https://github.com/reyes200205/Docs-Kampus) | Este sitio de documentación | `main` → cambiar a `develop` |
+| [`Frontend-Kampus`](https://github.com/reyes200205/Frontend-Kampus) | App en Expo (web y móvil) | `main` (pendiente cambiar a `develop`) |
+| [`Docs-Kampus`](https://github.com/reyes200205/Docs-Kampus) | Este sitio de documentación | `main` (pendiente cambiar a `develop`) |
 
 Separarlos permite que cada parte tenga su propio CI, sus dependencias y su versionado, y que los permisos se den por área.
 
@@ -23,19 +23,22 @@ Separarlos permite que cada parte tenga su propio CI, sus dependencias y su vers
 | `.gitattributes` | Backend | Fuerza saltos de línea `LF` (`* text=auto eol=lf`) para que Windows y Linux no generen diferencias falsas. |
 | `.editorconfig` | Backend | Indentación y codificación comunes en todos los editores. |
 | `.env.example` | Backend | Plantilla de variables de entorno **sin valores secretos**. |
-| `.github/pull_request_template.md` | Backend | Plantilla de PR con tarea, requisito, pasos de prueba y Definition of Done. |
-| `.github/workflows/` | Backend y documentación | Integración continua, revisión de commits, versionado y despliegue. |
-| `commitlint.config.mjs` + `.husky/commit-msg` | Documentación | Rechaza commits que no sigan la convención antes de crearlos. |
+| `.github/pull_request_template.md` | Backend y app | Plantilla de PR con tarea, requisito, pasos de prueba, capturas y Definition of Done. |
+| `.github/workflows/ci.yml` | Backend y app | Backend: formato (Pint), migraciones en PostgreSQL 16 y pruebas. App: revisión de tipos con TypeScript. |
+| `.github/workflows/commits.yml` | App y documentación | Revisa que cada commit del PR siga la convención. |
+| `.github/workflows/release.yml` + `scripts/release.mjs` | App y documentación | Calcula la versión con los commits, crea el tag y el GitHub Release; en la documentación, además, despliega en Cloudflare. |
+| `commitlint.config.mjs` + `.husky/commit-msg` | App y documentación | Rechaza commits que no sigan la convención antes de crearlos. |
+| `AGENTS.md` / `CLAUDE.md` | Backend y app | Reglas del proyecto para los asistentes de código (convenciones, estructura y comandos). |
 
 ## Archivos de exclusión (`.gitignore`)
 
 | Categoría | Patrones | Repositorio |
 | --- | --- | --- |
 | Dependencias | `/vendor`, `node_modules/` | Todos |
-| Compilados y cachés | `/public/build`, `.expo/`, `dist/`, `web-build/`, `/.next/`, `/out/`, `.source` | Según el proyecto |
-| Variables de entorno | `.env`, `.env.backup`, `.env.production`, `.env*.local` | Todos |
-| Llaves y certificados | `*.pem`, `*.key`, `*.jks`, `*.p8`, `*.p12`, `*.mobileprovision`, `/storage/*.key` | App y backend |
-| Archivos del editor y del sistema | `/.idea`, `/.vscode`, `.DS_Store`, `Thumbs.db` | Todos |
+| Compilados y cachés | `/public/build`, `.phpunit.cache` (backend) · `.expo/`, `dist/`, `web-build/`, `/ios`, `/android` (app) · `/.next/`, `/out/`, `.source` (documentación) | Según el proyecto |
+| Variables de entorno | `.env`, `.env.backup`, `.env.production` (backend) · `.env*.local` (app y documentación) | Todos |
+| Llaves y certificados | `*.pem` (todos) · `*.key`, `*.jks`, `*.p8`, `*.p12`, `*.mobileprovision` (app) · `/storage/*.key`, `auth.json` (backend) | Todos |
+| Archivos del editor y del sistema | `/.idea`, `/.vscode`, `/.zed`, `Thumbs.db` (backend) · `.DS_Store` (todos) | Todos |
 | Registros | `*.log`, `npm-debug.*` | Todos |
 
 ## Llaves y credenciales
@@ -60,14 +63,24 @@ Separarlos permite que cada parte tenga su propio CI, sus dependencias y su vers
 
 ### Protección de ramas
 
-En **Settings → Branches** (o **Rules → Rulesets**) de cada repositorio, `main` y `develop` deben tener:
+Reglas que debe tener `main` y `develop` en cada repositorio (**Settings → Rules → Rulesets**):
 
-- [ ] Requerir pull request antes de mergear.
-- [ ] Requerir al menos **1 aprobación**.
-- [ ] Requerir que los checks pasen (CI del backend o *Revisar convención* en la documentación).
-- [ ] Bloquear el push directo y el force push.
-- [ ] Borrar automáticamente la rama al mergear (Settings → General).
+| Regla | Backend | App | Documentación |
+| --- | :---: | :---: | :---: |
+| Requerir pull request antes de mergear | ✅ | ⬜ | ⬜ |
+| Requerir que los checks pasen | ✅ | ⬜ | ⬜ |
+| Bloquear el force push | ✅ | ⬜ | ⬜ |
+| Bloquear el borrado de la rama | ✅ | ⬜ | ⬜ |
 
-<Callout type="info" title="Pendiente de verificar">
-  Marca cada casilla cuando el dueño del repositorio confirme la regla en GitHub y agrega una captura en [Repositorios y evidencias](/docs/project/unit-2/evidence).
-</Callout>
+*Estado consultado en la API pública de GitHub (`/repos/{dueño}/{repo}/rules/branches/{rama}`) el 19 de octubre de 2026.*
+
+#### Cómo activarlas en la app y la documentación
+
+Lo hace el dueño del repositorio ([@reyes200205](https://github.com/reyes200205)):
+
+1. **Settings → Rules → Rulesets → New ruleset → New branch ruleset.**
+2. Nombre: `ramas-principales`. **Enforcement status:** *Active*.
+3. **Target branches → Add target → Include by pattern:** `main` y `develop`.
+4. Marca **Restrict deletions**, **Block force pushes** y **Require a pull request before merging** (*Required approvals*: 1).
+5. Marca **Require status checks to pass** y agrega los checks: *Tipos* y *Convención de commits* en la app; *Convención de commits* en la documentación.
+6. **Create.** Después, en **Settings → General**, cambia la rama por defecto a `develop` y activa **Automatically delete head branches**.
