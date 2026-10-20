@@ -13,15 +13,29 @@ Escala de desempeño: 5 Excelente (10) · 4 Bien (9.5) · 3 Suficiente (9) · 2 
 
 | Criterio específico | Dónde se cubre | Estado |
 | --- | --- | :---: |
-| Maquetado | [Prototipo y maquetado](/docs/project/unit-2/prototype) | 🟡 |
+| Maquetado | [Prototipo y maquetado](/docs/project/unit-2/prototype) · [Capturas](/docs/project/unit-2/prototype#capturas) | ✅ |
 | Prototipado | [Prototipo y maquetado](/docs/project/unit-2/prototype) · [Wireframes](/docs/project/unit-1/wireframes) · [Figma](https://www.figma.com/proto/1l4aKYvdrpLcIa8OO8JcD2/Kampus-%E2%80%94-Prototipo?page-id=1%3A2&node-id=1-592&starting-point-node-id=1%3A592&scaling=min-zoom&content-scaling=fixed) | ✅ |
-| Documentación en repositorio (README / Unidades 1 y 2) | Esta sección y el `README.md` del repositorio | 🟡 |
+| Documentación en repositorio (README / Unidades 1 y 2) | Esta sección y el [`README.md`](https://github.com/reyes200205/Docs-Kampus#readme) del repositorio · [sitio publicado](https://doc.kodev.online/) | ✅ |
 | Justificación de la herramienta y plataforma de versionamiento | [Control de versiones](/docs/project/unit-2/version-control) | ✅ |
 | Definición y diseño del flujo de trabajo (workflow) | [Flujo de trabajo](/docs/project/unit-2/workflow) | ✅ |
-| Configuración y parámetros del entorno de versiones | [Configuración de los repositorios](/docs/project/unit-2/repository-setup) | 🟡 |
-| Repositorio en funcionamiento y evidencias | [Repositorios y evidencias](/docs/project/unit-2/evidence) | 🟡 |
+| Configuración y parámetros del entorno de versiones | [Configuración de los repositorios](/docs/project/unit-2/repository-setup) | 🟡 Falta proteger ramas en app y documentación |
+| Repositorio en funcionamiento y evidencias | [Repositorios y evidencias](/docs/project/unit-2/evidence) · [Changelog](/changelog) | ✅ |
 | Diagramas del sistema (arquitectura / casos de uso / DER) | [Diagramas](/docs/project/unit-2/diagrams) | ✅ |
 | Diccionario de datos | [Diccionario de datos](/docs/project/unit-2/data-dictionary) | ✅ |
+
+## Pendientes antes de la revisión
+
+Estos pasos se hacen en GitHub y solo los puede hacer el dueño de cada repositorio:
+
+| Pendiente | Repositorio | Quién |
+| --- | --- | --- |
+| Activar el ruleset de `main` y `develop` ([pasos](/docs/project/unit-2/repository-setup#cómo-activarlas-en-la-app-y-la-documentación)) | App y documentación | @reyes200205 |
+| Cambiar la rama por defecto a `develop` y borrar ramas al mergear | App y documentación | @reyes200205 |
+| Cerrar el PR #1 (`garica`, lo reemplaza el #12) y borrar las ramas `garica` y `T-07-API-de-perfil-...` | Backend | @WilbertACDX |
+| Revisar y mergear los PR abiertos #11, #12 y #13 | Backend | Equipo de backend |
+| Revisar y mergear el PR #17 (módulo de Administración) | Documentación | @reyes200205 |
+
+Al terminar el primero, cambia *Configuración y parámetros* a ✅ y las casillas de [Protección de ramas](/docs/project/unit-2/repository-setup#protección-de-ramas).
 
 <Callout title="Seguimiento en Plane">
   Cada criterio pendiente debe tener su tarea en [Plane](https://app.plane.so/utt-plane/) dentro del módulo **Unidad 2**. Cuando una tarea se cierra, actualiza aquí su estado en el mismo PR que la termina.

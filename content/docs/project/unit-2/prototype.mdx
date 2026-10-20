@@ -60,10 +60,13 @@ Las pantallas se construyen en Expo con Expo Router: cada archivo dentro de `src
 | Registro | `src/app/auth/register/index.tsx` | RF-01, RF-04 | ✅ |
 | Revisa tu correo (verificación) | `src/components/auth/check-email-card.tsx` | RF-01 | ✅ |
 | Recuperar contraseña | `src/app/auth/forgot-password/index.tsx` | RF-02 | ✅ |
-| Navegación principal (Descubrir, Chats, Grupos, Perfil) | `src/app/(tabs)/` | RNF-01 | ✅ |
-| Perfil (crear y editar) | — | RF-03, RF-18 | ⬜ Sprint 2 |
-| Descubrir y perfil expandido | — | RF-05, RF-06, RF-21 | ⬜ Sprint 2 |
-| Matches y chat | — | RF-07, RF-08, RF-09 | ⬜ Sprint 3 |
+| Aviso de privacidad | `src/app/legal/privacy.tsx` | RF-01 | ✅ |
+| Normas de la comunidad | `src/app/legal/guidelines.tsx` | RF-01 | ✅ |
+| Navegación principal (Descubrir, Chats, Grupos, Perfil) | `src/app/(tabs)/_layout.tsx` · `src/constants/navigation.ts` | RNF-01 | ✅ |
+| Acceso solo con sesión (redirige al inicio de sesión) | `src/app/(tabs)/_layout.tsx` · `src/hooks/use-session.ts` | RF-02 | 🟡 Sesión en memoria hasta conectar la API (T-06) |
+| Perfil (crear y editar) | `src/app/(tabs)/profile.tsx` | RF-03, RF-18 | 🟡 Estructura, menú y cerrar sesión; datos reales en T-08 |
+| Descubrir y perfil expandido | `src/app/(tabs)/index.tsx` | RF-05, RF-06, RF-21 | 🟡 Selector *Para ti / Cerca* y estados vacíos; tarjetas en T-11 |
+| Matches y chat | `src/app/(tabs)/chats.tsx` | RF-07, RF-08, RF-09 | 🟡 Estado vacío; conversaciones en T-12 y T-16 |
 | Grupos | — | RF-11, RF-12 | ⬜ Sprint 4 |
 | Vista "Cerca" | — | RF-19 | ⬜ Sprint 4 |
 | Videollamada | — | RF-10 | ⬜ Sprint 4 |
@@ -89,10 +92,36 @@ Cómo levantar la app: [Instalación](/docs/mobile/installation).
 
 ## Criterios de calidad
 
-- **Semántica y accesibilidad:** cada control tiene etiqueta accesible (`accessibilityLabel`), contraste AA y tamaño táctil mínimo de 44 px (RNF-10).
-- **Responsividad:** usable de 360 px a 1920 px sin desplazamiento horizontal (RNF-01).
+- **Semántica y accesibilidad:** cada control tiene etiqueta accesible (`accessibilityLabel`), los títulos de pantalla usan `accessibilityRole="header"` (en web se renderizan como encabezados), contraste AA y tamaño táctil mínimo de 44 px (`MinTouchSize`, RNF-10).
+- **Responsividad:** usable de 360 px a 1920 px sin desplazamiento horizontal (RNF-01). `use-breakpoint.ts` cambia la barra inferior por una barra lateral en escritorio.
 - **Fidelidad al diseño:** colores, tipografía y espaciado del [sistema de marca](/docs/project/unit-1/content#152-imágenes-e-identidad-visual).
 
-<Callout type="info" title="Capturas">
-  Agrega capturas de cada pantalla terminada (web y móvil) en `public/docs/project/screens/` y enlázalas en esta página.
-</Callout>
+## Capturas
+
+Pantallas de la rama `develop` de la app, tomadas en web el 19 de octubre de 2026 con el tema oscuro por defecto. Las pestañas (Descubrir, Chats, Grupos y Perfil) se ven después de iniciar sesión.
+
+### Móvil (390 × 844)
+
+| Inicio de sesión | Registro | Recuperar contraseña |
+| --- | --- | --- |
+| ![Inicio de sesión en móvil](/docs/project/screens/movil-01-inicio-de-sesion.png) | ![Registro en móvil](/docs/project/screens/movil-02-registro.png) | ![Recuperar contraseña en móvil](/docs/project/screens/movil-03-recuperar-contrasena.png) |
+| Aviso de privacidad | Normas de la comunidad | Descubrir |
+| ![Aviso de privacidad en móvil](/docs/project/screens/movil-04-aviso-de-privacidad.png) | ![Normas de la comunidad en móvil](/docs/project/screens/movil-05-normas-de-la-comunidad.png) | ![Descubrir en móvil](/docs/project/screens/movil-06-descubrir.png) |
+| Chats | Grupos | Perfil |
+| ![Chats en móvil](/docs/project/screens/movil-07-chats.png) | ![Grupos en móvil](/docs/project/screens/movil-08-grupos.png) | ![Perfil en móvil](/docs/project/screens/movil-09-perfil.png) |
+
+### Escritorio (1280 × 800)
+
+En escritorio la barra inferior se convierte en barra lateral.
+
+| Inicio de sesión | Registro |
+| --- | --- |
+| ![Inicio de sesión en escritorio](/docs/project/screens/escritorio-01-inicio-de-sesion.png) | ![Registro en escritorio](/docs/project/screens/escritorio-02-registro.png) |
+| Recuperar contraseña | Aviso de privacidad |
+| ![Recuperar contraseña en escritorio](/docs/project/screens/escritorio-03-recuperar-contrasena.png) | ![Aviso de privacidad en escritorio](/docs/project/screens/escritorio-04-aviso-de-privacidad.png) |
+| Normas de la comunidad | Descubrir |
+| ![Normas de la comunidad en escritorio](/docs/project/screens/escritorio-05-normas-de-la-comunidad.png) | ![Descubrir en escritorio](/docs/project/screens/escritorio-06-descubrir.png) |
+| Chats | Grupos |
+| ![Chats en escritorio](/docs/project/screens/escritorio-07-chats.png) | ![Grupos en escritorio](/docs/project/screens/escritorio-08-grupos.png) |
+| Perfil | |
+| ![Perfil en escritorio](/docs/project/screens/escritorio-09-perfil.png) | |
