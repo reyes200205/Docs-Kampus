@@ -48,7 +48,7 @@ export default function HomePage() {
             </h1>
             <div className="mt-10 flex flex-wrap gap-3">
               <Link
-                href="/docs"
+                href="/docs/project"
                 className="rounded-full bg-brand-solid px-6 py-3 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90"
               >
                 Empezar
@@ -105,7 +105,7 @@ export default function HomePage() {
               </p>
             </div>
             <Link
-              href="/docs"
+              href="/docs/project"
               className="inline-flex items-center gap-2 rounded-full bg-brand-solid px-6 py-3 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90"
             >
               <Rocket className="size-4" />

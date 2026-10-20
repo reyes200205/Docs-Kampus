@@ -10,8 +10,8 @@ El proyecto se divide en tres repositorios independientes, uno por aplicación:
 | Repositorio | Contenido | Rama por defecto |
 | --- | --- | --- |
 | [`backend-kampus`](https://github.com/WilbertDevMx/backend-kampus) | API REST en Laravel | `develop` |
-| [`Frontend-Kampus`](https://github.com/reyes200205/Frontend-Kampus) | App en Expo (web y móvil) | `main` (pendiente cambiar a `develop`) |
-| [`Docs-Kampus`](https://github.com/reyes200205/Docs-Kampus) | Este sitio de documentación | `main` (pendiente cambiar a `develop`) |
+| [`Frontend-Kampus`](https://github.com/reyes200205/Frontend-Kampus) | App en Expo (web y móvil) | `main` |
+| [`Docs-Kampus`](https://github.com/reyes200205/Docs-Kampus) | Este sitio de documentación | `develop` |
 
 Separarlos permite que cada parte tenga su propio CI, sus dependencias y su versionado, y que los permisos se den por área.
 
@@ -25,9 +25,10 @@ Separarlos permite que cada parte tenga su propio CI, sus dependencias y su vers
 | `.env.example` | Backend | Plantilla de variables de entorno **sin valores secretos**. |
 | `.github/pull_request_template.md` | Backend y app | Plantilla de PR con tarea, requisito, pasos de prueba, capturas y Definition of Done. |
 | `.github/workflows/ci.yml` | Backend y app | Backend: formato (Pint), migraciones en PostgreSQL 16 y pruebas. App: revisión de tipos con TypeScript. |
-| `.github/workflows/commits.yml` | App y documentación | Revisa que cada commit del PR siga la convención. |
-| `.github/workflows/release.yml` + `scripts/release.mjs` | App y documentación | Calcula la versión con los commits, crea el tag y el GitHub Release; en la documentación, además, despliega en Cloudflare. |
-| `commitlint.config.mjs` + `.husky/commit-msg` | App y documentación | Rechaza commits que no sigan la convención antes de crearlos. |
+| `.github/workflows/commits.yml` | Los tres | Revisa que cada commit del PR siga la convención. |
+| `.github/workflows/release.yml` + `scripts/release.mjs` | Los tres | Calcula la versión con los commits, crea el tag y el GitHub Release; en la documentación, además, despliega en Cloudflare. |
+| `commitlint.config.mjs` | Los tres | Reglas de la convención de commits y excepciones para los commits anteriores a ella. |
+| `.husky/commit-msg` | App y documentación | Rechaza en la computadora los commits que no siguen la convención, antes de crearlos. En el backend solo los revisa CI. |
 | `AGENTS.md` / `CLAUDE.md` | Backend y app | Reglas del proyecto para los asistentes de código (convenciones, estructura y comandos). |
 
 ## Archivos de exclusión (`.gitignore`)
@@ -51,7 +52,7 @@ Separarlos permite que cada parte tenga su propio CI, sus dependencias y su vers
 | --- | --- | --- |
 | Variables locales | `.env` de cada integrante, copiado de `.env.example` | `APP_KEY`, `DB_PASSWORD`, `MAIL_PASSWORD`, `AWS_SECRET_ACCESS_KEY` |
 | Secretos de CI/CD | GitHub → Settings → Secrets and variables → Actions | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` |
-| Acceso al sitio de documentación | Cloudflare Access | Solo correos autorizados del equipo |
+| Acceso al sitio de documentación | Público, igual que los tres repositorios | Por eso en el sitio no va ningún secreto ni dato personal |
 | Autenticación con GitHub | Llave SSH o token personal de cada integrante | Nunca se comparte entre integrantes |
 
 ## Control de accesos
@@ -63,24 +64,24 @@ Separarlos permite que cada parte tenga su propio CI, sus dependencias y su vers
 
 ### Protección de ramas
 
-Reglas que debe tener `main` y `develop` en cada repositorio (**Settings → Rules → Rulesets**):
+Reglas activas en `main` y `develop` de cada repositorio (**Settings → Rules → Rulesets**):
 
 | Regla | Backend | App | Documentación |
 | --- | :---: | :---: | :---: |
-| Requerir pull request antes de mergear | ✅ | ⬜ | ⬜ |
-| Requerir que los checks pasen | ✅ | ⬜ | ⬜ |
-| Bloquear el force push | ✅ | ⬜ | ⬜ |
-| Bloquear el borrado de la rama | ✅ | ⬜ | ⬜ |
+| Requerir pull request antes de mergear | ✅ (1 aprobación) | ✅ (1 aprobación) | ✅ (sin aprobación obligatoria) |
+| Bloquear el force push | ✅ | ✅ | ✅ |
+| Bloquear el borrado de la rama | ✅ | ✅ | ✅ |
+
+En el backend, además, el PR solo se puede mergear si pasa el check *Formato y pruebas*.
 
 *Estado consultado en la API pública de GitHub (`/repos/{dueño}/{repo}/rules/branches/{rama}`) el 20 de octubre de 2026.*
 
-#### Cómo activarlas en la app y la documentación
+#### Cómo se configuraron en la app y la documentación
 
 Lo hace el dueño del repositorio ([@reyes200205](https://github.com/reyes200205)):
 
 1. **Settings → Rules → Rulesets → New ruleset → New branch ruleset.**
 2. Nombre: `ramas-principales`. **Enforcement status:** *Active*.
 3. **Target branches → Add target → Include by pattern:** `main` y `develop`.
-4. Marca **Restrict deletions**, **Block force pushes** y **Require a pull request before merging** (*Required approvals*: 1).
-5. Marca **Require status checks to pass** y agrega los checks: *Tipos* y *Convención de commits* en la app; *Convención de commits* en la documentación.
-6. **Create.** Después, en **Settings → General**, cambia la rama por defecto a `develop` y activa **Automatically delete head branches**.
+4. Marca **Restrict deletions**, **Block force pushes** y **Require a pull request before merging** (*Required approvals*: 1 en la app).
+5. **Create.** En la documentación, además, **Settings → General** tiene `develop` como rama por defecto.
