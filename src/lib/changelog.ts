@@ -17,7 +17,12 @@ export const sectionLabel: Record<SectionType, string> = {
  * Repositorios cuyos GitHub Releases aparecen en /changelog. Los crea el workflow `Versión`
  * al mergear un PR a main. Para un repo privado, el build necesita `GITHUB_TOKEN` con acceso de lectura.
  */
-const releaseSources = [{ repo: 'reyes200205/Docs-Kampus', project: 'docs' }];
+const releaseSources = [
+  { repo: 'reyes200205/Docs-Kampus', project: 'docs' },
+  { repo: 'reyes200205/Frontend-Kampus', project: 'app' },
+  // Todavía sin releases: cada PR integrado en develop está a mano en content/changelog.json.
+  { repo: 'WilbertDevMx/backend-kampus', project: 'api' },
+];
 
 export interface ChangelogItem {
   text: string;
