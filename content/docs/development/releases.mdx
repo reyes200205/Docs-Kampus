@@ -5,8 +5,8 @@ description: "Cómo se calcula y publica cada versión a partir de los commits."
 
 Las versiones no se escriben a mano. Salen de los commits: por eso todos tienen que seguir la [convención](/docs/development/commits).
 
-<Callout title="Por ahora, solo en docs-kampus">
-  Este flujo está activo en el repositorio de la documentación. Cuando funcione bien, se llevará al backend y a la app.
+<Callout title="Activo en los tres repositorios">
+  El flujo funciona igual en la documentación, el backend y la app. La página [/changelog](/changelog) junta los releases de los tres; cada versión lleva la etiqueta de su proyecto (`docs`, `api` o `app`).
 </Callout>
 
 ## Flujo
@@ -14,8 +14,8 @@ Las versiones no se escriben a mano. Salen de los commits: por eso todos tienen 
 1. Trabajas en una rama `feature/T-XX-...` y haces commits con la convención. Si un mensaje no la sigue, el commit se rechaza en tu computadora.
 2. Abres un PR a `develop`. CI vuelve a revisar todos los commits del PR.
 3. Cuando se quiere publicar, se abre un **PR de `develop` a `main`**. Un bot comenta en el PR qué versión se publicará y su changelog.
-4. Al mergear ese PR se crean el tag `vX.Y.Z` y el **GitHub Release** con las notas, y se despliega el sitio.
-5. La página [/changelog](/changelog) muestra la versión nueva.
+4. Al mergear ese PR se crean el tag `vX.Y.Z` y el **GitHub Release** con las notas. En `docs-kampus`, además, se despliega el sitio.
+5. La página [/changelog](/changelog) muestra la versión nueva. Lee los releases al generar el sitio, así que una versión del backend o de la app aparece en el siguiente despliegue de la documentación.
 
 ## Qué versión se publica
 
@@ -23,7 +23,7 @@ Se toman los commits desde el último tag. La primera versión es **v0.1.0**.
 
 | Commits en el PR | Versión | Ejemplo |
 | --- | --- | --- |
-| Solo `fix`, `perf`, `revert` o `docs` | Sube el último número | 0.1.0 → 0.1.1 |
+| Solo `fix`, `perf`, `revert` o `docs` | Sube el último número (en la app, `docs` no publica versión) | 0.1.0 → 0.1.1 |
 | Al menos un `feat` | Sube el número de en medio | 0.1.1 → 0.2.0 |
 | Un cambio importante (`feat!:` o `BREAKING CHANGE` en el cuerpo) | Antes de 1.0.0 sube el de en medio; después, el primero | 0.2.0 → 0.3.0 · 1.4.0 → 2.0.0 |
 | Solo `chore`, `ci`, `test`, `build`, `style` o `refactor` | No se publica versión | — |
@@ -50,16 +50,16 @@ Una sola vez, en *Settings* del repositorio:
 
 - **Branches → Branch protection** para `main` y `develop`: requerir PR, al menos una aprobación y que pasen los checks *Convención de commits* (y en `main`, *Vista previa de la versión*).
 - **Actions → General → Workflow permissions**: *Read and write permissions*, para que el workflow pueda crear tags, releases y comentarios.
-- **Secrets → Actions**: `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID` para el despliegue. Sin ellos se publica la versión pero no se despliega el sitio.
+- **Secrets → Actions** (solo `docs-kampus`): `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID` para el despliegue. Sin ellos se publica la versión pero no se despliega el sitio.
 
 ## Archivos
 
 | Archivo | Qué hace |
 | --- | --- |
 | `commitlint.config.mjs` | Reglas de la convención |
-| `.husky/commit-msg` | Revisa cada commit en tu computadora (se instala con `pnpm install`) |
+| `.husky/commit-msg` | Revisa cada commit en tu computadora (se instala con `pnpm install`). El backend no lo tiene: ahí solo lo revisa CI |
 | `.github/workflows/commits.yml` | Revisa los commits de cada PR |
-| `.github/workflows/release.yml` | Vista previa en el PR, publicación de la versión y despliegue |
+| `.github/workflows/release.yml` | Vista previa en el PR y publicación de la versión; en `docs-kampus`, también el despliegue |
 | `scripts/release.mjs` | Calcula la versión y escribe las notas |
 
 Puedes ver en tu computadora qué versión saldría con:
