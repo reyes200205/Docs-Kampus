@@ -1,23 +1,27 @@
 ---
 title: "Separación en tareas"
-description: "Las 39 tareas del proyecto, con responsable, estimación y dependencias."
+description: "Las 44 tareas del proyecto, con responsable, estimación y dependencias."
 ---
 
 ## 10. Separación del proyecto en tareas
 
 Las tareas se derivan de los requisitos funcionales y no funcionales. La estimación es en horas de trabajo; las dependencias indican qué tareas deben completarse antes. El número `T-XX` es el mismo que se usa en [Plane](https://app.plane.so/utt-plane/) y en el nombre de las ramas (ver [Flujo de Git](/docs/development/git-workflow)).
 
+<Callout type="warn" title="🆕 Nuevo · Sprint 2: Módulo de Administración">
+  Tareas nuevas **T-40 a T-44** del módulo de Administración; se ajustan T-02, T-04, T-05, T-09, T-17, T-18, T-21, T-22 y T-37, y **T-32 pasa a fase 2** ([cambio de alcance del 19 de octubre de 2026](/docs/project/unit-1/methodology#94--cambios-de-alcance)).
+</Callout>
+
 | ID | Tarea | Derivada de | Responsable | Est. (h) | Dependencias | Criterio de terminado |
 | --- | --- | --- | --- | :---: | --- | --- |
 | **T-01** | Configurar repositorio, ramas (`main`/`develop`), plantilla de PR y CI | RNF-07 | Wilbert | 4 | — | El pipeline ejecuta lint y pruebas en cada PR. |
-| **T-02** | Modelo entidad-relación y migraciones de base de datos | RF-01 a RF-16 | Mario | 8 | T-01 | Migraciones y seeders ejecutan sin error; diagrama ER en el repositorio. |
+| **T-02** | Modelo entidad-relación y migraciones de base de datos | RF-01 a RF-16, 🆕 RF-22 a RF-24 | Mario | 8 | T-01 | Migraciones y seeders ejecutan sin error; diagrama ER en el repositorio. 🆕 Incluye los roles, la aprobación de grupos, `reports.university_id` y la tabla `moderation_actions`. |
 | **T-03** | Sistema de diseño base (tema, tipografía, componentes UI) | RNF-01 | Aless | 8 | T-01 | Botón, input, tarjeta, navegación y layout responsivos documentados. |
-| **T-04** | API de registro y verificación por dominio de correo | RF-01, RF-04 | Mario | 10 | T-02 | Rechaza dominios no permitidos; envía correo de verificación; pruebas automatizadas. |
-| **T-05** | API de inicio/cierre de sesión con Sanctum y límite de intentos | RF-02, RNF-02 | Wilbert | 6 | T-02 | Tokens con expiración; bloqueo tras 5 intentos; pruebas. |
+| **T-04** | API de registro y verificación por dominio de correo | RF-01, RF-04 | Mario | 10 | T-02 | Rechaza dominios no permitidos; envía correo de verificación; pruebas automatizadas. 🆕 El registro siempre crea cuentas `student`. |
+| **T-05** | API de inicio/cierre de sesión con Sanctum y límite de intentos | RF-02, RNF-02 | Wilbert | 6 | T-02 | Tokens con expiración; bloqueo tras 5 intentos; pruebas. 🆕 La respuesta incluye el `role` del usuario. |
 | **T-06** | Pantallas de registro, verificación e inicio de sesión | RF-01, RF-02 | Luis | 10 | T-03, T-04, T-05 | Flujo completo funcional en móvil y escritorio. |
 | **T-07** | API de perfil: datos, intereses y carga de fotos a bucket privado | RF-03, RNF-03 | Mario | 10 | T-02 | Validaciones de tamaño/tipo; URLs firmadas; pruebas. |
 | **T-08** | Pantallas de perfil (ver y editar, fotos, intereses) | RF-03 | Aless | 10 | T-03, T-07 | Edición guardada y reflejada al instante. |
-| **T-09** | Algoritmo de descubrimiento y API de swipe (me interesa/pasar) con filtros | RF-05, RF-06 | Wilbert | 12 | T-07 | No repite perfiles; respeta filtros; respuesta < 500 ms. |
+| **T-09** | Algoritmo de descubrimiento y API de swipe (me interesa/pasar) con filtros | RF-05, RF-06 | Wilbert | 12 | T-07 | No repite perfiles; respeta filtros; respuesta < 500 ms. 🆕 Excluye al staff y rechaza swipes de cuentas de staff. |
 | **T-10** | Generación de match y evento `MatchCreated` | RF-07 | Wilbert | 6 | T-09 | Match creado con like mutuo; evento disparado y probado. |
 | **T-11** | Pantalla de descubrimiento con gestos de swipe y filtros | RF-05, RF-06 | Luis | 12 | T-03, T-09 | Gestos táctiles y botones; filtros persistentes. |
 | **T-12** | Pantalla "Es un match" y lista de matches | RF-07 | Aless | 6 | T-10 | Nuevo match visible en < 5 s. |
@@ -25,12 +29,12 @@ Las tareas se derivan de los requisitos funcionales y no funcionales. La estimac
 | **T-14** | API de mensajes (enviar, historial paginado, marcar leído) | RF-08 | Mario | 8 | T-13 | Solo entre matches; latencia < 2 s; pruebas. |
 | **T-15** | Envío de imágenes en el chat | RF-09 | Mario | 6 | T-14 | JPG/PNG ≤ 5 MB; URL firmada; vista previa. |
 | **T-16** | Pantallas de chat (lista de conversaciones y conversación) | RF-08, RF-09 | Luis | 12 | T-13 a T-15 | Mensajes e imágenes en tiempo real en móvil y escritorio. |
-| **T-17** | API de grupos: CRUD, unirse/abandonar, actividades | RF-11, RF-12 | Wilbert | 10 | T-02 | Permisos de administrador de grupo; pruebas. |
-| **T-18** | Pantallas de grupos (explorar, detalle, crear, actividades) | RF-11, RF-12 | Aless | 12 | T-17 | Flujo completo probado en móvil y escritorio. |
+| **T-17** | API de grupos: CRUD, unirse/abandonar, actividades | RF-11, RF-12 | Wilbert | 10 | T-02 | Permisos de administrador de grupo; pruebas. 🆕 Los grupos de alumnos se crean en `pending` y solo se listan los aprobados. |
+| **T-18** | Pantallas de grupos (explorar, detalle, crear, actividades) | RF-11, RF-12 | Aless | 12 | T-17 | Flujo completo probado en móvil y escritorio. 🆕 Estado "En revisión" para el creador, motivo si se rechaza e insignia "Oficial". |
 | **T-19** | Integración de LiveKit en el servidor (tokens y salas 1 a 1) mediante Adapter | RF-10 | Mario | 8 | T-10 | Token válido solo para usuarios con match; sala limitada a 2 participantes. |
 | **T-20** | Pantalla de videollamada con el SDK de LiveKit y manejo de permisos | RF-10 | Luis | 12 | T-19 | Llamada funcional en Chrome (escritorio/Android) y Safari iOS; guía de permisos. |
-| **T-21** | API de bloqueo y reporte de usuarios | RF-13, RF-14 | Wilbert | 6 | T-09, T-14 | Bloqueado excluido de descubrimiento y chat; reporte registrado. |
-| **T-22** | UI de bloqueo/reporte y panel básico de moderación | RF-13 a RF-15 | Aless | 8 | T-21, T-37 | El moderador puede suspender/reactivar cuentas. |
+| **T-21** | API de bloqueo y reporte de usuarios | RF-13, RF-14 | Wilbert | 6 | T-09, T-14 | Bloqueado excluido de descubrimiento y chat; reporte registrado. 🆕 El reporte guarda la universidad del usuario reportado. |
+| **T-22** | UI de bloqueo/reporte y panel básico de moderación | RF-13 a RF-15 | Aless | 8 | T-21, T-37 | El moderador puede suspender/reactivar cuentas. 🆕 Queda integrado al panel de administración (T-44). |
 | **T-23** | Aviso de privacidad, normas de comunidad y eliminación de cuenta | RF-04, RF-16 | Alejandro (textos) / Mario (API) | 6 | T-02 | Documentos visibles en registro y ajustes; borrado de datos en ≤ 72 h. |
 | **T-24** | Despliegue en entorno de pruebas (API, WebSocket, app web, HTTPS) | RNF-05, RNF-06 | Wilbert | 8 | T-05, T-13 | URL pública con HTTPS; monitoreo básico. |
 | **T-25** | Pruebas de usabilidad con estudiantes (guion, sesiones, cuestionario SUS, informe) | RNF-04 | Alejandro | 10 | T-16, T-18 | Informe con hallazgos priorizados; SUS ≥ 70. |
@@ -40,13 +44,20 @@ Las tareas se derivan de los requisitos funcionales y no funcionales. La estimac
 | **T-29** | Estilo oscuro del mapa (MapLibre + OpenFreeMap) y componente base de mapa | RF-19 | Aless | 6 | T-03 | Mapa con estilo propio (calles sutiles, parques y agua) en móvil y escritorio. |
 | **T-30** | Vista "Cerca": avatares por zona, ficha rápida y distancia aproximada | RF-19 | Aless | 12 | T-28, T-29, T-35 | Avatares en el centro de su zona con desplazamiento fijo; la ficha abre el perfil expandido. |
 | **T-31** | Perfil expandible en Descubrir (galería, datos institucionales, grupos en común) | RF-21 | Luis | 6 | T-11, T-17 | Deslizar hacia arriba muestra el perfil completo; acciones siempre visibles. |
-| **T-32** | Mensaje de ubicación en el chat (API + mini-mapa + confirmación previa) | RF-20, RNF-11 | Mario (API) / Luis (UI) | 10 | T-14, T-29 | Solo entre matches; confirmación antes de enviar; el emisor puede eliminarlo. |
+| **T-32** | ~~Mensaje de ubicación en el chat (API + mini-mapa + confirmación previa)~~ 🆕 Pasa a fase 2 | RF-20, RNF-11 | Mario (API) / Luis (UI) | 10 | T-14, T-29 | Solo entre matches; confirmación antes de enviar; el emisor puede eliminarlo. |
 | **T-33** | Contrato inicial de la API en OpenAPI (autenticación, registro y perfil) | RNF-07 | Alejandro (con Mario y Wilbert) | 4 | T-02 | Contrato en el repositorio con los endpoints de los Sprints 1 y 2; se actualiza cada sprint. |
 | **T-34** | Datos de demostración: usuarios verificados con perfil, fotos e intereses | RF-05, RNF-04 | Mario | 5 | T-07 | Al menos 60 usuarios entre las tres universidades; fotos de licencia libre; nunca se ejecuta en producción. |
 | **T-35** | API de la vista "Cerca": usuarios por zona con posición difuminada y distancia aproximada | RF-19, RNF-11 | Wilbert | 6 | T-28 | Solo usuarios con "Cerca de ti" activo; excluye bloqueados; nunca expone coordenadas exactas; < 500 ms. |
 | **T-36** | Selección de zona y activación de "Cerca de ti" en el perfil (permiso de GPS y geohash en el cliente) | RF-18, RNF-11 | Aless | 6 | T-08, T-28 | Pantalla explicativa antes de pedir el permiso; solo se envía la celda; desactivar borra la celda. |
-| **T-37** | API de moderación: lista de reportes, revisión y suspensión o reactivación de cuentas | RF-15 | Mario | 6 | T-21 | Solo para administradores; cambia el estado del reporte; una cuenta suspendida no puede iniciar sesión; pruebas. |
+| **T-37** | API de moderación: lista de reportes, revisión y suspensión o reactivación de cuentas | RF-15 | Mario | 6 | T-21 | ~~Solo para administradores~~ 🆕 El moderador solo ve los reportes de su universidad y el administrador todos; cambia el estado del reporte; una cuenta suspendida no puede iniciar sesión; 🆕 cada suspensión exige motivo y queda en `moderation_actions`; pruebas. |
 | **T-38** | Pantalla de Ajustes: usuarios bloqueados, eliminar cuenta y cerrar sesión | RF-13, RF-16 | Luis | 4 | T-05, T-21, T-23 | Desbloquear usuarios; eliminar la cuenta con confirmación; funciona en móvil y escritorio. |
 | **T-39** | Prueba de carga básica sobre descubrimiento y chat | RNF-05 | Wilbert | 3 | T-24 | 100 usuarios concurrentes con respuesta < 500 ms en el percentil 95; informe con resultados. |
+| **🆕 T-40** | Roles y permisos: roles `student`, `moderator` y `admin`; Policies por recurso; filtro por universidad; comando `php artisan kampus:create-admin` | RF-15, RF-22 a RF-24, RNF-02 | Wilbert | 6 | T-02, T-05 | No hay endpoint público para crear staff; pruebas de cada permiso y de escalada de privilegios. |
+| **🆕 T-41** | API de gestión de staff: crear, asignar universidad y desactivar moderadores y administradores | RF-22 | Wilbert | 6 | T-40 | Solo la usa un administrador; valida que el correo sea del dominio de la universidad; cada acción queda en la bitácora; pruebas. |
+| **🆕 T-42** | Aprobación de grupos: cola de pendientes, aprobar o rechazar con motivo, aviso al creador y grupos oficiales | RF-12, RF-23 | Wilbert | 6 | T-17, T-40 | El moderador solo revisa los grupos de su universidad; los del staff se aprueban solos; pruebas. |
+| **🆕 T-43** | API de consulta de usuarios (listar, buscar y ver detalle) y suspensión de cuentas reportadas | RF-15, RF-24 | Mario | 6 | T-37, T-40 | El moderador solo ve su universidad y solo suspende cuentas con reporte; motivo obligatorio en `moderation_actions`; pruebas. |
+| **🆕 T-44** | Panel de administración en el frontend: menú según el rol; usuarios, reportes, grupos pendientes, grupos oficiales y staff | RF-15, RF-22 a RF-24 | Aless (con apoyo de Luis) | 12 | T-22, T-41 a T-43 | El staff no ve Descubrir, Cerca ni Chat; la sección de staff solo aparece para el administrador; funciona en móvil y escritorio. |
 
 *Esfuerzo total estimado: aproximadamente 320 horas de desarrollo, unas 6 a 7 horas por integrante por semana durante las 10 semanas del proyecto. Distribución de tareas propias: Wilbert 69 h, Mario 69 h, Aless 68 h, Luis 56 h y Alejandro 24 h; las tareas T-23, T-27 y T-32 se reparten entre varios integrantes. Las notificaciones dentro de la app (RF-17) se mantienen como función deseable sin tarea asignada: solo se implementan si el Sprint 5 termina con tiempo disponible.*
+
+*🆕 Con el módulo de Administración se suman unas 48 horas (36 de T-40 a T-44, 8 de ajustes a tareas existentes y pruebas, y 4 de documentación), y T-32 (10 horas) pasa a fase 2. El total queda en unas **358 horas**. Tareas propias: Wilbert 87 h, Mario 75 h, Aless 80 h, Luis 56 h y Alejandro 24 h.*

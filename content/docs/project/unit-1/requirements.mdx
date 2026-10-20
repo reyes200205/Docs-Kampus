@@ -9,36 +9,43 @@ Prioridad: **Alta** = indispensable para el MVP, **Media** = importante, **Baja*
 
 ### 8.1 Requisitos funcionales
 
+<Callout type="warn" title="🆕 Nuevo · Sprint 2: Módulo de Administración">
+  Requisitos nuevos: **RF-22**, **RF-23** y **RF-24**. Se modifican RF-05, RF-11, RF-12 y RF-15, y RF-20 pasa a fase 2. En las historias de usuario se ajusta HU-07 y se agregan HU-11 y HU-12 ([cambio de alcance del 19 de octubre de 2026](/docs/project/unit-1/methodology#94--cambios-de-alcance)).
+</Callout>
+
 | ID | Requisito | Prioridad | Criterio de aceptación |
 | --- | --- | --- | --- |
 | **RF-01** | Registro con correo institucional | Alta | Solo se aceptan correos de los dominios de UTT, UAdeC y Tec Laguna; se envía un enlace de verificación; la cuenta permanece inactiva hasta verificar. |
 | **RF-02** | Inicio y cierre de sesión | Alta | Autenticación con token; la sesión expira; bloqueo temporal tras 5 intentos fallidos. |
 | **RF-03** | Gestión de perfil | Alta | El usuario captura carrera, semestre, mínimo 3 intereses del catálogo, hasta 5 fotos y una bio de máximo 300 caracteres; puede editarlos en cualquier momento. |
 | **RF-04** | Aceptación de aviso de privacidad y normas de comunidad | Alta | No es posible completar el registro sin aceptar ambos documentos; quedan accesibles desde Ajustes. |
-| **RF-05** | Descubrimiento tipo swipe | Alta | Se muestran perfiles verificados de la misma universidad o de las instituciones aliadas; el usuario da "Me interesa" o "Pasar"; no se repiten perfiles ya evaluados. |
+| **RF-05** | Descubrimiento tipo swipe | Alta | Se muestran perfiles verificados de la misma universidad o de las instituciones aliadas; el usuario da "Me interesa" o "Pasar"; no se repiten perfiles ya evaluados. 🆕 Solo aparecen cuentas de estudiantes: moderadores y administradores nunca se muestran ni pueden evaluar perfiles. |
 | **RF-06** | Filtros de descubrimiento | Media | El usuario puede filtrar por universidad(es), carrera e intereses; los filtros persisten entre sesiones. |
 | **RF-07** | Generación de match | Alta | Cuando dos usuarios se dan "Me interesa" mutuamente se crea un match y ambos lo ven en su lista en menos de 5 segundos. |
 | **RF-08** | Chat en tiempo real | Alta | Solo disponible entre usuarios con match; los mensajes llegan en menos de 2 segundos; el historial se conserva y se pagina. |
 | **RF-09** | Envío de imágenes en el chat | Media | Se aceptan JPG/PNG de hasta 5 MB; se muestra vista previa; la imagen solo es accesible para los dos participantes. |
 | **RF-10** | Videollamada 1 a 1 | Media | Desde el chat de un match se puede iniciar una llamada; el receptor acepta o rechaza; funciona en Chrome (escritorio y Android) y Safari (iOS) con permisos de cámara y micrófono. |
-| **RF-11** | Explorar y unirse a grupos | Media | Lista de grupos filtrable por institución y categoría (deportivo/cultural/otro); el usuario puede unirse y abandonar. |
-| **RF-12** | Crear y administrar grupos | Media | Cualquier usuario verificado crea un grupo con nombre, descripción, categoría e imagen; el administrador publica actividades (título, fecha, lugar, descripción). |
+| **RF-11** | Explorar y unirse a grupos | Media | Lista de grupos filtrable por institución y categoría (deportivo/cultural/otro); el usuario puede unirse y abandonar. 🆕 Solo se listan grupos aprobados. |
+| **RF-12** | Crear y administrar grupos | Media | Cualquier usuario verificado crea un grupo con nombre, descripción, categoría e imagen; el administrador publica actividades (título, fecha, lugar, descripción). 🆕 El grupo de un alumno queda "En revisión" hasta que lo aprueba un moderador de su universidad o un administrador (RF-23); los grupos que crea el staff son oficiales y se aprueban solos. |
 | **RF-13** | Bloqueo de usuarios | Alta | El usuario bloqueado desaparece del descubrimiento, matches y chat de ambos; la acción es reversible desde Ajustes. |
 | **RF-14** | Reporte de usuarios | Alta | El usuario elige un motivo del catálogo y agrega una descripción opcional; el reporte queda registrado con fecha y evidencia (conversación) para revisión. |
-| **RF-15** | Panel básico de moderación | Media | Un administrador ve la lista de reportes y su estado, y puede suspender o reactivar cuentas. |
+| **RF-15** | Panel de moderación 🆕 por universidad | Media | ~~Un administrador ve la lista de reportes y su estado, y puede suspender o reactivar cuentas.~~ 🆕 Un moderador ve los reportes de **su universidad** (la del usuario reportado) y un administrador los de todas; ven el estado de cada reporte y pueden suspender, reactivar o eliminar la cuenta reportada. Solo se suspende una cuenta que tenga un reporte, y el motivo es obligatorio y queda en la bitácora de moderación. |
 | **RF-16** | Eliminación de cuenta | Media | El usuario puede eliminar su cuenta; sus datos personales y fotos se borran en un máximo de 72 horas. |
 | **RF-17** | Notificaciones dentro de la app | Baja | El usuario ve un indicador de nuevos matches, mensajes y actividades de sus grupos. |
 | **RF-18** | Zona del usuario (declarada + GPS aproximado) | Alta | Al completar el perfil el usuario elige su campus y, opcionalmente, su colonia de un catálogo. De forma opcional puede activar "Cerca de ti": se solicita permiso de ubicación, la coordenada se convierte en una celda de ~1 km (geohash de precisión 6) y solo se guarda la celda; el usuario puede desactivarla y borrarla en cualquier momento. |
 | **RF-19** | Vista "Cerca" con mapa por zonas | Media | En Descubrir, el modo "Cerca" muestra en un mapa con estilo propio a los usuarios que activaron la función, en el centro de su zona con un desplazamiento aleatorio fijo; al tocar un avatar se abre una ficha con distancia aproximada ("≈ 2 km") y acceso al perfil. Nunca se muestra una dirección exacta. |
-| **RF-20** | Compartir ubicación en el chat | Baja | Solo entre usuarios con match; el emisor confirma antes de enviar; se envía la coordenada del momento como mensaje de tipo ubicación con mini-mapa; el emisor puede eliminarlo; no existe ubicación en vivo. |
+| **RF-20** | Compartir ubicación en el chat (🆕 pasa a fase 2) | Baja | Solo entre usuarios con match; el emisor confirma antes de enviar; se envía la coordenada del momento como mensaje de tipo ubicación con mini-mapa; el emisor puede eliminarlo; no existe ubicación en vivo. |
 | **RF-21** | Perfil expandible en Descubrir | Alta | Al deslizar hacia arriba sobre una tarjeta se muestra el perfil completo: galería, universidad, carrera y semestre con insignia de verificación, "Sobre mí", intereses y grupos en común; las acciones Pasar / Me interesa siguen visibles. |
+| **🆕 RF-22** | Gestión de cuentas de staff | Media | Solo un administrador crea moderadores y administradores, les asigna universidad (el moderador tiene una sola) y puede desactivarlos; no existe registro público para el staff; el correo debe ser del dominio de la universidad asignada; cada acción queda en la bitácora. El primer administrador se crea con un comando del servidor. |
+| **🆕 RF-23** | Aprobación de grupos | Media | Los grupos que crean los alumnos quedan "En revisión" hasta que un moderador de su universidad o un administrador los aprueba o rechaza; el rechazo exige un motivo que ve el creador; los grupos del staff llevan la insignia "Oficial". Por ahora, editar un grupo aprobado no lo regresa a revisión. |
+| **🆕 RF-24** | Consulta de usuarios por universidad | Media | El moderador lista, busca y ve el detalle de los usuarios de su universidad; el administrador ve los de todas. Un moderador nunca ve ni modifica datos de otra universidad. |
 
 ### 8.2 Requisitos no funcionales
 
 | ID | Requisito | Prioridad | Criterio de aceptación |
 | --- | --- | --- | --- |
 | **RNF-01** | Responsividad | Alta | La interfaz es usable desde 360 px (móvil) hasta 1920 px (escritorio) sin desplazamiento horizontal; probada en Chrome, Firefox y Safari. |
-| **RNF-02** | Seguridad | Alta | Todo el tráfico va por HTTPS; contraseñas con hash bcrypt; tokens con expiración; validación de entradas en el servidor; protección contra XSS, CSRF e inyección SQL; límite de peticiones en login y registro. |
+| **RNF-02** | Seguridad | Alta | Todo el tráfico va por HTTPS; contraseñas con hash bcrypt; tokens con expiración; validación de entradas en el servidor; protección contra XSS, CSRF e inyección SQL; límite de peticiones en login y registro. 🆕 Los permisos por rol y por universidad se validan en el servidor, no en la app. |
 | **RNF-03** | Privacidad de datos | Alta | Los datos y fotos solo son visibles para usuarios verificados; las imágenes se guardan en un bucket privado con URLs firmadas temporales; se recolecta el mínimo de datos conforme a la LFPDPPP. |
 | **RNF-04** | Usabilidad | Alta | Un usuario nuevo completa registro, primer match y envío de mensaje sin ayuda; puntaje SUS ≥ 70 en las pruebas de usabilidad. |
 | **RNF-05** | Rendimiento | Media | Carga inicial de la app web < 3 s en red 4G; respuesta de la API < 500 ms en el percentil 95 con 100 usuarios concurrentes. |
@@ -59,7 +66,9 @@ Prioridad: **Alta** = indispensable para el MVP, **Media** = importante, **Baja*
 | **HU-04** | Como usuario con un match, quiero chatear al instante y enviar imágenes para mantener el contacto. | RF-08, RF-09 |
 | **HU-05** | Como estudiante, quiero unirme a grupos culturales o deportivos de mi institución para participar en sus eventos. | RF-11, RF-12 |
 | **HU-06** | Como usuario, quiero bloquear o reportar cuentas con comportamientos inadecuados para sentirme seguro en la plataforma. | RF-13, RF-14 |
-| **HU-07** | Como moderador, necesito revisar los reportes recibidos y suspender cuentas para mantener un espacio seguro. | RF-15 |
+| **HU-07** | Como moderador 🆕 de mi universidad, necesito revisar los reportes recibidos y suspender 🆕 con un motivo las cuentas reportadas para mantener un espacio seguro. | RF-15, 🆕 RF-24 |
 | **HU-08** | Como alumno, quiero ver en un mapa a los universitarios de mi campus o de zonas cercanas, sin exponer mi dirección, para coordinar encuentros en persona. | RF-18, RF-19 |
 | **HU-09** | Como usuario con un match, quiero enviar a propósito mi ubicación en el chat para acordar un punto de reunión en el plantel. | RF-20 |
 | **HU-10** | Como usuario en Descubrir, quiero deslizar la tarjeta hacia arriba para ver la galería completa, la carrera y los grupos en común antes de decidir. | RF-21 |
+| **🆕 HU-11** | Como administrador, quiero crear y desactivar cuentas de moderadores y asignarles su universidad para que cada institución tenga quién atienda sus reportes. | RF-22 |
+| **🆕 HU-12** | Como moderador, quiero aprobar o rechazar los grupos que crean los alumnos de mi universidad para que solo se publiquen grupos adecuados. | RF-23 |
