@@ -7,7 +7,7 @@ Hay dos tipos de pull request, y cada uno va en una dirección distinta:
 
 | PR | Dirección | Para qué | Cómo se mergea |
 | --- | --- | --- | --- |
-| **De tarea** | `feature/T-XX-...` → `develop` | Integrar tu trabajo | **Squash and merge** |
+| **De tarea** | `feature/T-XX-...` → `develop` | Integrar tu trabajo | **Create a merge commit** |
 | **De publicación** | `develop` → `main` | Publicar una versión | **Create a merge commit** |
 
 <Callout title="Los PR no se abren solos">
@@ -31,10 +31,10 @@ Hay dos tipos de pull request, y cada uno va en una dirección distinta:
    O desde el repositorio: **Pull requests → New pull request**.
 
 3. Revisa los selectores de arriba: **base: `develop`** ← **compare: `tu rama`**.
-4. Título con la [convención](/docs/development/commits), por ejemplo `feat: agrega login con correo institucional`. Con *squash*, **este título es el commit que llega a `develop`** y la línea que aparecerá en el changelog.
+4. Título con la [convención](/docs/development/commits), por ejemplo `feat: agrega login con correo institucional`. Al mergear se conservan **tus commits**, y cada uno será una línea del changelog: por eso todos deben seguir la convención (CI los revisa).
 5. Llena la plantilla (abajo) y da **Create pull request**.
 6. Espera los checks en verde y la aprobación de otro integrante.
-7. Mergea con **Squash and merge** y borra la rama.
+7. Mergea con **Create a merge commit** y borra la rama.
 
 ## PR de publicación: develop → main
 
