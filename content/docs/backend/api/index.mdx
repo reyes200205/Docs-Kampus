@@ -35,6 +35,8 @@ Responde `200` cuando la aplicación está arriba. Útil para monitoreo.
 | `GET` | `/api/email/verify/{id}/{hash}` | Enlace firmado | Verifica el correo; el enlace llega por correo y vence a los 60 minutos ([Autenticación](/docs/backend/api/authentication#verificar-el-correo)) |
 | `POST` | `/api/login` | No | Inicia sesión y devuelve el token ([Autenticación](/docs/backend/api/authentication#iniciar-sesión)) |
 | `POST` | `/api/logout` | Token | Revoca el token de la petición ([Autenticación](/docs/backend/api/authentication#cerrar-sesión)) |
+| `POST` | `/api/forgot-password` | No | Manda el enlace para restablecer la contraseña; responde igual exista o no el correo ([Autenticación](/docs/backend/api/authentication#pedir-el-enlace)) |
+| `POST` | `/api/reset-password` | No | Restablece la contraseña con el token del correo y cierra todas las sesiones ([Autenticación](/docs/backend/api/authentication#restablecer-la-contraseña)) |
 | `GET` | `/api/user` | Sí | Usuario autenticado |
 | `GET` · `PATCH` | `/api/profile` | Estudiante | Lee o actualiza el perfil: nombre, carrera, semestre, fecha de nacimiento, bio, zona y filtros de descubrimiento (T-07) |
 | `GET` | `/api/interests` | Estudiante | Catálogo de intereses (T-07) |
