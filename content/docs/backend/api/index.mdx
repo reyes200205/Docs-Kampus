@@ -74,9 +74,10 @@ Rutas propuestas para T-41 a T-43. Todas requieren token de una cuenta de staff;
 | `POST` | `/api/admin/users/{id}/reactivate` | Moderador, admin | Reactiva una cuenta suspendida, con `reason` | T-43 |
 | `GET` | `/api/admin/reports` | Moderador, admin | Reportes por estado | T-37 |
 | `PATCH` | `/api/admin/reports/{id}` | Moderador, admin | Resuelve o descarta un reporte | T-37 |
-| `GET` | `/api/admin/groups?status=pending` | Moderador, admin | Grupos pendientes de aprobación | T-42 |
-| `POST` | `/api/admin/groups/{id}/approve` | Moderador, admin | Aprueba un grupo | T-42 |
-| `POST` | `/api/admin/groups/{id}/reject` | Moderador, admin | Rechaza un grupo, con `reason` | T-42 |
+| `GET` | `/api/admin/groups?status=pending` | Moderador, admin | Cola de grupos en revisión, o historial con `status` ([Administración: grupos](/docs/backend/api/group-review#cola-de-revisión)) | T-42 |
+| `POST` | `/api/admin/groups/{id}/approve` | Moderador, admin | Aprueba un grupo ([Administración: grupos](/docs/backend/api/group-review#aprobar-o-rechazar)) | T-42 |
+| `POST` | `/api/admin/groups/{id}/reject` | Moderador, admin | Rechaza un grupo, con `reason` obligatorio ([Administración: grupos](/docs/backend/api/group-review#aprobar-o-rechazar)) | T-42 |
+| `POST` | `/api/admin/groups` | Moderador, admin | Crea un grupo oficial, ya aprobado ([Administración: grupos](/docs/backend/api/group-review#crear-un-grupo-oficial)) | T-42 |
 | `GET` · `POST` | `/api/admin/staff` | Admin | Lista o crea cuentas de staff ([Administración: staff](/docs/backend/api/staff)) | T-41 |
 | `PATCH` | `/api/admin/staff/{id}` | Admin | Desactiva o reactiva una cuenta de staff, con `reason`. La universidad no se cambia ([Administración: staff](/docs/backend/api/staff#desactivar-o-reactivar-una-cuenta)) | T-41 |
 
