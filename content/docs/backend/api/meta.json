@@ -2,5 +2,5 @@
   "title": "API REST",
   "icon": "Braces",
   "defaultOpen": true,
-  "pages": ["index", "authentication", "discovery", "matches", "groups", "staff", "group-review"]
+  "pages": ["index", "authentication", "discovery", "matches", "groups", "location", "staff", "group-review"]
 }

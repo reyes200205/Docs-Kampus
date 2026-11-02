@@ -43,6 +43,10 @@ Responde `200` cuando la aplicación está arriba. Útil para monitoreo.
 | `PUT` | `/api/profile/interests` | Estudiante | Reemplaza los intereses del perfil, de 3 a 20 (T-07) |
 | `POST` | `/api/profile/photos` | Estudiante | Sube una foto JPG, PNG o WebP de hasta 5 MB, con un máximo de 5 por perfil. Se le quitan los metadatos EXIF y GPS (T-07) |
 | `DELETE` | `/api/profile/photos/{photo}` | Estudiante | Borra una foto del propio perfil (T-07) |
+| `GET` | `/api/zones` | Estudiante | Catálogo de zonas: campus y colonias ([Zonas y ubicación](/docs/backend/api/location#catálogo-de-zonas)) |
+| `GET` | `/api/location` | Estudiante | Zona declarada y celda de Cerca de ti ([Zonas y ubicación](/docs/backend/api/location#ver-la-ubicación-del-alumno)) |
+| `PUT` | `/api/location/zone` | Estudiante | Declara o quita la zona ([Zonas y ubicación](/docs/backend/api/location#declarar-la-zona)) |
+| `PUT` · `DELETE` | `/api/location/nearby` | Estudiante | Activa Cerca de ti con un geohash de 6 caracteres, o lo desactiva y borra la celda ([Zonas y ubicación](/docs/backend/api/location#activar-cerca-de-ti)) |
 | `GET` | `/api/discover` | Estudiante | Siguiente tanda de perfiles por evaluar ([Descubrimiento](/docs/backend/api/discovery#obtener-perfiles)) |
 | `GET` · `PUT` | `/api/discover/filters` | Estudiante | Lee o reemplaza los filtros guardados ([Descubrimiento](/docs/backend/api/discovery#filtros)) |
 | `POST` | `/api/swipes` | Estudiante | Me interesa o Pasar sobre un perfil; si el Me interesa es mutuo, devuelve el match ([Descubrimiento](/docs/backend/api/discovery#evaluar-un-perfil)) |
