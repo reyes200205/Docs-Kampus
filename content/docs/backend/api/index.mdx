@@ -67,8 +67,8 @@ Rutas propuestas para T-41 a T-43. Todas requieren token de una cuenta de staff;
 | `GET` | `/api/admin/groups?status=pending` | Moderador, admin | Grupos pendientes de aprobación | T-42 |
 | `POST` | `/api/admin/groups/{id}/approve` | Moderador, admin | Aprueba un grupo | T-42 |
 | `POST` | `/api/admin/groups/{id}/reject` | Moderador, admin | Rechaza un grupo, con `reason` | T-42 |
-| `GET` · `POST` | `/api/admin/staff` | Admin | Lista o crea cuentas de staff | T-41 |
-| `PATCH` | `/api/admin/staff/{id}` | Admin | Cambia la universidad o desactiva una cuenta de staff | T-41 |
+| `GET` · `POST` | `/api/admin/staff` | Admin | Lista o crea cuentas de staff ([Administración: staff](/docs/backend/api/staff)) | T-41 |
+| `PATCH` | `/api/admin/staff/{id}` | Admin | Desactiva o reactiva una cuenta de staff, con `reason`. La universidad no se cambia ([Administración: staff](/docs/backend/api/staff#desactivar-o-reactivar-una-cuenta)) | T-41 |
 
 <Callout title="En construcción">
   La API está en sus primeras tareas. Cada endpoint nuevo se documenta aquí como parte de la [Definition of Done](/docs/development/pull-requests#definition-of-done).

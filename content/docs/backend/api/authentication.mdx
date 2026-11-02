@@ -12,6 +12,8 @@ La API usa **Laravel Sanctum** con tokens personales (Bearer). La app obtiene un
   - el formato de `/api/user` y las cabeceras de seguridad ([PR #11](https://github.com/WilbertDevMx/backend-kampus/pull/11));
   - el registro y la verificación de correo ([PR #28](https://github.com/WilbertDevMx/backend-kampus/pull/28) y [PR #30](https://github.com/WilbertDevMx/backend-kampus/pull/30), T-04);
   - los roles ([PR #23](https://github.com/WilbertDevMx/backend-kampus/pull/23), T-40).
+
+  La excepción es el rechazo de cuentas suspendidas en el login, que llega con T-41 ([PR #33](https://github.com/WilbertDevMx/backend-kampus/pull/33), en revisión).
 </Callout>
 
 <Callout type="warn" title="Nuevo · Sprint 2: Módulo de Administración">
@@ -60,6 +62,7 @@ Content-Type: application/json
 | --- | --- | --- |
 | `422` | Faltan campos, la contraseña es incorrecta o el correo no existe. Los dos últimos casos dan **el mismo mensaje**, para no revelar qué correos están registrados. | `Las credenciales no son correctas.` |
 | `403` | El correo todavía no se verifica (RF-01). | `Verifica tu correo institucional antes de iniciar sesión.` |
+| `403` | **[Nuevo]** La cuenta está suspendida por moderación o es de staff desactivado (RF-15, [T-41](/docs/backend/api/staff#desactivar-o-reactivar-una-cuenta)). Con la contraseña incorrecta se recibe el `422` de siempre, sin revelar la suspensión. | `Tu cuenta está suspendida.` |
 | `429` | Hubo **5 intentos fallidos** con el mismo correo desde la misma IP. El bloqueo dura **15 minutos**, aunque luego se ponga la contraseña correcta. Un inicio de sesión correcto reinicia el contador. | `Demasiados intentos fallidos. Intenta de nuevo en 15 minutos.` |
 
 Cada intento fallido y cada bloqueo se registran en `storage/logs/security.log`, con el correo enmascarado (`an****@utt.edu.mx`).
