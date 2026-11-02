@@ -32,6 +32,9 @@ Responde `200` cuando la aplicación está arriba. Útil para monitoreo.
 | Método | Ruta | Auth | Descripción |
 | --- | --- | --- | --- |
 | `GET` | `/api/user` | Sí | Usuario autenticado |
+| `GET` | `/api/discover` | Estudiante | Siguiente tanda de perfiles por evaluar ([Descubrimiento](/docs/backend/api/discovery#obtener-perfiles)) |
+| `GET` · `PUT` | `/api/discover/filters` | Estudiante | Lee o reemplaza los filtros guardados ([Descubrimiento](/docs/backend/api/discovery#filtros)) |
+| `POST` | `/api/swipes` | Estudiante | Me interesa o Pasar sobre un perfil ([Descubrimiento](/docs/backend/api/discovery#evaluar-un-perfil)) |
 
 ### Módulo de Administración (planeado)
 
