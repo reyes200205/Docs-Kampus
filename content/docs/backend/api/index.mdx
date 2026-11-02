@@ -43,7 +43,8 @@ Responde `200` cuando la aplicación está arriba. Útil para monitoreo.
 | `DELETE` | `/api/profile/photos/{photo}` | Estudiante | Borra una foto del propio perfil (T-07) |
 | `GET` | `/api/discover` | Estudiante | Siguiente tanda de perfiles por evaluar ([Descubrimiento](/docs/backend/api/discovery#obtener-perfiles)) |
 | `GET` · `PUT` | `/api/discover/filters` | Estudiante | Lee o reemplaza los filtros guardados ([Descubrimiento](/docs/backend/api/discovery#filtros)) |
-| `POST` | `/api/swipes` | Estudiante | Me interesa o Pasar sobre un perfil ([Descubrimiento](/docs/backend/api/discovery#evaluar-un-perfil)) |
+| `POST` | `/api/swipes` | Estudiante | Me interesa o Pasar sobre un perfil; si el Me interesa es mutuo, devuelve el match ([Descubrimiento](/docs/backend/api/discovery#evaluar-un-perfil)) |
+| `GET` | `/api/matches` | Estudiante | Lista de matches, del más reciente al más antiguo ([Matches](/docs/backend/api/matches#lista-de-matches)) |
 
 En la columna **Auth**:
 
