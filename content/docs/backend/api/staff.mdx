@@ -1,0 +1,165 @@
+---
+title: "Administración: staff"
+description: "Alta, desactivación y reactivación de moderadores y administradores, con su bitácora (T-41, RF-22)."
+---
+
+**[Nuevo]** Un administrador da de alta a moderadores y a otros administradores desde el panel, y puede desactivar o reactivar sus cuentas (RF-22). Nadie se registra como staff por su cuenta: el [registro público](/docs/backend/api/authentication#crear-la-cuenta) siempre crea estudiantes, y el primer administrador se crea en el servidor con `php artisan kampus:create-admin`.
+
+<Callout title="Estado">
+  Llega con T-41 en el [PR #33](https://github.com/WilbertDevMx/backend-kampus/pull/33), que está en revisión. Esta página describe cómo queda la API al fusionarse. La moderación de usuarios, reportes y grupos llega con T-37, T-42 y T-43.
+</Callout>
+
+Todas las rutas de esta página requieren un token de Sanctum, un correo verificado y una cuenta **`admin`**. Un moderador o un estudiante recibe `403` (`Tu cuenta no tiene acceso a esta sección.`), y sin token la respuesta es `401`.
+
+## Reglas
+
+- Un **moderador** tiene **una sola** universidad, y su correo tiene que ser del dominio de esa universidad.
+- Un **administrador** no tiene universidad (`null`) porque ve todas; su correo tiene que ser de alguna institución participante.
+- La universidad se asigna **al crear la cuenta** y no se cambia después, porque rompería la regla del dominio del correo. Para mover a un moderador de universidad, se desactiva su cuenta y se le crea otra con el correo de la nueva universidad.
+- Las cuentas de staff **se desactivan, no se borran**, para conservar la [bitácora](#bitácora).
+- Nadie puede desactivar ni reactivar **su propia** cuenta, así siempre queda al menos un administrador activo.
+- Toda acción lleva un **motivo** (`reason`), que queda en la bitácora.
+
+## Listar el staff
+
+```http
+GET /api/admin/staff?page=1
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+Devuelve los moderadores y administradores, activos y desactivados, ordenados por nombre y de 20 en 20. No incluye estudiantes.
+
+### Respuesta `200`
+
+```json
+{
+  "data": [
+    {
+      "id": 4,
+      "name": "Moderador UTT",
+      "email": "moderador@utt.edu.mx",
+      "role": "moderator",
+      "university": {
+        "id": 1,
+        "name": "Universidad Tecnológica de Torreón",
+        "short_name": "UTT"
+      },
+      "active": true,
+      "deactivated_at": null,
+      "created_at": "2026-11-02T16:40:00+00:00"
+    }
+  ],
+  "links": { "first": "...", "last": "...", "prev": null, "next": null },
+  "meta": { "current_page": 1, "last_page": 1, "per_page": 20, "total": 1 }
+}
+```
+
+| Campo | Descripción |
+| --- | --- |
+| `role` | `moderator` o `admin`. |
+| `university` | Universidad del moderador; `null` en un administrador. |
+| `active` | `false` si la cuenta está desactivada. |
+| `deactivated_at` | Cuándo se desactivó; `null` si está activa. |
+
+## Dar de alta una cuenta
+
+```http
+POST /api/admin/staff
+Accept: application/json
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "Moderador UTT",
+  "email": "moderador@utt.edu.mx",
+  "role": "moderator",
+  "university_id": 1,
+  "password": "********",
+  "password_confirmation": "********",
+  "reason": "Moderación de la UTT para el piloto."
+}
+```
+
+| Campo | Reglas |
+| --- | --- |
+| `name` | Obligatorio, hasta 255 caracteres. |
+| `email` | Obligatorio, no registrado y se guarda sin espacios y en minúsculas. Tiene que ser institucional; en un moderador, del dominio de `university_id`. |
+| `role` | `moderator` o `admin`. |
+| `university_id` | **Obligatorio** en un moderador (universidad activa). **No se envía** en un administrador. |
+| `password` | Con `password_confirmation`. Mínimo 8 caracteres, con mayúsculas, minúsculas y números. Es la contraseña inicial: el administrador se la comunica a la persona por un medio seguro. |
+| `reason` | Obligatorio, hasta 1000 caracteres. |
+
+La cuenta se crea **ya verificada**, porque la da de alta un administrador con un correo institucional validado. Responde `201` con la cuenta, en el mismo formato que la lista:
+
+```json
+{
+  "data": {
+    "id": 4,
+    "name": "Moderador UTT",
+    "email": "moderador@utt.edu.mx",
+    "role": "moderator",
+    "university": { "id": 1, "name": "Universidad Tecnológica de Torreón", "short_name": "UTT" },
+    "active": true,
+    "deactivated_at": null,
+    "created_at": "2026-11-02T16:40:00+00:00"
+  }
+}
+```
+
+### Errores
+
+Todos son `422`, con el error en su campo:
+
+| Campo | Cuándo | Mensaje |
+| --- | --- | --- |
+| `email` | El correo no es de ninguna institución participante. | `El correo debe ser de una institución participante.` |
+| `email` | En un moderador, el correo es de otra universidad. | `El correo debe ser del dominio de la universidad asignada.` |
+| `email` | El correo ya está registrado (sin importar mayúsculas). | Error de validación |
+| `university_id` | Falta en un moderador, no existe o está inactiva, o se envía en un administrador. | Error de validación |
+| `role` | No es `moderator` ni `admin`. | Error de validación |
+| `password` | No cumple la política o la confirmación no coincide. | Error de validación |
+| `reason` | Falta. | Error de validación |
+
+## Desactivar o reactivar una cuenta
+
+```http
+PATCH /api/admin/staff/{id}
+Accept: application/json
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "active": false,
+  "reason": "Terminó su servicio social."
+}
+```
+
+`active: false` **desactiva** la cuenta y `active: true` la **reactiva**. Responde `200` con la cuenta actualizada.
+
+Al desactivar una cuenta:
+
+1. se marca como suspendida (`users.suspended_at`) y queda en la lista con `active: false`;
+2. **se cierran todas sus sesiones**: se revocan sus tokens, así que la app pierde el acceso en la siguiente petición;
+3. el [login](/docs/backend/api/authentication#iniciar-sesión) le responde `403` con `Tu cuenta está suspendida.` hasta que se reactive.
+
+### Errores
+
+| Código | Cuándo | Mensaje |
+| --- | --- | --- |
+| `422` | Es la propia cuenta de quien hace la petición. | `No puedes cambiar el estado de tu propia cuenta.` (en `errors.active`) |
+| `422` | La cuenta ya está en ese estado. | `La cuenta ya está activa.` o `La cuenta ya está desactivada.` |
+| `422` | Falta `active` o `reason`. | Error de validación en el campo |
+| `404` | El id no existe o es de un estudiante. Las cuentas de estudiantes se moderan con T-43. | |
+
+## Bitácora
+
+Cada acción de esta página queda en la tabla `moderation_actions` (ver el [diccionario de datos](/docs/project/unit-2/data-dictionary)), con quién la hizo, sobre qué cuenta, la universidad y el motivo:
+
+| Acción | `action` |
+| --- | --- |
+| Alta de un moderador o administrador | `create_staff` |
+| Desactivación | `deactivate_staff` |
+| Reactivación | `reactivate_user` |
+
+La bitácora es **inmutable**: solo tiene `created_at`, y la API no permite editar ni borrar un registro.

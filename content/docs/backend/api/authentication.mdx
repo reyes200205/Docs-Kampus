@@ -1,6 +1,6 @@
 ---
 title: "Autenticación"
-description: "Cómo se autentica la app contra la API con Laravel Sanctum: registro, verificación de correo, inicio de sesión, token y cierre de sesión."
+description: "Cómo se autentica la app contra la API con Laravel Sanctum: registro, verificación de correo, inicio de sesión, token, cierre de sesión y recuperación de contraseña."
 ---
 
 La API usa **Laravel Sanctum** con tokens personales (Bearer). La app obtiene un token al iniciar sesión y lo envía en cada petición protegida. Los tokens **expiran a los 7 días** (RNF-02).
@@ -12,6 +12,8 @@ La API usa **Laravel Sanctum** con tokens personales (Bearer). La app obtiene un
   - el formato de `/api/user` y las cabeceras de seguridad ([PR #11](https://github.com/WilbertDevMx/backend-kampus/pull/11));
   - el registro y la verificación de correo ([PR #28](https://github.com/WilbertDevMx/backend-kampus/pull/28) y [PR #30](https://github.com/WilbertDevMx/backend-kampus/pull/30), T-04);
   - los roles ([PR #23](https://github.com/WilbertDevMx/backend-kampus/pull/23), T-40).
+
+  Hay dos excepciones, que están en revisión: el rechazo de cuentas suspendidas en el login, que llega con T-41 ([PR #33](https://github.com/WilbertDevMx/backend-kampus/pull/33)), y la [recuperación de contraseña](#recuperar-la-contraseña), que llega con T-45 ([PR #34](https://github.com/WilbertDevMx/backend-kampus/pull/34)).
 </Callout>
 
 <Callout type="warn" title="Nuevo · Sprint 2: Módulo de Administración">
@@ -60,6 +62,7 @@ Content-Type: application/json
 | --- | --- | --- |
 | `422` | Faltan campos, la contraseña es incorrecta o el correo no existe. Los dos últimos casos dan **el mismo mensaje**, para no revelar qué correos están registrados. | `Las credenciales no son correctas.` |
 | `403` | El correo todavía no se verifica (RF-01). | `Verifica tu correo institucional antes de iniciar sesión.` |
+| `403` | **[Nuevo]** La cuenta está suspendida por moderación o es de staff desactivado (RF-15, [T-41](/docs/backend/api/staff#desactivar-o-reactivar-una-cuenta)). Con la contraseña incorrecta se recibe el `422` de siempre, sin revelar la suspensión. | `Tu cuenta está suspendida.` |
 | `429` | Hubo **5 intentos fallidos** con el mismo correo desde la misma IP. El bloqueo dura **15 minutos**, aunque luego se ponga la contraseña correcta. Un inicio de sesión correcto reinicia el contador. | `Demasiados intentos fallidos. Intenta de nuevo en 15 minutos.` |
 
 Cada intento fallido y cada bloqueo se registran en `storage/logs/security.log`, con el correo enmascarado (`an****@utt.edu.mx`).
@@ -186,3 +189,78 @@ GET /api/email/verify/{id}/{hash}?expires=...&signature=...
 | `403` | El `hash` no corresponde al correo de esa cuenta. | `El enlace de verificación no es válido.` |
 
 Después de verificar, el usuario ya puede [iniciar sesión](#iniciar-sesión).
+
+## Recuperar la contraseña
+
+**[Nuevo]** Llega con T-45 en el [PR #34](https://github.com/WilbertDevMx/backend-kampus/pull/34), que está en revisión (rúbrica de la Unidad 3, criterio "Recuperación de Contraseñas").
+
+El flujo tiene dos pasos:
+
+1. En la pantalla "Olvidé mi contraseña", la app manda el correo a `POST /api/forgot-password`.
+2. Llega un correo con un enlace que abre la pantalla `auth/reset-password` de la app, con `token` y `email` en la URL. Ahí la persona escribe su contraseña nueva y la app la manda a `POST /api/reset-password`.
+
+### Pedir el enlace
+
+```http
+POST /api/forgot-password
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "ana.lopez@utt.edu.mx"
+}
+```
+
+Responde `200` **exista o no el correo**, para no revelar qué cuentas están registradas:
+
+```json
+{
+  "message": "Si el correo está registrado, te enviamos un enlace para restablecer tu contraseña."
+}
+```
+
+- El correo llega en español ("Restablece tu contraseña de Kampus") y sale por la cola de trabajos, igual que el de verificación.
+- El enlace **vence a los 60 minutos** y **solo sirve una vez**. La API guarda un hash del token, nunca el token.
+- Si se pide otro enlace para el mismo correo antes de 60 segundos, no se manda otro correo, aunque la respuesta sea la misma.
+- La API permite **6 peticiones por minuto** desde la misma IP; después responde `429`. Un correo mal escrito da `422`.
+
+El enlace apunta a `PASSWORD_RESET_URL`, que por defecto es `http://localhost:8081/auth/reset-password`:
+
+```text
+http://localhost:8081/auth/reset-password?token=3f9c...&email=ana.lopez%40utt.edu.mx
+```
+
+### Restablecer la contraseña
+
+```http
+POST /api/reset-password
+Accept: application/json
+Content-Type: application/json
+
+{
+  "token": "3f9c...",
+  "email": "ana.lopez@utt.edu.mx",
+  "password": "********",
+  "password_confirmation": "********"
+}
+```
+
+La contraseña nueva sigue la misma política que el registro: mínimo 8 caracteres, con mayúsculas, minúsculas y números. Si todo es válido, responde `200`:
+
+```json
+{
+  "message": "Tu contraseña se restableció. Inicia sesión con la nueva."
+}
+```
+
+Al restablecerla se **cierra la sesión en todos los dispositivos** (se revocan todos los tokens), así que si alguien más tenía acceso a la cuenta, lo pierde. Después, la persona [inicia sesión](#iniciar-sesión) con la contraseña nueva.
+
+#### Errores
+
+| Código | Cuándo | Mensaje |
+| --- | --- | --- |
+| `422` | El token es inválido, ya venció o ya se usó, o el correo no corresponde. Todos los casos dan **el mismo mensaje**. | `El enlace para restablecer la contraseña no es válido o ya venció.` (en `errors.email`) |
+| `422` | La contraseña no cumple la política, la confirmación no coincide o falta un campo. | Error de validación en el campo |
+| `429` | Más de 6 peticiones por minuto desde la misma IP. | |
+
+Cada solicitud y cada cambio de contraseña quedan en `storage/logs/security.log`, con el correo enmascarado.

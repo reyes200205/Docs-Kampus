@@ -35,6 +35,8 @@ Responde `200` cuando la aplicación está arriba. Útil para monitoreo.
 | `GET` | `/api/email/verify/{id}/{hash}` | Enlace firmado | Verifica el correo; el enlace llega por correo y vence a los 60 minutos ([Autenticación](/docs/backend/api/authentication#verificar-el-correo)) |
 | `POST` | `/api/login` | No | Inicia sesión y devuelve el token ([Autenticación](/docs/backend/api/authentication#iniciar-sesión)) |
 | `POST` | `/api/logout` | Token | Revoca el token de la petición ([Autenticación](/docs/backend/api/authentication#cerrar-sesión)) |
+| `POST` | `/api/forgot-password` | No | Manda el enlace para restablecer la contraseña; responde igual exista o no el correo ([Autenticación](/docs/backend/api/authentication#pedir-el-enlace)) |
+| `POST` | `/api/reset-password` | No | Restablece la contraseña con el token del correo y cierra todas las sesiones ([Autenticación](/docs/backend/api/authentication#restablecer-la-contraseña)) |
 | `GET` | `/api/user` | Sí | Usuario autenticado |
 | `GET` · `PATCH` | `/api/profile` | Estudiante | Lee o actualiza el perfil: nombre, carrera, semestre, fecha de nacimiento, bio, zona y filtros de descubrimiento (T-07) |
 | `GET` | `/api/interests` | Estudiante | Catálogo de intereses (T-07) |
@@ -45,6 +47,14 @@ Responde `200` cuando la aplicación está arriba. Útil para monitoreo.
 | `GET` · `PUT` | `/api/discover/filters` | Estudiante | Lee o reemplaza los filtros guardados ([Descubrimiento](/docs/backend/api/discovery#filtros)) |
 | `POST` | `/api/swipes` | Estudiante | Me interesa o Pasar sobre un perfil; si el Me interesa es mutuo, devuelve el match ([Descubrimiento](/docs/backend/api/discovery#evaluar-un-perfil)) |
 | `GET` | `/api/matches` | Estudiante | Lista de matches, del más reciente al más antiguo ([Matches](/docs/backend/api/matches#lista-de-matches)) |
+| `GET` · `POST` | `/api/groups` | Estudiante | Explora los grupos aprobados o crea uno, que queda en revisión ([Grupos](/docs/backend/api/groups#explorar-grupos)) |
+| `GET` | `/api/groups/mine` | Estudiante | Grupos del alumno, en cualquier estado ([Grupos](/docs/backend/api/groups#mis-grupos)) |
+| `GET` · `PATCH` · `DELETE` | `/api/groups/{id}` | Estudiante | Ver un grupo; editarlo o borrarlo, si es su administrador ([Grupos](/docs/backend/api/groups#ver-editar-y-borrar)) |
+| `POST` | `/api/groups/{id}/image` | Estudiante | Imagen del grupo, sin EXIF y en el bucket privado ([Grupos](/docs/backend/api/groups#imagen-del-grupo)) |
+| `GET` · `POST` | `/api/groups/{id}/members` | Estudiante | Lista de integrantes o unirse al grupo ([Grupos](/docs/backend/api/groups#integrantes)) |
+| `DELETE` | `/api/groups/{id}/members/me` | Estudiante | Salir del grupo ([Grupos](/docs/backend/api/groups#integrantes)) |
+| `GET` · `POST` | `/api/groups/{id}/activities` | Estudiante | Próximas (o pasadas) actividades, o publicar una ([Grupos](/docs/backend/api/groups#actividades)) |
+| `PATCH` · `DELETE` | `/api/groups/{id}/activities/{activity}` | Estudiante | Editar o borrar una actividad ([Grupos](/docs/backend/api/groups#publicar-editar-y-borrar)) |
 
 En la columna **Auth**:
 
@@ -67,8 +77,8 @@ Rutas propuestas para T-41 a T-43. Todas requieren token de una cuenta de staff;
 | `GET` | `/api/admin/groups?status=pending` | Moderador, admin | Grupos pendientes de aprobación | T-42 |
 | `POST` | `/api/admin/groups/{id}/approve` | Moderador, admin | Aprueba un grupo | T-42 |
 | `POST` | `/api/admin/groups/{id}/reject` | Moderador, admin | Rechaza un grupo, con `reason` | T-42 |
-| `GET` · `POST` | `/api/admin/staff` | Admin | Lista o crea cuentas de staff | T-41 |
-| `PATCH` | `/api/admin/staff/{id}` | Admin | Cambia la universidad o desactiva una cuenta de staff | T-41 |
+| `GET` · `POST` | `/api/admin/staff` | Admin | Lista o crea cuentas de staff ([Administración: staff](/docs/backend/api/staff)) | T-41 |
+| `PATCH` | `/api/admin/staff/{id}` | Admin | Desactiva o reactiva una cuenta de staff, con `reason`. La universidad no se cambia ([Administración: staff](/docs/backend/api/staff#desactivar-o-reactivar-una-cuenta)) | T-41 |
 
 <Callout title="En construcción">
   La API está en sus primeras tareas. Cada endpoint nuevo se documenta aquí como parte de la [Definition of Done](/docs/development/pull-requests#definition-of-done).
