@@ -1,0 +1,122 @@
+---
+title: "Zonas y ubicación"
+description: "Catálogo de zonas, zona declarada y celda aproximada para Cerca de ti, sin guardar coordenadas (T-28, RF-18 y RNF-11)."
+---
+
+El alumno declara su **zona** (su campus o su colonia) y, si quiere, activa **Cerca de ti**. Con eso, el celular calcula una **celda aproximada de ~1 km** y solo esa celda llega a la API (RF-18). La vista "Cerca" (T-35) usa estos datos para el mapa por zonas.
+
+<Callout title="Estado">
+  Llega con T-28 en el [PR #37](https://github.com/WilbertDevMx/backend-kampus/pull/37), que está en revisión. Esta página describe cómo queda la API al fusionarse.
+</Callout>
+
+<Callout type="warn" title="Privacidad (RNF-11)">
+  La API **nunca recibe ni guarda una coordenada exacta**. Si una petición de esta página trae `lat`, `lng`, `lon`, `latitude`, `longitude`, `coords` o `coordinates`, responde `422`. Ver [Privacidad de la ubicación](/docs/project/location-privacy).
+</Callout>
+
+Todas las rutas de esta página requieren un token de Sanctum, un correo verificado y una cuenta `student`. El staff recibe `403`.
+
+## Catálogo de zonas
+
+```http
+GET /api/zones?type=campus&university_id=1
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+Devuelve primero los campus y después las colonias, por nombre. Los dos filtros son opcionales: `type` (`campus` o `colonia`) y `university_id`. Como el catálogo es corto, no se pagina.
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Campus UTT",
+      "type": "campus",
+      "university_id": 1,
+      "city": "Torreón",
+      "center": { "lat": 25.5615, "lng": -103.291 }
+    },
+    {
+      "id": 4,
+      "name": "Centro",
+      "type": "colonia",
+      "university_id": null,
+      "city": "Torreón",
+      "center": { "lat": 25.5393, "lng": -103.4574 }
+    }
+  ]
+}
+```
+
+`center` es el punto **público** del campus o de la colonia: sirve para dibujar la zona en el mapa, nunca es la ubicación de una persona.
+
+El catálogo inicial lo carga `ZoneSeeder` (`php artisan migrate:fresh --seed`): los 3 campus y 6 colonias de Torreón. **Sus centros son aproximados**; hay que verificarlos en un mapa antes de producción.
+
+## Ver la ubicación del alumno
+
+```http
+GET /api/location
+```
+
+```json
+{
+  "data": {
+    "zone": { "id": 1, "name": "Campus UTT", "type": "campus", "university_id": 1, "city": "Torreón", "center": { "lat": 25.5615, "lng": -103.291 } },
+    "nearby_enabled": true,
+    "geohash": "9u5fbj"
+  }
+}
+```
+
+Las rutas que siguen responden con este mismo formato. Si no hay zona declarada, `zone` es `null`; si Cerca de ti está desactivado, `nearby_enabled` es `false` y `geohash` es `null`.
+
+## Declarar la zona
+
+```http
+PUT /api/location/zone
+Content-Type: application/json
+
+{
+  "zone_id": 1
+}
+```
+
+`zone_id` es obligatorio: el id de una zona del catálogo, o `null` para quitar la zona. Una zona que no existe da `422`.
+
+## Activar Cerca de ti
+
+```http
+PUT /api/location/nearby
+Content-Type: application/json
+
+{
+  "geohash": "9u5fbj"
+}
+```
+
+El celular pide permiso de ubicación (con una explicación previa), obtiene la posición, la **convierte en un geohash de precisión 6** y solo manda ese texto. La coordenada nunca sale del dispositivo.
+
+- `geohash` tiene que tener **exactamente 6 caracteres** del alfabeto de geohash (`0-9` y `b-z` sin `a`, `i`, `l` ni `o`): una celda de unos 1.2 km × 0.6 km. Uno más largo sería más preciso, así que se rechaza con `La celda debe ser un geohash de 6 caracteres.`
+- La primera vez activa Cerca de ti; las siguientes **actualizan** la celda (por ejemplo, cuando el alumno se mueve). Solo hay una celda por alumno.
+- Límite de 30 peticiones por minuto.
+
+## Desactivar Cerca de ti
+
+```http
+DELETE /api/location/nearby
+```
+
+Desactiva Cerca de ti y **borra la celda** de la base. Responde `200` con `nearby_enabled: false` y `geohash: null`. La celda también se borra si se elimina la cuenta.
+
+<Callout title="Desde el perfil">
+  `PATCH /api/profile` ya **no** acepta `nearby_enabled`: Cerca de ti solo se activa con su celda y se desactiva borrándola, desde estas rutas. `PATCH /api/profile` sigue aceptando `zone_id`, igual que `PUT /api/location/zone`.
+</Callout>
+
+## Errores
+
+| Código | Cuándo |
+| --- | --- |
+| `401` | Sin token o con un token vencido. |
+| `403` | El correo no está verificado, o la cuenta es de staff. |
+| `422` | La zona no existe; falta `zone_id`; el geohash no tiene 6 caracteres válidos; o la petición trae una coordenada. |
+| `429` | Más de 30 actualizaciones de la celda por minuto. |

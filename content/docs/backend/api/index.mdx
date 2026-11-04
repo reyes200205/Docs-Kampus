@@ -43,6 +43,10 @@ Responde `200` cuando la aplicación está arriba. Útil para monitoreo.
 | `PUT` | `/api/profile/interests` | Estudiante | Reemplaza los intereses del perfil, de 3 a 20 (T-07) |
 | `POST` | `/api/profile/photos` | Estudiante | Sube una foto JPG, PNG o WebP de hasta 5 MB, con un máximo de 5 por perfil. Se le quitan los metadatos EXIF y GPS (T-07) |
 | `DELETE` | `/api/profile/photos/{photo}` | Estudiante | Borra una foto del propio perfil (T-07) |
+| `GET` | `/api/zones` | Estudiante | Catálogo de zonas: campus y colonias ([Zonas y ubicación](/docs/backend/api/location#catálogo-de-zonas)) |
+| `GET` | `/api/location` | Estudiante | Zona declarada y celda de Cerca de ti ([Zonas y ubicación](/docs/backend/api/location#ver-la-ubicación-del-alumno)) |
+| `PUT` | `/api/location/zone` | Estudiante | Declara o quita la zona ([Zonas y ubicación](/docs/backend/api/location#declarar-la-zona)) |
+| `PUT` · `DELETE` | `/api/location/nearby` | Estudiante | Activa Cerca de ti con un geohash de 6 caracteres, o lo desactiva y borra la celda ([Zonas y ubicación](/docs/backend/api/location#activar-cerca-de-ti)) |
 | `GET` | `/api/discover` | Estudiante | Siguiente tanda de perfiles por evaluar ([Descubrimiento](/docs/backend/api/discovery#obtener-perfiles)) |
 | `GET` · `PUT` | `/api/discover/filters` | Estudiante | Lee o reemplaza los filtros guardados ([Descubrimiento](/docs/backend/api/discovery#filtros)) |
 | `POST` | `/api/swipes` | Estudiante | Me interesa o Pasar sobre un perfil; si el Me interesa es mutuo, devuelve el match ([Descubrimiento](/docs/backend/api/discovery#evaluar-un-perfil)) |
@@ -74,9 +78,10 @@ Rutas propuestas para T-41 a T-43. Todas requieren token de una cuenta de staff;
 | `POST` | `/api/admin/users/{id}/reactivate` | Moderador, admin | Reactiva una cuenta suspendida, con `reason` | T-43 |
 | `GET` | `/api/admin/reports` | Moderador, admin | Reportes por estado | T-37 |
 | `PATCH` | `/api/admin/reports/{id}` | Moderador, admin | Resuelve o descarta un reporte | T-37 |
-| `GET` | `/api/admin/groups?status=pending` | Moderador, admin | Grupos pendientes de aprobación | T-42 |
-| `POST` | `/api/admin/groups/{id}/approve` | Moderador, admin | Aprueba un grupo | T-42 |
-| `POST` | `/api/admin/groups/{id}/reject` | Moderador, admin | Rechaza un grupo, con `reason` | T-42 |
+| `GET` | `/api/admin/groups?status=pending` | Moderador, admin | Cola de grupos en revisión, o historial con `status` ([Administración: grupos](/docs/backend/api/group-review#cola-de-revisión)) | T-42 |
+| `POST` | `/api/admin/groups/{id}/approve` | Moderador, admin | Aprueba un grupo ([Administración: grupos](/docs/backend/api/group-review#aprobar-o-rechazar)) | T-42 |
+| `POST` | `/api/admin/groups/{id}/reject` | Moderador, admin | Rechaza un grupo, con `reason` obligatorio ([Administración: grupos](/docs/backend/api/group-review#aprobar-o-rechazar)) | T-42 |
+| `POST` | `/api/admin/groups` | Moderador, admin | Crea un grupo oficial, ya aprobado ([Administración: grupos](/docs/backend/api/group-review#crear-un-grupo-oficial)) | T-42 |
 | `GET` · `POST` | `/api/admin/staff` | Admin | Lista o crea cuentas de staff ([Administración: staff](/docs/backend/api/staff)) | T-41 |
 | `PATCH` | `/api/admin/staff/{id}` | Admin | Desactiva o reactiva una cuenta de staff, con `reason`. La universidad no se cambia ([Administración: staff](/docs/backend/api/staff#desactivar-o-reactivar-una-cuenta)) | T-41 |
 
