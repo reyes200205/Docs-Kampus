@@ -1,0 +1,120 @@
+---
+title: "Matches"
+description: "Cómo se crea un match, la lista de matches y el aviso en tiempo real match.created (T-10, RF-07)."
+---
+
+Un **match** se crea cuando dos estudiantes se dan **Me interesa** mutuamente en el [descubrimiento](/docs/backend/api/discovery) (RF-07). Desde ese momento los dos lo ven en su lista y, con T-14, pueden chatear.
+
+<Callout title="Estado">
+  Llega con T-10 en el [PR #32](https://github.com/WilbertDevMx/backend-kampus/pull/32), que va después de T-09 ([PR #31](https://github.com/WilbertDevMx/backend-kampus/pull/31)). Los dos están en revisión; esta página describe cómo queda la API al fusionarse. El aviso en tiempo real necesita además el servidor de WebSocket de T-13.
+</Callout>
+
+Las rutas de esta página requieren un token de Sanctum, un correo verificado y una cuenta `student`. **[Nuevo]** El staff recibe `403`: no tiene matches.
+
+## Cómo se crea
+
+1. Ana da Me interesa a Luis: se guarda el swipe y `match` viene en `null`.
+2. Luis da Me interesa a Ana: la API ve que ya existía el de Ana, **crea el match** y lo devuelve en la respuesta de [`POST /api/swipes`](/docs/backend/api/discovery#evaluar-un-perfil). Luis ve "Es un match" en ese momento.
+3. Al guardarse el match, la API transmite el evento [`match.created`](#aviso-en-tiempo-real) a los dos. Así Ana también se entera sin recargar.
+
+Un Pasar de cualquiera de los dos nunca crea un match. Cada par tiene **un solo** match: la API guarda el par ordenado y la base no acepta otro igual. Si los dos dan Me interesa al mismo tiempo, el segundo espera a que se guarde el primero, así que el match no se pierde.
+
+## Lista de matches
+
+```http
+GET /api/matches?page=1
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+Devuelve los matches del alumno, del **más reciente al más antiguo**, de 20 en 20. En cada uno, `user` es siempre **la otra persona**.
+
+### Respuesta `200`
+
+```json
+{
+  "data": [
+    {
+      "id": 7,
+      "matched_at": "2026-11-02T16:30:00+00:00",
+      "user": {
+        "id": 12,
+        "name": "Ana López",
+        "university": {
+          "id": 1,
+          "name": "Universidad Tecnológica de Torreón",
+          "short_name": "UTT"
+        },
+        "photo_url": "https://<bucket>/profiles/12/5f1c...jpg?X-Amz-Expires=900&X-Amz-Signature=..."
+      }
+    }
+  ],
+  "links": {
+    "first": "http://localhost:8000/api/matches?page=1",
+    "last": "http://localhost:8000/api/matches?page=1",
+    "prev": null,
+    "next": null
+  },
+  "meta": {
+    "current_page": 1,
+    "last_page": 1,
+    "per_page": 20,
+    "total": 1
+  }
+}
+```
+
+`meta` trae además `from`, `to`, `path` y `links` (la paginación estándar de Laravel).
+
+| Campo | Descripción |
+| --- | --- |
+| `id` | Id del match. Es el que usará el chat (T-14) y su canal `chat.{matchId}` (T-13). |
+| `matched_at` | Cuándo se creó el match. |
+| `user.photo_url` | Primera foto del perfil, con URL firmada que **vence a los 15 minutos** (RNF-03). Es `null` si no tiene fotos. |
+
+La tarjeta no trae correo, fecha de nacimiento ni zona.
+
+### Quién no aparece
+
+- Un match con **bloqueo** entre los dos, en cualquier sentido, desaparece de la lista de **ambos** (RF-13).
+- Un match con una cuenta **suspendida** tampoco aparece.
+- Nunca aparecen matches de otras personas.
+
+## Aviso en tiempo real
+
+Cuando se crea un match, la API transmite el evento `match.created` por el canal privado de **cada uno** de los dos: `user.{id}`. Es el canal personal que configura T-13; la conexión de Echo se explica en `docs/websocket.md`, en la rama de T-13 del backend.
+
+```js
+Echo.private(`user.${miId}`).listen(".match.created", ({ match }) => {
+  const otraPersona = match.users.find((user) => user.id !== miId);
+  // Mostrar "Es un match" con otraPersona y agregar el match a la lista.
+});
+```
+
+El punto inicial de `.match.created` le indica a Echo que es un nombre propio del evento y que no le anteponga el namespace de Laravel.
+
+### Payload
+
+Los dos canales reciben lo mismo, así que `users` trae a las dos personas y la app toma a la que no es ella:
+
+```json
+{
+  "match": {
+    "id": 7,
+    "matched_at": "2026-11-02T16:30:00+00:00",
+    "users": [
+      { "id": 12, "name": "Ana López", "university": { "id": 1, "name": "Universidad Tecnológica de Torreón", "short_name": "UTT" }, "photo_url": "https://..." },
+      { "id": 15, "name": "Luis Pérez", "university": { "id": 2, "name": "Universidad Autónoma de Coahuila", "short_name": "UAdeC" }, "photo_url": null }
+    ]
+  }
+}
+```
+
+El evento se transmite **después** de guardar el match y **por la cola de trabajos**, igual que el correo de verificación. En el servidor tiene que correr `php artisan queue:work` y el servidor de Reverb (T-13). Mientras T-13 no esté en `develop`, el evento se registra en el log (`BROADCAST_CONNECTION=log`) y la lista de matches sigue funcionando sin tiempo real.
+
+## Errores
+
+| Código | Cuándo |
+| --- | --- |
+| `401` | Sin token o con un token vencido. |
+| `403` | El correo no está verificado, o la cuenta es de staff (`Tu cuenta no tiene acceso a esta sección.`). |
