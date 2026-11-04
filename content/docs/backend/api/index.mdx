@@ -31,10 +31,25 @@ Responde `200` cuando la aplicación está arriba. Útil para monitoreo.
 
 | Método | Ruta | Auth | Descripción |
 | --- | --- | --- | --- |
+| `POST` | `/api/register` | No | Crea una cuenta de estudiante con correo institucional ([Autenticación](/docs/backend/api/authentication#crear-la-cuenta)) |
+| `GET` | `/api/email/verify/{id}/{hash}` | Enlace firmado | Verifica el correo; el enlace llega por correo y vence a los 60 minutos ([Autenticación](/docs/backend/api/authentication#verificar-el-correo)) |
+| `POST` | `/api/login` | No | Inicia sesión y devuelve el token ([Autenticación](/docs/backend/api/authentication#iniciar-sesión)) |
+| `POST` | `/api/logout` | Token | Revoca el token de la petición ([Autenticación](/docs/backend/api/authentication#cerrar-sesión)) |
 | `GET` | `/api/user` | Sí | Usuario autenticado |
+| `GET` · `PATCH` | `/api/profile` | Estudiante | Lee o actualiza el perfil: nombre, carrera, semestre, fecha de nacimiento, bio, zona y filtros de descubrimiento (T-07) |
+| `GET` | `/api/interests` | Estudiante | Catálogo de intereses (T-07) |
+| `PUT` | `/api/profile/interests` | Estudiante | Reemplaza los intereses del perfil, de 3 a 20 (T-07) |
+| `POST` | `/api/profile/photos` | Estudiante | Sube una foto JPG, PNG o WebP de hasta 5 MB, con un máximo de 5 por perfil. Se le quitan los metadatos EXIF y GPS (T-07) |
+| `DELETE` | `/api/profile/photos/{photo}` | Estudiante | Borra una foto del propio perfil (T-07) |
 | `GET` | `/api/discover` | Estudiante | Siguiente tanda de perfiles por evaluar ([Descubrimiento](/docs/backend/api/discovery#obtener-perfiles)) |
 | `GET` · `PUT` | `/api/discover/filters` | Estudiante | Lee o reemplaza los filtros guardados ([Descubrimiento](/docs/backend/api/discovery#filtros)) |
 | `POST` | `/api/swipes` | Estudiante | Me interesa o Pasar sobre un perfil ([Descubrimiento](/docs/backend/api/discovery#evaluar-un-perfil)) |
+
+En la columna **Auth**:
+
+- **Token**: basta con el token de Sanctum.
+- **Sí**: token y correo verificado.
+- **Estudiante**: además, la cuenta debe ser `student`. **[Nuevo]** El staff recibe `403` en esas rutas.
 
 ### Módulo de Administración (planeado)
 

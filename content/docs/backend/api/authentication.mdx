@@ -1,16 +1,21 @@
 ---
 title: "Autenticación"
-description: "Cómo se autentica la app contra la API con Laravel Sanctum: inicio de sesión, token, cierre de sesión y registro."
+description: "Cómo se autentica la app contra la API con Laravel Sanctum: registro, verificación de correo, inicio de sesión, token y cierre de sesión."
 ---
 
 La API usa **Laravel Sanctum** con tokens personales (Bearer). La app obtiene un token al iniciar sesión y lo envía en cada petición protegida. Los tokens **expiran a los 7 días** (RNF-02).
 
 <Callout title="Estado">
-  El inicio y el cierre de sesión ya están en `develop` ([PR #7](https://github.com/WilbertDevMx/backend-kampus/pull/7), T-05). El formato de `/api/user` y las cabeceras de seguridad llegan con el [PR #11](https://github.com/WilbertDevMx/backend-kampus/pull/11), que está en revisión; esta página describe cómo queda al fusionarse.
+  Todo lo de esta página ya está en `develop`:
+
+  - el inicio y el cierre de sesión ([PR #7](https://github.com/WilbertDevMx/backend-kampus/pull/7), T-05);
+  - el formato de `/api/user` y las cabeceras de seguridad ([PR #11](https://github.com/WilbertDevMx/backend-kampus/pull/11));
+  - el registro y la verificación de correo ([PR #28](https://github.com/WilbertDevMx/backend-kampus/pull/28) y [PR #30](https://github.com/WilbertDevMx/backend-kampus/pull/30), T-04);
+  - los roles ([PR #23](https://github.com/WilbertDevMx/backend-kampus/pull/23), T-40).
 </Callout>
 
 <Callout type="warn" title="Nuevo · Sprint 2: Módulo de Administración">
-  Kampus tendrá tres roles: `student`, `moderator` y `admin`. Con T-40, el objeto `user` de las respuestas incluye `role` para que la app muestre la vista correcta. Ver [Roles](#roles) ([cambio de alcance del 19 de octubre de 2026](/docs/project/unit-1/methodology#94-cambios-de-alcance)).
+  Kampus tiene tres roles: `student`, `moderator` y `admin`. Desde T-40, el objeto `user` de las respuestas incluye `role` y `university_id` para que la app muestre la vista correcta. Ver [Roles](#roles) ([cambio de alcance del 19 de octubre de 2026](/docs/project/unit-1/methodology#94-cambios-de-alcance)).
 </Callout>
 
 ## Iniciar sesión
@@ -41,12 +46,13 @@ Content-Type: application/json
     "name": "Ana López",
     "email": "ana.lopez@utt.edu.mx",
     "email_verified_at": "2026-10-01T18:00:00+00:00",
-    "role": "student"
+    "role": "student",
+    "university_id": 1
   }
 }
 ```
 
-**[Nuevo]** El campo `role` se agrega con T-40.
+**[Nuevo]** Los campos `role` y `university_id` se agregaron con T-40. Un administrador tiene `university_id` en `null`, porque ve todas las universidades.
 
 ### Errores
 
@@ -77,7 +83,8 @@ Solo trae los campos públicos del usuario (`UserResource`):
     "name": "Ana López",
     "email": "ana.lopez@utt.edu.mx",
     "email_verified_at": "2026-10-01T18:00:00+00:00",
-    "role": "student"
+    "role": "student",
+    "university_id": 1
   }
 }
 ```
@@ -116,8 +123,66 @@ Los permisos se validan en la API con *Policies*: si un moderador pide datos de 
 
 ## Registro
 
-Solo se aceptan correos institucionales (RF-01). En T-04 (rama `feature/T-04-registro`, en preparación), los dominios aceptados salen de la tabla `universities` (columna `email_domains`), ya no de la variable `KAMPUS_ALLOWED_EMAIL_DOMAINS`. Ver [El proyecto](/docs/project/kampus#instituciones). **[Nuevo]** El registro público siempre crea cuentas `student`; las cuentas de staff solo las crea un administrador (T-41).
+Solo se aceptan correos institucionales (RF-01). Los dominios aceptados salen de la tabla `universities` (columna `email_domains`, solo universidades activas); ya no existe la variable `KAMPUS_ALLOWED_EMAIL_DOMAINS`. Ver [El proyecto](/docs/project/kampus#instituciones). **[Nuevo]** El registro público siempre crea cuentas `student`: si la petición manda `role`, se ignora. Las cuentas de staff solo las crea un administrador (T-41).
 
-<Callout title="Pendiente">
-  Los endpoints de registro (`POST /api/register`) y de verificación de correo se documentarán aquí cuando se integre T-04.
-</Callout>
+### Crear la cuenta
+
+```http
+POST /api/register
+Accept: application/json
+Content-Type: application/json
+
+{
+  "name": "Ana López",
+  "email": "ana.lopez@utt.edu.mx",
+  "password": "********",
+  "password_confirmation": "********"
+}
+```
+
+| Campo | Reglas |
+| --- | --- |
+| `name` | Obligatorio, hasta 255 caracteres. |
+| `email` | Obligatorio, correo válido de un dominio institucional y que no esté registrado. Se guarda sin espacios y en minúsculas, igual que en el login, así que `Ana.Lopez@UTT.edu.mx` cuenta como el mismo correo. |
+| `password` | Obligatoria, con `password_confirmation` igual. Mínimo 8 caracteres, con mayúsculas, minúsculas y números (en producción también se rechazan contraseñas filtradas). |
+
+La cuenta queda asignada a la universidad de su dominio. La API manda un correo con el enlace de verificación (por la cola de trabajos) y responde `201`:
+
+```json
+{
+  "message": "Registro exitoso. Revisa tu correo para verificar tu cuenta.",
+  "user": {
+    "id": 1,
+    "name": "Ana López",
+    "email": "ana.lopez@utt.edu.mx",
+    "email_verified_at": null,
+    "role": "student",
+    "university_id": 1
+  }
+}
+```
+
+La cuenta todavía **no puede iniciar sesión**: el login responde `403` hasta que se verifique el correo.
+
+#### Errores
+
+| Código | Cuándo |
+| --- | --- |
+| `422` | Falta un campo, el correo ya está registrado, la contraseña no cumple la política o el dominio no es de una universidad participante (`El dominio del correo no está permitido.`). |
+| `429` | Más de **6 registros por minuto** desde la misma IP. |
+
+### Verificar el correo
+
+El enlace del correo apunta a la API y **vence a los 60 minutos**:
+
+```http
+GET /api/email/verify/{id}/{hash}?expires=...&signature=...
+```
+
+| Código | Cuándo | Mensaje |
+| --- | --- | --- |
+| `200` | El enlace es válido. También si la cuenta ya estaba verificada. | `Correo verificado correctamente.` |
+| `403` | El enlace venció o se modificó (la firma no coincide). | |
+| `403` | El `hash` no corresponde al correo de esa cuenta. | `El enlace de verificación no es válido.` |
+
+Después de verificar, el usuario ya puede [iniciar sesión](#iniciar-sesión).
