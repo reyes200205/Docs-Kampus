@@ -293,6 +293,11 @@ Ver también [Privacidad de la ubicación](#privacidad-de-la-ubicación).
 >
 > Se agregan los riesgos **R12** (escalada de privilegios del staff) y **R13** (cambio de alcance a mitad del proyecto), y se ajusta el plan de R3 ([cambio de alcance del 19 de octubre de 2026](#94-cambios-de-alcance)).
 
+> [!WARNING]
+> **Nuevo · Sprint 3: seguimiento de riesgos**
+>
+> Al cierre del Sprint 3 se agregan **R14** (la app no alcanza al backend) y **R15** (PR revisados por lotes). Los puntajes actualizados de cada sprint están en [Seguimiento por sprint](https://doc.kodev.online/docs/project/sprints/sprint-3#riesgos-al-cierre-del-sprint-3); esta tabla conserva los valores del anteproyecto.
+
 | # | Riesgo | Prob. | Impacto | Puntaje | Nivel | Consecuencia | Respuesta | Plan de manejo |
 | :---: | --- | :---: | :---: | :---: | :---: | --- | :---: | --- |
 | **R1** | Baja adopción inicial de la app ("red vacía", pocos usuarios al lanzar) | 4 | 5 | **20** | 🔴 Alto | Desinterés de los primeros usuarios, abandono rápido de la plataforma y pérdida de tracción inicial. | Mitigar | Lanzamiento piloto focalizado en la semana de inducción, precargar clubes reales y buscar alianzas con coordinadores de tutorías. |
@@ -308,6 +313,8 @@ Ver también [Privacidad de la ubicación](#privacidad-de-la-ubicación).
 | **R11** | Dependencia de cambios o disponibilidad de APIs de terceros (video, correo, mapas) | 2 | 3 | **6** | 🟢 Bajo | Incompatibilidades o interrupción no planificada de integraciones clave. | Mitigar | Patrón Adapter en servicios externos para reemplazarlos ágilmente y versiones fijas de SDKs y dependencias. |
 | **R12** | [Nuevo] Escalada de privilegios o abuso del rol de staff (un moderador actúa sobre otra universidad o suspende cuentas sin motivo) | 2 | 5 | **10** | 🟡 Medio | Suspensiones injustas, exposición de datos de alumnos de otra universidad y pérdida de confianza en la plataforma. | Mitigar | Permisos validados en el servidor con Policies y filtro por universidad; solo un administrador crea cuentas de staff; un moderador solo suspende cuentas con un reporte; motivo obligatorio en una bitácora que no se edita; pruebas automatizadas de escalada de privilegios. |
 | **R13** | [Nuevo] Cambio de alcance a mitad del proyecto (módulo de Administración, unas 48 h) | 3 | 3 | **9** | 🟡 Medio | Retraso en los sprints 3 y 4 y menos tiempo para pruebas y correcciones. | Mitigar | Cambio aprobado por el Product Owner y el profesor; T-32 (ubicación en el chat, 10 h) pasa a fase 2; el trabajo se reparte entre backend y frontend; si hay retraso se recortan primero las funciones Could. |
+| **R14** | [Nuevo] La app no alcanza al backend: las pantallas de chat, mapa y grupos quedan sin terminar | 4 | 5 | **20** | 🔴 Alto | El MVP no se puede demostrar completo y las pruebas de usabilidad (T-25) no tienen chat ni grupos que probar. | Mitigar | Priorizar en la app las funciones de prioridad Alta (chat, match, perfil expandible, zona, bloqueo y Ajustes), reforzar el frontend con quien termine el backend y mover a fase 2 las de prioridad Media que no alcancen. |
+| **R15** | [Nuevo] Pull requests acumulados que se revisan por lotes | 4 | 3 | **12** | 🟡 Medio | Los sprints cierran sin trabajo fusionado, el avance real no se ve hasta tarde y crecen los conflictos entre ramas. | Mitigar | Revisar cada PR en menos de 48 horas, abrir PR pequeños por tarea y fusionar en cuanto pasen CI y la revisión. |
 
 ### Requisitos
 
@@ -447,6 +454,8 @@ Un cambio de alcance se propone en Slack, lo aprueban el Product Owner y el prof
 | Fecha | Cambio | Aprobado por | Compensación | Impacto |
 | --- | --- | --- | --- | --- |
 | 19 oct 2026 | **Módulo de Administración.** Tres roles: estudiante, moderador (una sola universidad) y administrador (todas). El staff solo usa el panel de administración. Incluye aprobación de grupos, consulta de usuarios, suspensión de cuentas reportadas con motivo obligatorio y una bitácora de moderación. Requisitos RF-22 a RF-24; tareas T-40 a T-44. | Jorge Alejandro Rentería (Product Owner) y el profesor | T-32 (ubicación en el chat, 10 h) pasa a fase 2. | Unas 48 h más, 38 h netas; unas 10 h más por integrante. |
+| 2 nov 2026 | **Rúbrica de la Unidad 3 (T-45 a T-48).** Recuperación de contraseña, gestión de sesiones, autenticación en dos pasos y documentación de la Unidad 3. | Jorge Alejandro Rentería (Product Owner) | — | Unas 21 h, todas de Wilbert. |
+| 8 nov 2026 | **Perfil obligatorio por pasos (T-49).** El perfil debe estar completo (nombre, fecha de nacimiento con mínimo 17 años, género, carrera y semestre, al menos 3 intereses, al menos 1 foto y "Sobre mí") para aparecer en Descubrir y usarlo. El género tiene 4 opciones y solo se muestra en el perfil. | Jorge Alejandro Rentería (Product Owner); falta informarlo al profesor | La zona queda opcional; no se agrega un filtro por género. | Unas 10 h (4 de backend y 6 de app), hechas dentro del Sprint 3. Los perfiles que ya existían deben completarse una vez. |
 
 Reglas acordadas para el módulo:
 
@@ -469,6 +478,11 @@ Las tareas se derivan de los requisitos funcionales y no funcionales. La estimac
 > **Nuevo · Sprint 2: Módulo de Administración**
 >
 > Tareas nuevas **T-40 a T-44** del módulo de Administración; se ajustan T-02, T-04, T-05, T-09, T-17, T-18, T-21, T-22 y T-37, y **T-32 pasa a fase 2** ([cambio de alcance del 19 de octubre de 2026](#94-cambios-de-alcance)).
+
+> [!WARNING]
+> **Nuevo · Sprint 3: rúbrica de la Unidad 3**
+>
+> Tareas nuevas **T-45 a T-48**, acordadas con el Product Owner el 2 de noviembre de 2026 para cubrir los criterios de la rúbrica de la Unidad 3. Suman 21 horas. El 8 de noviembre se agrega **T-49** (perfil obligatorio por pasos, unas 10 horas). El avance real de cada sprint está en [Seguimiento por sprint](https://doc.kodev.online/docs/project/sprints).
 
 | ID | Tarea | Derivada de | Responsable | Est. (h) | Dependencias | Criterio de terminado |
 | --- | --- | --- | --- | :---: | --- | --- |
@@ -516,10 +530,19 @@ Las tareas se derivan de los requisitos funcionales y no funcionales. La estimac
 | **[Nuevo] T-42** | Aprobación de grupos: cola de pendientes, aprobar o rechazar con motivo, aviso al creador y grupos oficiales | RF-12, RF-23 | Wilbert | 6 | T-17, T-40 | El moderador solo revisa los grupos de su universidad; los del staff se aprueban solos; pruebas. |
 | **[Nuevo] T-43** | API de consulta de usuarios (listar, buscar y ver detalle) y suspensión de cuentas reportadas | RF-15, RF-24 | Mario | 6 | T-37, T-40 | El moderador solo ve su universidad y solo suspende cuentas con reporte; motivo obligatorio en `moderation_actions`; pruebas. |
 | **[Nuevo] T-44** | Panel de administración en el frontend: menú según el rol; usuarios, reportes, grupos pendientes, grupos oficiales y staff | RF-15, RF-22 a RF-24 | Aless (con apoyo de Luis) | 12 | T-37, T-41 a T-43 | El staff no ve Descubrir, Cerca ni Chat; la sección de staff solo aparece para el administrador; funciona en móvil y escritorio. |
+| **[Nuevo] T-45** | Recuperación de contraseña por correo (enlace de un solo uso) | RF-02, RNF-02 | Wilbert | 5 | T-05 | `POST /api/forgot-password` responde lo mismo exista o no el correo; el enlace es de un solo uso y vence a los 60 minutos; `POST /api/reset-password` aplica `Password::defaults()` y cierra todas las sesiones; límite de peticiones; correo en español por la cola; pruebas. |
+| **[Nuevo] T-46** | Gestión de sesiones: listar sesiones activas y cerrar sesiones remotas | RF-02, RNF-02 | Wilbert | 4 | T-05 | Lista de sesiones activas con dispositivo, último uso y cuál es la actual; cerrar una sesión de otro dispositivo; cerrar todas las demás; nadie ve ni cierra sesiones ajenas; pruebas. |
+| **[Nuevo] T-47** | Autenticación en dos pasos (MFA) con app de autenticación (TOTP) | RF-02, RNF-02 | Wilbert | 8 | T-05, T-45 | Activar y desactivar MFA con código TOTP; el login pide el código cuando está activo; códigos de respaldo; el secreto se guarda cifrado; sirve como segundo método al recuperar la contraseña; pruebas. |
+| **[Nuevo] T-48** | Documentación para la Unidad 3: resolución de conflictos, seguimiento por sprint con riesgos y patrones enlazados al código | Rúbrica de la Unidad 3 | Wilbert | 4 | — | Sección de resolución de conflictos en la página de Pull Requests; página de seguimiento por sprint con objetivo, lo cerrado, lo que pasó al siguiente sprint y riesgos actualizados; la página de patrones enlaza las clases reales. |
+| **[Nuevo] T-49** | Perfil obligatorio por pasos: género, edad mínima de 17 años y perfil completo para usar Descubrir | RF-03, RF-05 | Alejandro | 10 | T-07, T-08 | Al entrar con el perfil incompleto, la app pide por pasos nombre y fecha de nacimiento, género, carrera y semestre, al menos 3 intereses, al menos 1 foto y "Sobre mí"; hasta completarlo no aparece en Descubrir ni puede hacer swipe (`403 profile_incomplete`); pruebas. |
 
 *Esfuerzo total estimado: aproximadamente 320 horas de desarrollo, unas 6 a 7 horas por integrante por semana durante las 10 semanas del proyecto. Distribución de tareas propias: Wilbert 69 h, Mario 69 h, Aless 68 h, Luis 56 h y Alejandro 24 h; las tareas T-23, T-27 y T-32 se reparten entre varios integrantes. Las notificaciones dentro de la app (RF-17) se mantienen como función deseable sin tarea asignada: solo se implementan si el Sprint 5 termina con tiempo disponible.*
 
 *[Nuevo] Con el módulo de Administración se suman unas 48 horas (36 de T-40 a T-44, 8 de ajustes a tareas existentes y pruebas, y 4 de documentación), y T-32 (10 horas) pasa a fase 2. El total queda en unas **358 horas**. Tareas propias: Wilbert 87 h, Mario 75 h, Aless 80 h, Luis 56 h y Alejandro 24 h.*
+
+*[Nuevo] Con T-45 a T-48 (rúbrica de la Unidad 3) se suman 21 horas, todas de Wilbert: el total queda en unas **379 horas** y Wilbert en 108 h.*
+
+*[Nuevo] T-49 (perfil obligatorio, 8 de noviembre) suma unas 10 horas: el total queda en unas **389 horas**.*
 
 ### Cronograma
 
@@ -534,18 +557,23 @@ Las revisiones con el profesor se realizan únicamente los **lunes y martes** ha
 >
 > Se agregan T-40 a T-44 a los sprints 2, 3 y 4, y T-32 sale del Sprint 5 porque pasa a fase 2 ([cambio de alcance del 19 de octubre de 2026](#94-cambios-de-alcance)).
 
+> [!WARNING]
+> **Nuevo · Sprint 3: rúbrica de la Unidad 3**
+>
+> Se agregan T-45 al Sprint 3 y T-46, T-47 y T-48 al Sprint 4. Lo que de verdad se cerró en cada sprint, y lo que pasó al siguiente, está en [Seguimiento por sprint](https://doc.kodev.online/docs/project/sprints).
+
 | Sprint | Fechas | Hito verificable | Tareas | Responsables | Revisión con el profesor |
 | --- | --- | --- | --- | --- | --- |
 | **Sprint 0** · Planeación | 21 – 29 sep | Anteproyecto completo según la rúbrica; stack definido; wireframes; backlog inicial; repositorios creados y pipeline de CI funcionando. | T-01, T-03 (inicio), wireframes y documento | Todo el equipo; Alejandro (documento); Wilbert (repositorio) | Lun 28 sep: entrega del anteproyecto · Mar 29 sep: Planning Sprint 1 |
 | **Sprint 1** · Autenticación | 30 sep – 13 oct | Un estudiante se registra con su correo institucional, verifica su cuenta e inicia sesión desde móvil y escritorio. | T-02, T-03, T-04, T-05, T-06, T-33 | Mario y Wilbert (API); Luis y Aless (interfaz); Alejandro (contrato de la API) | Lun 5 oct: seguimiento · Lun 12 oct: Review · Mar 13 oct: Planning |
 | **Sprint 2** · Perfil y match | 14 – 27 oct | Perfil completo con intereses y fotos; descubrimiento tipo swipe con perfil expandible sobre usuarios de demostración; primer match entre dos usuarios. **[Nuevo]** Roles y permisos: el staff no aparece en el descubrimiento. | T-07, T-08, T-09, T-10, T-11, T-12, T-31, T-34, **[Nuevo]** T-40 | Mario y Wilbert (API y datos de demostración); Luis y Aless (interfaz); **[Nuevo]** Wilbert (roles y permisos) | Lun 19 oct: seguimiento · Lun 26 oct: Review · Mar 27 oct: Planning |
-| **Sprint 3** · Chat y despliegue | 28 oct – 10 nov | Chat en tiempo real con imágenes entre matches; API de grupos y de zonas terminada; selección de zona en el perfil; app desplegada en el entorno de pruebas; spike técnico de LiveKit. Con esto el MVP "Must" queda completo. **[Nuevo]** API de gestión de staff y de aprobación de grupos. | T-13, T-14, T-15, T-16, T-17, T-24, T-28, T-29, T-36, **[Nuevo]** T-41, **[Nuevo]** T-42 | Mario (WebSocket, mensajes e imágenes); Wilbert (grupos, zonas y despliegue; **[Nuevo]** staff y aprobación de grupos); Luis (chat); Aless (selección de zona y mapa) | Mar 3 nov: seguimiento · Lun 9 nov: Review · Mar 10 nov: Planning |
-| **Sprint 4** · Grupos, mapa y video | 11 – 24 nov | Módulo de grupos y clubes funcional; vista "Cerca" con mapa por zonas; videollamada 1 a 1 entre matches; API de bloqueo, reporte y moderación. **[Nuevo]** Panel de administración con consulta de usuarios y suspensión de cuentas reportadas. | T-18, T-19, T-20, T-21, T-30, T-35, T-37, **[Nuevo]** T-43, **[Nuevo]** T-44 | Aless (grupos y vista Cerca; **[Nuevo]** panel de administración); Mario (LiveKit y moderación; **[Nuevo]** consulta de usuarios); Luis (videollamada); Wilbert (API de Cerca, bloqueo y reporte) | Mar 17 nov: seguimiento (el 16 es festivo) · Lun 23 nov: Review · Mar 24 nov: Planning |
+| **Sprint 3** · Chat y despliegue | 28 oct – 10 nov | Chat en tiempo real con imágenes entre matches; API de grupos y de zonas terminada; selección de zona en el perfil; app desplegada en el entorno de pruebas; spike técnico de LiveKit. Con esto el MVP "Must" queda completo. **[Nuevo]** API de gestión de staff y de aprobación de grupos. | T-13, T-14, T-15, T-16, T-17, T-24, T-28, T-29, T-36, **[Nuevo]** T-41, **[Nuevo]** T-42, **[Nuevo]** T-45, **[Nuevo]** T-49 | Mario (WebSocket, mensajes e imágenes); Wilbert (grupos, zonas y despliegue; **[Nuevo]** staff y aprobación de grupos); Luis (chat); Aless (selección de zona y mapa) | Mar 3 nov: seguimiento · Lun 9 nov: Review · Mar 10 nov: Planning |
+| **Sprint 4** · Grupos, mapa y video | 11 – 24 nov | Módulo de grupos y clubes funcional; vista "Cerca" con mapa por zonas; videollamada 1 a 1 entre matches; API de bloqueo, reporte y moderación. **[Nuevo]** Panel de administración con consulta de usuarios y suspensión de cuentas reportadas. | T-18, T-19, T-20, T-21, T-30, T-35, T-37, **[Nuevo]** T-43, **[Nuevo]** T-44, **[Nuevo]** T-46, **[Nuevo]** T-47, **[Nuevo]** T-48 | Aless (grupos y vista Cerca; **[Nuevo]** panel de administración); Mario (LiveKit y moderación; **[Nuevo]** consulta de usuarios); Luis (videollamada); Wilbert (API de Cerca, bloqueo y reporte) | Mar 17 nov: seguimiento (el 16 es festivo) · Lun 23 nov: Review · Mar 24 nov: Planning |
 | **Sprint 5** · Cierre | 25 nov – 1 dic | Interfaz de bloqueo, reporte y moderación; Ajustes; ~~ubicación en el chat~~ (**[Nuevo]** fase 2); prueba de carga; pruebas de usabilidad; errores corregidos; documentación y entrega final. | T-22, T-23, T-25, T-26, T-27, ~~T-32~~, T-38, T-39 | Aless (moderación); Mario (eliminación de cuenta); Luis (Ajustes); Wilbert (prueba de carga); Alejandro (pruebas y documentación); todo el equipo (correcciones) | Lun 30 nov: Review final · Mar 1 dic: entrega final |
 
 **Hitos verificables:** cada Sprint Review presenta software funcionando, no avances en papel. Si un sprint se retrasa, se recortan primero las funciones "Could" y después las "Should", conservando siempre las "Must" que sostienen el objetivo general.
 
-El avance real de cada tarea se sigue en [Plane](https://app.plane.so/utt-plane/).
+El avance real de cada tarea se sigue en [Plane](https://app.plane.so/utt-plane/), y el resumen por sprint en [Seguimiento por sprint](https://doc.kodev.online/docs/project/sprints).
 
 ### Arquitectura y tecnologías
 
@@ -673,6 +701,22 @@ La elección de los patrones responde a las exigencias de creación, arquitectur
 | De comportamiento | **Observer** | Eventos del sistema (matches, mensajes y reportes) | Un evento dispara varias reacciones (persistir, notificar por WebSocket, registrar) sin acoplar al emisor; es la base del tiempo real (RF-07, RF-08). |
 | De comportamiento | **Strategy** | Cálculo de afinidad y orden de perfiles | Permite intercambiar o combinar criterios de ordenamiento y ajustarlos tras las pruebas de usabilidad sin reescribir el servicio de descubrimiento (RF-05). |
 | Frontend | **Container/Presentational y Custom Hooks** | Interfaz en Expo (React Native) | Separa la lógica de datos de los componentes visuales, favorece la reutilización y permite probarlos de forma aislada (RNF-01, RNF-07). |
+
+##### Dónde está cada patrón en el código
+
+> [!WARNING]
+> **Nuevo · Sprint 3: patrones enlazados al código (T-48)**
+>
+> Estado al 8 de noviembre de 2026. Cada patrón enlaza a las clases reales en la rama `develop`. Tres están implementados, dos se aplican en tareas que aún no llegan y uno no se implementó.
+
+| Patrón | Estado | Clases | Cómo se aplica |
+| --- | --- | --- | --- |
+| **Builder** | ✅ Implementado (T-09) | [`app/Discovery/DiscoveryQuery.php`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/app/Discovery/DiscoveryQuery.php) | La consulta del descubrimiento se arma paso a paso: `DiscoveryQuery::for($alumno)->withFilters($filtros)->rankedBy($orden)->take(10)`. Cada método agrega solo su condición (universidades, carrera, intereses); la base (`User::discoverableBy()`) ya deja fuera a quien no debe aparecer y a los perfiles ya evaluados. |
+| **Strategy** | ✅ Implementado (T-09) | [`app/Discovery/Ranking/DiscoveryRanking.php`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/app/Discovery/Ranking/DiscoveryRanking.php) (interfaz) · [`SharedInterestsRanking.php`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/app/Discovery/Ranking/SharedInterestsRanking.php) · [`AppServiceProvider.php`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/app/Providers/AppServiceProvider.php) | El orden de los perfiles es una estrategia intercambiable. Hoy se usa `SharedInterestsRanking` (más intereses en común primero); el contenedor de Laravel la inyecta en `DiscoveryController`, así que cambiar el criterio es cambiar una línea del `AppServiceProvider`. |
+| **Observer** | ✅ Implementado (T-10 y seguridad) | [`app/Events/MatchCreated.php`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/app/Events/MatchCreated.php) · [`app/Discovery/RecordSwipe.php`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/app/Discovery/RecordSwipe.php) · [`app/Listeners/SecurityEventSubscriber.php`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/app/Listeners/SecurityEventSubscriber.php) | `RecordSwipe` dispara `MatchCreated` sin saber quién lo escucha; el evento se transmite por WebSocket a los dos usuarios después de guardar el match. `SecurityEventSubscriber` observa los eventos de autenticación de Laravel (bloqueo por intentos, registro, verificación) y los escribe en `security.log`. Los eventos del chat (T-14) y de reportes seguirán el mismo esquema. |
+| **Container/Presentational y Custom Hooks** | ✅ Implementado (T-06, T-08 y T-11) | [`src/hooks/use-discovery.ts`](https://github.com/reyes200205/Frontend-Kampus/blob/develop/src/hooks/use-discovery.ts) · [`use-profile.ts`](https://github.com/reyes200205/Frontend-Kampus/blob/develop/src/hooks/use-profile.ts) · [`use-session.ts`](https://github.com/reyes200205/Frontend-Kampus/blob/develop/src/hooks/use-session.ts) · [`src/services/`](https://github.com/reyes200205/Frontend-Kampus/blob/develop/src/services) | Los hooks cargan y guardan los datos con los servicios de `src/services/`; los componentes de `src/components/` (como `swipe-card.tsx` o `profile-hero.tsx`) solo reciben props y dibujan. |
+| **Adapter** | ⏳ Pendiente (T-19) | — | Se aplica con la videollamada: una interfaz `VideoCallProvider` con LiveKit detrás. T-19 está en el Backlog del Sprint 4. |
+| **Repository** | ❌ No implementado | — | Los controladores usan Eloquent directamente, con *scopes* en los modelos (por ejemplo `UserMatch::visibleTo()`) y objetos de consulta como `DiscoveryQuery`. Falta decidir: implementar la capa de repositorios o registrar aquí que se sustituye por esos *scopes* y objetos de consulta. |
 
 ### Wireframes
 
@@ -2049,8 +2093,8 @@ El menú lateral tiene un selector con cuatro secciones. `/docs` abre en **Proye
 
 | Sección | Qué contiene | Carpeta |
 | --- | --- | --- |
-| **Proyecto** | El proyecto, privacidad de la ubicación (RNF-11) y la documentación formal: Unidad 1 (anteproyecto) y Unidad 2 | `content/docs/project/` |
-| **Backend** | API REST con Laravel: instalación, configuración, comandos, CI y endpoints | `content/docs/backend/` |
+| **Proyecto** | El proyecto, privacidad de la ubicación (RNF-11), la documentación formal (Unidad 1 y Unidad 2) y el seguimiento por sprint | `content/docs/project/` |
+| **Backend** | API REST con Laravel: instalación y comandos, configuración, despliegue y endpoints por módulo | `content/docs/backend/` |
 | **App (Expo)** | Web y móvil con Expo y Expo Router: instalación, dispositivo, sistema de diseño y problemas comunes | `content/docs/mobile/` |
 | **Desarrollo** | Flujo de Git, commits, pull requests, versiones y cómo documentar | `content/docs/development/` |
 
@@ -2063,12 +2107,16 @@ Además del contenido de `/docs`, el sitio tiene las páginas `/blog`, `/changel
 | Página | Archivo |
 | --- | --- |
 | Backend | [index.mdx](content/docs/backend/index.mdx) |
-| Instalación | [installation.mdx](content/docs/backend/installation.mdx) |
+| Instalación y comandos (incluye CI) | [installation.mdx](content/docs/backend/installation.mdx) |
 | Configuración (variables de entorno) | [configuration.mdx](content/docs/backend/configuration.mdx) |
-| Comandos útiles | [commands.mdx](content/docs/backend/commands.mdx) |
-| Integración continua (GitHub Actions) | [continuous-integration.mdx](content/docs/backend/continuous-integration.mdx) |
+| Despliegue (entorno de pruebas) | [deployment.mdx](content/docs/backend/deployment.mdx) |
 | API REST · Introducción | [api/index.mdx](content/docs/backend/api/index.mdx) |
-| API REST · Autenticación (Sanctum) | [api/authentication.mdx](content/docs/backend/api/authentication.mdx) |
+| API REST · Autenticación | [api/auth/](content/docs/backend/api/auth): inicio de sesión, registro y verificación, recuperar la contraseña |
+| API REST · Perfil | [api/profile/](content/docs/backend/api/profile): perfil, intereses y fotos; zonas y ubicación |
+| API REST · Descubrimiento y matches | [api/social/](content/docs/backend/api/social): descubrimiento y swipe, matches, bloqueo y reporte |
+| API REST · Chat | [api/chat/](content/docs/backend/api/chat): tiempo real (Reverb) |
+| API REST · Grupos | [api/groups/](content/docs/backend/api/groups) |
+| API REST · Administración | [api/admin/](content/docs/backend/api/admin): staff y revisión de grupos |
 
 #### App (Expo)
 

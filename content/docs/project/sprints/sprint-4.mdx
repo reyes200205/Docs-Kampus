@@ -1,0 +1,63 @@
+---
+title: "Sprint 4 · Grupos, mapa y video"
+description: "11 – 24 nov 2026: plan del sprint, carga por persona con lo arrastrado del Sprint 3 y propuestas para el Planning."
+---
+
+**Objetivo planeado:** módulo de grupos y clubes funcional; vista "Cerca" con mapa por zonas; videollamada 1 a 1 entre matches; API de bloqueo, reporte y moderación. **[Nuevo]** Panel de administración con consulta de usuarios y suspensión de cuentas reportadas.
+
+<Callout type="warn" title="Por empezar">
+  El Planning es el martes 10 de noviembre y el sprint corre del 11 al 24. La revisión de seguimiento es el martes 17 (el 16 es festivo) y la Review, el lunes 23.
+</Callout>
+
+| Propias | Arrastradas del Sprint 3 | Total |
+| :---: | :---: | :---: |
+| 86 h | 55 h | **141 h** |
+
+## Tareas propias
+
+| Tarea | Responsable | Horas | Estado |
+| --- | --- | :---: | --- |
+| T-18 Pantallas de grupos | Aless | 12 | Backlog. La API (T-17) ya está. |
+| T-19 LiveKit en el servidor (Adapter) | Mario | 8 | Backlog |
+| T-20 Pantalla de videollamada | Luis | 12 | Backlog |
+| T-30 Vista "Cerca" | Aless | 12 | Backlog |
+| T-35 API de la vista "Cerca" | Wilbert | 6 | Backlog. La API de zonas (T-28) ya está. |
+| T-37 API de moderación | Mario | 6 | Backlog |
+| **[Nuevo]** T-43 Consulta de usuarios y suspensión | Mario | 6 | Backlog |
+| **[Nuevo]** T-44 Panel de administración en la app | Aless (con Luis) | 12 | Backlog |
+| **[Nuevo]** T-46 Gestión de sesiones | Wilbert | 4 | Backlog |
+| **[Nuevo]** T-47 Autenticación en dos pasos (TOTP) | Wilbert | 8 | Backlog |
+| **[Nuevo]** T-48 Documentación de la Unidad 3 | Wilbert | 4 | ✅ Adelantada al Sprint 3 (en revisión); no cuenta. |
+| T-21 API de bloqueo y reporte | Wilbert | 6 | ✅ Cerrada antes, el 5 nov (backend #42); no cuenta. |
+
+Sin contar T-21 ni T-48, que se adelantaron al Sprint 3, son **86 h**. En Plane las dos ya están en el ciclo del Sprint 3.
+
+## Arrastradas del Sprint 3
+
+T-14, T-15, T-16, T-29, T-31, T-34, T-33 y el cierre de T-24: **55 h**. T-12 y T-36 se terminaron el 8 nov y ya no pasan. El detalle de cada una está en [Sprint 3](/docs/project/sprints/sprint-3#pasa-al-sprint-4).
+
+## Carga por persona
+
+| Persona | Propias | Arrastradas | Total |
+| --- | --- | --- | :---: |
+| Aless | T-18, T-30, T-44 (36 h) | T-16, T-29 (18 h) | **54 h** |
+| Mario | T-19, T-37, T-43 (20 h) | T-14, T-15, T-34 (19 h) | **39 h** |
+| Wilbert | T-35, T-46, T-47 (18 h) | T-24 (8 h) | **26 h** |
+| Luis | T-20 (12 h) | T-31 (6 h) | **18 h** + apoyo en T-44 |
+| Alejandro | — | T-33 (4 h) | **4 h** + preparar las pruebas de usabilidad (T-25) |
+
+La carga está desbalanceada: la app (Aless y Luis) concentra la mayor parte y tiene la ruta crítica del chat.
+
+## Propuestas para el Planning (10 nov)
+
+Son propuestas: si cambian el alcance, se aprueban y registran como indica la [sección 9.4](/docs/project/unit-1/methodology#94-cambios-de-alcance).
+
+1. **Primero el chat.** T-14 → T-15 → T-16 es la ruta crítica: las pruebas de usabilidad (T-25) dependen de T-16 y de T-18.
+2. **Recortar lo de prioridad Media que no alcance**, empezando por la videollamada (T-19 y T-20, 20 h) y la vista "Cerca" (T-29, T-30 y T-35, 24 h).
+3. **Rebalancear la carga.** Wilbert tiene la menor carga pendiente; puede apoyar con T-14 y T-15 para desbloquear el chat de la app.
+4. **Cerrar T-34** (datos de demostración, 5 h) para que el descubrimiento se pueda demostrar.
+5. **Decidir T-33**: hacer el contrato OpenAPI o cerrarla, porque la referencia ya vive en [API REST](/docs/backend/api).
+
+## Riesgos a vigilar
+
+Los puntajes vienen del [cierre del Sprint 3](/docs/project/sprints/sprint-3#riesgos-al-cierre-del-sprint-3): **R14** la app no alcanza al backend (20 🔴), **R6** curva de aprendizaje (16 🔴), **R4** videollamadas a tiempo (15 🔴), **R3** uso indebido sin moderación (15 🔴) y **R15** PR revisados por lotes (12 🟡).

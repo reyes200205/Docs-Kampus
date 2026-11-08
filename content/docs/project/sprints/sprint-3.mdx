@@ -1,0 +1,101 @@
+---
+title: "Sprint 3 · Chat y despliegue"
+description: "28 oct – 10 nov 2026: lo cerrado, lo que sigue en curso, lo que pasa al Sprint 4, la velocidad y los riesgos al cierre."
+---
+
+**Objetivo:** chat en tiempo real con imágenes entre matches; API de grupos y de zonas; selección de zona en el perfil; app desplegada en el entorno de pruebas; API de staff y de aprobación de grupos.
+
+**Resultado:** el objetivo se cumple **en parte**. El backend del sprint está completo salvo los mensajes. En la app se terminaron la pantalla "Es un match" (T-12) y la selección de zona con "Cerca de ti" (T-36), y se agregó el perfil obligatorio por pasos (T-49, tarea nueva); las tres están en revisión. El chat y el mapa no empezaron, y el despliegue tiene la configuración pero todavía no una URL pública.
+
+<Callout type="info" title="Corte">
+  Datos al **domingo 8 de noviembre de 2026 por la noche**, un día antes de la Review (lunes 9) y dos antes del cierre (martes 10). Las horas son las estimadas en la [tabla de tareas](/docs/project/unit-1/tasks). Una tarea **en revisión** tiene su PR abierto; cuenta como cerrada cuando se fusiona en `develop`.
+</Callout>
+
+| Planeadas | Arrastradas de sprints anteriores | Cerradas en el sprint | En revisión | Pasan al Sprint 4 |
+| :---: | :---: | :---: | :---: | :---: |
+| 89 h + 10 h de T-49 (nueva) | 97 h | **125 h** | **26 h** | 55 h |
+
+## Cerrado
+
+| Tarea | Responsable | Horas | PR | Fecha |
+| --- | --- | :---: | --- | --- |
+| T-13 Servidor WebSocket y canales privados | Mario | 8 | backend #41 | 3 nov |
+| T-17 API de grupos | Wilbert | 10 | backend #35 | 3 nov |
+| T-28 Zonas y ubicación aproximada | Wilbert | 8 | backend #37 | 3 nov |
+| T-41 Gestión de staff | Wilbert | 6 | backend #33 | 3 nov |
+| T-42 Aprobación de grupos | Wilbert | 6 | backend #36 | 3 nov |
+| **[Nuevo]** T-45 Recuperación de contraseña | Wilbert | 5 | backend #34 | 3 nov |
+| T-21 Bloqueo y reporte *(del Sprint 4, adelantada)* | Wilbert | 6 | backend #42 | 5 nov |
+
+Arrastradas de sprints anteriores y cerradas en este:
+
+| Tarea | Sprint planeado | Horas | PR | Fecha |
+| --- | --- | :---: | --- | --- |
+| T-04 Registro y verificación | 1 | 10 | backend #28 y #30 | 29 oct |
+| T-06 Pantallas de registro, verificación e inicio de sesión | 1 | 10 | app #6 y #7 | 3 nov |
+| T-07 API de perfil | 2 | 10 | backend #29 | 29 oct |
+| T-08 Pantallas de perfil | 2 | 10 | app #9 | 3 nov |
+| T-09 Descubrimiento y swipe | 2 | 12 | backend #31 | 2 nov |
+| T-10 Match y evento `MatchCreated` | 2 | 6 | backend #32 | 2 nov |
+| T-11 Pantalla de descubrimiento | 2 | 12 | app #8 | 3 nov |
+| T-40 Roles y permisos | 2 | 6 | backend #23 | 29 oct |
+
+## Terminado, en revisión
+
+Terminadas el 8 de noviembre. Pasan a Done en Plane cuando se fusione su PR, antes del cierre del martes 10.
+
+| Tarea | Horas | PR | Qué incluye |
+| --- | :---: | --- | --- |
+| T-12 Pantalla "Es un match" y lista de matches | 6 | app #11 | Pantalla animada (las fotos chocan y salen corazones), lista de matches en Chats con "Nuevo", store compartido con Descubrir. |
+| T-36 Selección de zona y "Cerca de ti" | 6 | app #14 | Pantalla "Zona y Cerca de ti" desde el Perfil; el geohash de 6 caracteres se calcula en el celular; recordatorio para activarlo en Descubrir → Cerca. |
+| **[Nuevo]** T-49 Perfil obligatorio por pasos | 10 | backend #44 · app #15 | Género, edad mínima de 17 años y perfil completo para usar Descubrir; la app pide los datos por pasos al entrar. |
+| T-48 Documentación de la Unidad 3 *(del Sprint 4, adelantada)* | 4 | docs `docs/cierre-sprint-3` | Resolución de conflictos, este seguimiento por sprint y patrones enlazados al código. |
+
+También en revisión, sin tarea propia: la app ya usa la recuperación de contraseña de T-45 (app #12), mayúscula automática en nombre y apellido del registro (app #13) y los parches de Expo SDK 58 (app #10).
+
+## En curso
+
+| Tarea | Responsable | Horas | Qué falta |
+| --- | --- | :---: | --- |
+| T-24 Despliegue en entorno de pruebas | Wilbert | 8 | La configuración (Docker, Nginx y certbot) está en `develop` desde el 8 nov (backend #43). Falta la URL pública con HTTPS, la app web publicada y el monitor de `/up`. |
+| T-16 Pantallas de chat | Aless | 12 | En Plane está en curso, pero no hay código; además depende de T-14. |
+
+## Pasa al Sprint 4
+
+| Tarea | Responsable | Horas | Por qué |
+| --- | --- | :---: | --- |
+| T-14 API de mensajes | Mario | 8 | No empezó. Bloquea T-15 y T-16, y con ellas el hito del chat. |
+| T-15 Imágenes en el chat | Mario | 6 | Depende de T-14. |
+| T-16 Pantallas de chat | Aless | 12 | Depende de T-14 y T-15. |
+| T-29 Componente de mapa | Aless | 6 | No empezó. |
+| T-31 Perfil expandible en Descubrir | Luis | 6 | Viene del Sprint 2; no empezó. |
+| T-34 Datos de demostración | Mario | 5 | Viene del Sprint 2; no empezó. Sin ella, el descubrimiento se demuestra con pocos usuarios. |
+| T-33 Contrato OpenAPI | Alejandro | 4 | Viene del Sprint 1. La referencia de la API se lleva en esta documentación. |
+| T-24 Despliegue (cierre) | Wilbert | 8 | Solo falta publicarlo y registrar el monitor. |
+
+Son **55 h** que se suman a las 86 h propias del Sprint 4 (T-48 ya se adelantó): **141 h para dos semanas** (ver [Sprint 4](/docs/project/sprints/sprint-4)).
+
+## Velocidad
+
+| Área | Cerrado en la ventana del Sprint 3 | En revisión | Pendiente total |
+| --- | :---: | :---: | :---: |
+| Backend | 93 h | 4 h (T-49) | 62 h + T-46 y T-47 (12 h) |
+| App | 32 h | 18 h (T-12, T-36 y T-49) | 84 h |
+| Documentación, pruebas y cierre | — | 4 h (T-48) | 40 h |
+
+El backend va adelantado: ya tiene casi todo lo de los sprints 1 a 3 y una tarea del Sprint 4. **El cuello de botella sigue siendo la app**, aunque el último día se terminaron 18 h: con las 84 h pendientes hace falta sostener unas 28 h por semana en las tres semanas que quedan.
+
+## Riesgos al cierre del Sprint 3
+
+Puntaje = probabilidad × impacto, con la misma escala del [análisis de riesgos](/docs/project/unit-1/risks).
+
+| Riesgo | Antes | Ahora | Por qué cambia | Mitigación |
+| --- | :---: | :---: | --- | --- |
+| **R4** No completar a tiempo las videollamadas | 4 × 3 = 12 🟡 | 5 × 3 = **15 🔴** | T-19 y T-20 (20 h) siguen en Backlog y el Sprint 4 recibe 55 h arrastradas. | Proponer en el Planning del 10 nov que la videollamada pase a fase 2, o reducirla al spike de LiveKit. |
+| **R6** Curva de aprendizaje del stack | 4 × 3 = 12 🟡 | 4 × 4 = **16 🔴** | La app avanza a menos de la mitad del ritmo necesario. | Pareo en las pantallas de chat y mapa; reutilizar los hooks y servicios de T-08 y T-11. |
+| **R13** Cambio de alcance a mitad del proyecto | 3 × 3 = 9 🟡 | 4 × 3 = **12 🟡** | El 2 nov se sumaron T-45 a T-48 (21 h) por la rúbrica de la Unidad 3, y el 8 nov T-49 (10 h), el perfil obligatorio. | Que todo alcance nuevo pase por la sección 9.4 de la [metodología](/docs/project/unit-1/methodology#94-cambios-de-alcance) con su compensación. |
+| **R3** Uso indebido sin moderación | 3 × 5 = 15 🔴 | 3 × 5 = 15 🔴 | El bloqueo y el reporte ya están en la API (T-21), pero la revisión (T-37) y la interfaz (T-22) no. | Mantener T-37 en el Sprint 4. |
+| **R8** Filtración de datos personales e imágenes | 2 × 5 = 10 🟡 | 1 × 5 = **5 🟢** | Bucket privado, URLs firmadas de 15 min y fotos sin EXIF ni GPS (T-07). | Revisar lo mismo en las imágenes del chat (T-15). |
+| **R12** Escalada de privilegios del staff | 2 × 5 = 10 🟡 | 1 × 5 = **5 🟢** | Policies por universidad, bitácora y pruebas de cada permiso (T-40, T-41 y T-42). | Repetir las pruebas en T-37 y T-43. |
+| **[Nuevo] R14** La app no alcanza al backend | — | 4 × 5 = **20 🔴** | 84 h pendientes en la app; hasta el 7 nov avanzaba unas 19 h por semana. | Priorizar las funciones de prioridad Alta en la app; mover a fase 2 las de prioridad Media que no alcancen; reforzar la app con quien termine el backend. |
+| **[Nuevo] R15** PR acumulados y revisados por lotes | — | 4 × 3 = **12 🟡** | Los sprints 1 y 2 cerraron casi sin merges; tres lotes de 6, 7 y 14 PR (sin contar los de Dependabot). | Revisar cada PR en menos de 48 h y abrir PR más pequeños. |
