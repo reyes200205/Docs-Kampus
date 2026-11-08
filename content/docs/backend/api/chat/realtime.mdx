@@ -1,0 +1,105 @@
+---
+title: "Tiempo real"
+description: "Servidor de WebSocket con Laravel Reverb, canales privados y cómo conectarse desde la app (T-13, RF-07 y RF-08)."
+---
+
+Los avisos que deben llegar sin recargar (un match nuevo y, con T-14, los mensajes del chat) viajan por **WebSocket**. El servidor es [Laravel Reverb](https://reverb.laravel.com) y la app se conecta con **Laravel Echo**.
+
+<Callout title="Estado">
+  El servidor y la autorización de canales están en `develop` desde el 3 de noviembre con T-13 ([PR #41](https://github.com/WilbertDevMx/backend-kampus/pull/41)). Hoy el único evento que se transmite es [`match.created`](/docs/backend/api/social/matches#aviso-en-tiempo-real); los eventos del chat llegan con T-14. La app todavía no instala Echo: lo hará T-16.
+</Callout>
+
+## Cómo funciona
+
+<Mermaid chart={`
+sequenceDiagram
+    participant App
+    participant API as API (Laravel)
+    participant Cola as Cola de trabajos
+    participant Reverb
+    App->>Reverb: Abre el WebSocket con REVERB_APP_KEY
+    App->>API: POST /api/broadcasting/auth (token + canal)
+    API-->>App: 200 si puede entrar, 403 si no
+    App->>Reverb: Se suscribe a private-user.{id}
+    Note over API: Se crea un match
+    API->>Cola: Encola match.created
+    Cola->>Reverb: Publica el evento
+    Reverb-->>App: match.created
+`} />
+
+1. La app abre la conexión con Reverb.
+2. Para entrar a un canal privado, Echo pide permiso a la API en `POST /api/broadcasting/auth`. La ruta usa el mismo token de Sanctum que el resto de la API y exige el correo verificado.
+3. Cuando ocurre algo (por ejemplo, un match), la API encola el evento; el trabajador de la cola lo publica en Reverb y Reverb lo entrega a quien esté suscrito.
+
+Los eventos salen **por la cola**, así que en cualquier entorno donde se quiera tiempo real tienen que correr `php artisan queue:work` y `php artisan reverb:start`.
+
+## Canales privados
+
+Los permisos están en `routes/channels.php` y en las clases de `app/Broadcasting`.
+
+| Canal | Quién puede entrar | Eventos |
+| --- | --- | --- |
+| `user.{userId}` | Solo el propio usuario, si su cuenta no está suspendida (`UserChannel`). | `match.created` (T-10) |
+| `chat.{matchId}` | Solo los dos integrantes del match, ninguno suspendido y **sin bloqueo** en ningún sentido (`ChatChannel`, con las mismas reglas que la lista de matches). | Mensajes del chat (T-14, pendiente) |
+
+En `Echo.private()` el nombre va **sin** el prefijo `private-`: Laravel lo agrega solo.
+
+| Respuesta de `/api/broadcasting/auth` | Cuándo |
+| --- | --- |
+| `200` | Puede entrar al canal. |
+| `401` | Sin token o con token vencido. |
+| `403` | Correo sin verificar, cuenta suspendida, canal de otra persona o match ajeno o bloqueado. |
+
+## Conectarse desde la app
+
+La app necesita `laravel-echo` y `pusher-js`. La clave pública (`REVERB_APP_KEY`) es la misma del backend; el **secreto nunca** va en la app.
+
+```ts
+import Echo from "laravel-echo";
+import Pusher from "pusher-js";
+
+const echo = new Echo({
+  broadcaster: "reverb",
+  Pusher,
+  key: process.env.EXPO_PUBLIC_REVERB_APP_KEY,
+  wsHost: process.env.EXPO_PUBLIC_REVERB_HOST,
+  wsPort: Number(process.env.EXPO_PUBLIC_REVERB_PORT ?? 8080),
+  wssPort: 443,
+  forceTLS: process.env.EXPO_PUBLIC_REVERB_SCHEME === "https",
+  enabledTransports: ["ws", "wss"],
+  authEndpoint: `${process.env.EXPO_PUBLIC_API_URL}/broadcasting/auth`,
+  auth: { headers: { Authorization: `Bearer ${token}`, Accept: "application/json" } },
+});
+
+echo.private(`user.${miId}`).listen(".match.created", ({ match }) => {
+  // Mostrar "Es un match" (T-12).
+});
+```
+
+`EXPO_PUBLIC_API_URL` ya incluye `/api`, por eso el `authEndpoint` termina en `/broadcasting/auth`.
+
+## Variables del backend
+
+| Variable | Local | Entorno de pruebas | Para qué |
+| --- | --- | --- | --- |
+| `BROADCAST_CONNECTION` | `log` | `reverb` | Con `log` los eventos solo se escriben en el log y no hace falta Reverb. |
+| `REVERB_APP_ID` · `REVERB_APP_KEY` · `REVERB_APP_SECRET` | Vacías | Aleatorias | Credenciales de la app en Reverb. Se generan por entorno. |
+| `REVERB_HOST` · `REVERB_PORT` · `REVERB_SCHEME` | `127.0.0.1` · `8080` · `http` | `reverb` · `8080` · `http` | Adónde manda Laravel los eventos. En el servidor es el contenedor `reverb`, dentro de la red de Docker. |
+| `REVERB_SERVER_HOST` · `REVERB_SERVER_PORT` | `0.0.0.0` · `8080` | `0.0.0.0` · `8080` | Dónde escucha Reverb. |
+| `REVERB_ALLOWED_ORIGINS` | `*` | El dominio de la app | Orígenes que pueden abrir el WebSocket. |
+
+En el entorno de pruebas la app se conecta por `wss://<dominio-de-la-API>/app/{REVERB_APP_KEY}`: Nginx manda `/app` a Reverb (ver [Despliegue](/docs/backend/deployment)).
+
+## Probarlo en local
+
+1. En `.env`, cambia `BROADCAST_CONNECTION=reverb` y llena `REVERB_APP_ID`, `REVERB_APP_KEY` y `REVERB_APP_SECRET` con valores cualquiera.
+2. En tres terminales:
+
+   ```bash
+   php artisan serve --host=127.0.0.1 --port=8000
+   php artisan reverb:start --host=0.0.0.0 --port=8080
+   php artisan queue:work
+   ```
+
+3. Con dos usuarios verificados, suscríbete a `user.{id}` de uno y haz que los dos se den Me interesa: debe llegar `match.created`.
+4. Prueba también el caso negativo: suscribirse a `user.{id}` de otra persona o a `chat.{matchId}` de un match ajeno debe dar `403`.

@@ -3,10 +3,10 @@ title: "Matches"
 description: "Cómo se crea un match, la lista de matches y el aviso en tiempo real match.created (T-10, RF-07)."
 ---
 
-Un **match** se crea cuando dos estudiantes se dan **Me interesa** mutuamente en el [descubrimiento](/docs/backend/api/discovery) (RF-07). Desde ese momento los dos lo ven en su lista y, con T-14, pueden chatear.
+Un **match** se crea cuando dos estudiantes se dan **Me interesa** mutuamente en el [descubrimiento](/docs/backend/api/social/discovery) (RF-07). Desde ese momento los dos lo ven en su lista y, con T-14, pueden chatear.
 
 <Callout title="Estado">
-  Llega con T-10 en el [PR #32](https://github.com/WilbertDevMx/backend-kampus/pull/32), que va después de T-09 ([PR #31](https://github.com/WilbertDevMx/backend-kampus/pull/31)). Los dos están en revisión; esta página describe cómo queda la API al fusionarse. El aviso en tiempo real necesita además el servidor de WebSocket de T-13.
+  En `develop` desde el 2 de noviembre con T-10 ([PR #32](https://github.com/WilbertDevMx/backend-kampus/pull/32)). El aviso en tiempo real usa el servidor de WebSocket de T-13 ([PR #41](https://github.com/WilbertDevMx/backend-kampus/pull/41)); ver [Tiempo real](/docs/backend/api/chat/realtime). La pantalla "Es un match" de la app (T-12) está pendiente.
 </Callout>
 
 Las rutas de esta página requieren un token de Sanctum, un correo verificado y una cuenta `student`. **[Nuevo]** El staff recibe `403`: no tiene matches.
@@ -14,7 +14,7 @@ Las rutas de esta página requieren un token de Sanctum, un correo verificado y 
 ## Cómo se crea
 
 1. Ana da Me interesa a Luis: se guarda el swipe y `match` viene en `null`.
-2. Luis da Me interesa a Ana: la API ve que ya existía el de Ana, **crea el match** y lo devuelve en la respuesta de [`POST /api/swipes`](/docs/backend/api/discovery#evaluar-un-perfil). Luis ve "Es un match" en ese momento.
+2. Luis da Me interesa a Ana: la API ve que ya existía el de Ana, **crea el match** y lo devuelve en la respuesta de [`POST /api/swipes`](/docs/backend/api/social/discovery#evaluar-un-perfil). Luis ve "Es un match" en ese momento.
 3. Al guardarse el match, la API transmite el evento [`match.created`](#aviso-en-tiempo-real) a los dos. Así Ana también se entera sin recargar.
 
 Un Pasar de cualquiera de los dos nunca crea un match. Cada par tiene **un solo** match: la API guarda el par ordenado y la base no acepta otro igual. Si los dos dan Me interesa al mismo tiempo, el segundo espera a que se guarde el primero, así que el match no se pierde.
@@ -82,7 +82,7 @@ La tarjeta no trae correo, fecha de nacimiento ni zona.
 
 ## Aviso en tiempo real
 
-Cuando se crea un match, la API transmite el evento `match.created` por el canal privado de **cada uno** de los dos: `user.{id}`. Es el canal personal que configura T-13; la conexión de Echo se explica en `docs/websocket.md`, en la rama de T-13 del backend.
+Cuando se crea un match, la API transmite el evento `match.created` por el canal privado de **cada uno** de los dos: `user.{id}`. Es el canal personal que configura T-13; la conexión de Echo se explica en [Tiempo real](/docs/backend/api/chat/realtime).
 
 ```js
 Echo.private(`user.${miId}`).listen(".match.created", ({ match }) => {
@@ -110,7 +110,7 @@ Los dos canales reciben lo mismo, así que `users` trae a las dos personas y la 
 }
 ```
 
-El evento se transmite **después** de guardar el match y **por la cola de trabajos**, igual que el correo de verificación. En el servidor tiene que correr `php artisan queue:work` y el servidor de Reverb (T-13). Mientras T-13 no esté en `develop`, el evento se registra en el log (`BROADCAST_CONNECTION=log`) y la lista de matches sigue funcionando sin tiempo real.
+El evento se transmite **después** de guardar el match y **por la cola de trabajos**, igual que el correo de verificación. En el servidor tiene que correr `php artisan queue:work` y el servidor de Reverb (T-13). En local, `.env.example` trae `BROADCAST_CONNECTION=log`: el evento solo se escribe en el log y la lista de matches funciona sin tiempo real. Para probarlo, cambia a `reverb` (ver [Tiempo real](/docs/backend/api/chat/realtime#probarlo-en-local)).
 
 ## Errores
 

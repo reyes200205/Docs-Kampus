@@ -1,12 +1,12 @@
 ---
-title: "Administración: grupos"
+title: "Revisión de grupos"
 description: "Revisión de los grupos que crean los alumnos y grupos oficiales del staff (T-42, RF-23)."
 ---
 
 **[Nuevo]** Los grupos que crean los estudiantes quedan en revisión hasta que los aprueba un moderador de su universidad o un administrador (RF-23). El staff también crea **grupos oficiales**, que se publican sin revisión y llevan la insignia "Oficial".
 
 <Callout title="Estado">
-  Llega con T-42 en el [PR #36](https://github.com/WilbertDevMx/backend-kampus/pull/36), que va después de T-17 ([PR #35](https://github.com/WilbertDevMx/backend-kampus/pull/35)) y de T-41 ([PR #33](https://github.com/WilbertDevMx/backend-kampus/pull/33)). Todos están en revisión; esta página describe cómo queda la API al fusionarse.
+  En `develop` desde el 3 de noviembre con T-42 ([PR #36](https://github.com/WilbertDevMx/backend-kampus/pull/36)). El panel de administración del frontend que la usa llega con T-44.
 </Callout>
 
 Todas las rutas de esta página requieren un token de Sanctum, un correo verificado y una cuenta **`moderator`** o **`admin`**. Un estudiante recibe `403`. Lo que ve cada estudiante de sus grupos está en [Grupos](/docs/backend/api/groups).
@@ -16,7 +16,7 @@ Todas las rutas de esta página requieren un token de Sanctum, un correo verific
 - Un **moderador** solo ve y revisa los grupos de **su universidad**; un **administrador**, todos. Un grupo fuera de su alcance responde `404`.
 - Solo se revisan grupos **en revisión** (`pending`). Uno ya aprobado o rechazado da `422` con `El grupo ya fue revisado.`
 - **Rechazar exige un motivo**, que ve quien creó el grupo (en `rejection_reason`).
-- Cada decisión queda en la [bitácora](/docs/backend/api/staff#bitácora) `moderation_actions`, como `approve_group` o `reject_group`, con la universidad del grupo.
+- Cada decisión queda en la [bitácora](/docs/backend/api/admin/staff#bitácora) `moderation_actions`, como `approve_group` o `reject_group`, con la universidad del grupo.
 - Quien creó el grupo recibe un **correo** (en español y por la cola): "ya está publicado" o "no se aprobó", con el motivo.
 - Editar un grupo ya aprobado **no** lo regresa a revisión.
 

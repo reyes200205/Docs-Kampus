@@ -11,6 +11,10 @@ Las tareas se derivan de los requisitos funcionales y no funcionales. La estimac
   Tareas nuevas **T-40 a T-44** del módulo de Administración; se ajustan T-02, T-04, T-05, T-09, T-17, T-18, T-21, T-22 y T-37, y **T-32 pasa a fase 2** ([cambio de alcance del 19 de octubre de 2026](/docs/project/unit-1/methodology#94-cambios-de-alcance)).
 </Callout>
 
+<Callout type="warn" title="Nuevo · Sprint 3: rúbrica de la Unidad 3">
+  Tareas nuevas **T-45 a T-48**, acordadas con el Product Owner el 2 de noviembre de 2026 para cubrir los criterios de la rúbrica de la Unidad 3. Suman 21 horas. El 8 de noviembre se agrega **T-49** (perfil obligatorio por pasos, unas 10 horas). El avance real de cada sprint está en [Seguimiento por sprint](/docs/project/sprints).
+</Callout>
+
 | ID | Tarea | Derivada de | Responsable | Est. (h) | Dependencias | Criterio de terminado |
 | --- | --- | --- | --- | :---: | --- | --- |
 | **T-01** | Configurar repositorio, ramas (`main`/`develop`), plantilla de PR y CI | RNF-07 | Wilbert | 4 | — | El pipeline ejecuta lint y pruebas en cada PR. |
@@ -57,7 +61,16 @@ Las tareas se derivan de los requisitos funcionales y no funcionales. La estimac
 | **[Nuevo] T-42** | Aprobación de grupos: cola de pendientes, aprobar o rechazar con motivo, aviso al creador y grupos oficiales | RF-12, RF-23 | Wilbert | 6 | T-17, T-40 | El moderador solo revisa los grupos de su universidad; los del staff se aprueban solos; pruebas. |
 | **[Nuevo] T-43** | API de consulta de usuarios (listar, buscar y ver detalle) y suspensión de cuentas reportadas | RF-15, RF-24 | Mario | 6 | T-37, T-40 | El moderador solo ve su universidad y solo suspende cuentas con reporte; motivo obligatorio en `moderation_actions`; pruebas. |
 | **[Nuevo] T-44** | Panel de administración en el frontend: menú según el rol; usuarios, reportes, grupos pendientes, grupos oficiales y staff | RF-15, RF-22 a RF-24 | Aless (con apoyo de Luis) | 12 | T-37, T-41 a T-43 | El staff no ve Descubrir, Cerca ni Chat; la sección de staff solo aparece para el administrador; funciona en móvil y escritorio. |
+| **[Nuevo] T-45** | Recuperación de contraseña por correo (enlace de un solo uso) | RF-02, RNF-02 | Wilbert | 5 | T-05 | `POST /api/forgot-password` responde lo mismo exista o no el correo; el enlace es de un solo uso y vence a los 60 minutos; `POST /api/reset-password` aplica `Password::defaults()` y cierra todas las sesiones; límite de peticiones; correo en español por la cola; pruebas. |
+| **[Nuevo] T-46** | Gestión de sesiones: listar sesiones activas y cerrar sesiones remotas | RF-02, RNF-02 | Wilbert | 4 | T-05 | Lista de sesiones activas con dispositivo, último uso y cuál es la actual; cerrar una sesión de otro dispositivo; cerrar todas las demás; nadie ve ni cierra sesiones ajenas; pruebas. |
+| **[Nuevo] T-47** | Autenticación en dos pasos (MFA) con app de autenticación (TOTP) | RF-02, RNF-02 | Wilbert | 8 | T-05, T-45 | Activar y desactivar MFA con código TOTP; el login pide el código cuando está activo; códigos de respaldo; el secreto se guarda cifrado; sirve como segundo método al recuperar la contraseña; pruebas. |
+| **[Nuevo] T-48** | Documentación para la Unidad 3: resolución de conflictos, seguimiento por sprint con riesgos y patrones enlazados al código | Rúbrica de la Unidad 3 | Wilbert | 4 | — | Sección de resolución de conflictos en la página de Pull Requests; página de seguimiento por sprint con objetivo, lo cerrado, lo que pasó al siguiente sprint y riesgos actualizados; la página de patrones enlaza las clases reales. |
+| **[Nuevo] T-49** | Perfil obligatorio por pasos: género, edad mínima de 17 años y perfil completo para usar Descubrir | RF-03, RF-05 | Alejandro | 10 | T-07, T-08 | Al entrar con el perfil incompleto, la app pide por pasos nombre y fecha de nacimiento, género, carrera y semestre, al menos 3 intereses, al menos 1 foto y "Sobre mí"; hasta completarlo no aparece en Descubrir ni puede hacer swipe (`403 profile_incomplete`); pruebas. |
 
 *Esfuerzo total estimado: aproximadamente 320 horas de desarrollo, unas 6 a 7 horas por integrante por semana durante las 10 semanas del proyecto. Distribución de tareas propias: Wilbert 69 h, Mario 69 h, Aless 68 h, Luis 56 h y Alejandro 24 h; las tareas T-23, T-27 y T-32 se reparten entre varios integrantes. Las notificaciones dentro de la app (RF-17) se mantienen como función deseable sin tarea asignada: solo se implementan si el Sprint 5 termina con tiempo disponible.*
 
 *[Nuevo] Con el módulo de Administración se suman unas 48 horas (36 de T-40 a T-44, 8 de ajustes a tareas existentes y pruebas, y 4 de documentación), y T-32 (10 horas) pasa a fase 2. El total queda en unas **358 horas**. Tareas propias: Wilbert 87 h, Mario 75 h, Aless 80 h, Luis 56 h y Alejandro 24 h.*
+
+*[Nuevo] Con T-45 a T-48 (rúbrica de la Unidad 3) se suman 21 horas, todas de Wilbert: el total queda en unas **379 horas** y Wilbert en 108 h.*
+
+*[Nuevo] T-49 (perfil obligatorio, 8 de noviembre) suma unas 10 horas: el total queda en unas **389 horas**.*

@@ -6,10 +6,10 @@ description: "Explorar, crear y administrar grupos, unirse y salir, y publicar a
 Los grupos y clubes reúnen a estudiantes por intereses: deportivos, culturales, académicos o sociales (RF-11). Cualquier estudiante verificado crea un grupo, y sus administradores publican actividades (RF-12).
 
 <Callout title="Estado">
-  Llega con T-17 en el [PR #35](https://github.com/WilbertDevMx/backend-kampus/pull/35), que va después de T-09 y T-10 (PR #31 y #32). Los tres están en revisión; esta página describe cómo queda la API al fusionarse. La aprobación de grupos y los grupos oficiales del staff llegan con T-42 ([PR #36](https://github.com/WilbertDevMx/backend-kampus/pull/36)); ver [Administración: grupos](/docs/backend/api/group-review).
+  En `develop` desde el 3 de noviembre con T-17 ([PR #35](https://github.com/WilbertDevMx/backend-kampus/pull/35)). La aprobación de grupos y los grupos oficiales del staff llegaron con T-42 ([PR #36](https://github.com/WilbertDevMx/backend-kampus/pull/36)); ver [Administración: grupos](/docs/backend/api/admin/group-review). Las pantallas de grupos de la app llegan con T-18 (Sprint 4).
 </Callout>
 
-Todas las rutas de esta página requieren un token de Sanctum, un correo verificado y una cuenta `student`. El staff recibe `403`: revisa los grupos desde el [panel de administración](/docs/backend/api/group-review) (T-42).
+Todas las rutas de esta página requieren un token de Sanctum, un correo verificado y una cuenta `student`. El staff recibe `403`: revisa los grupos desde el [panel de administración](/docs/backend/api/admin/group-review) (T-42).
 
 ## Reglas
 
@@ -65,7 +65,7 @@ Authorization: Bearer <token>
 
 Devuelve los grupos **aprobados**, de 20 en 20: primero los oficiales y después por nombre. Los dos filtros son opcionales. Una categoría que no existe da `422`.
 
-La respuesta trae `data` (lista de grupos) y la paginación estándar de Laravel (`links` y `meta`), igual que la [lista de matches](/docs/backend/api/matches#lista-de-matches).
+La respuesta trae `data` (lista de grupos) y la paginación estándar de Laravel (`links` y `meta`), igual que la [lista de matches](/docs/backend/api/social/matches#lista-de-matches).
 
 ### Mis grupos
 

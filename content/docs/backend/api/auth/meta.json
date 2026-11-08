@@ -1,0 +1,8 @@
+{
+  "title": "Autenticación",
+  "pages": [
+    "login",
+    "register",
+    "password"
+  ]
+}
