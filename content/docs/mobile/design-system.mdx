@@ -110,8 +110,8 @@ Las cuatro secciones viven en `src/constants/navigation.ts` y se comparten entre
 - **iOS y Android:** `NativeTabs` (`src/components/app-tabs.tsx`) con íconos SF Symbols y Material Symbols.
 - **Web:** `src/components/app-tabs.web.tsx`, con barra inferior o lateral según el ancho.
 
-<Callout type="info" title="Sesión temporal">
-  Mientras no hay backend, `src/hooks/use-session.ts` guarda la sesión en memoria: iniciar sesión con cualquier correo y contraseña abre las pestañas, y "Cerrar sesión" regresa al login. T-06 lo reemplaza por el token de Sanctum.
+<Callout type="info" title="Sesión">
+  Desde T-06, `src/hooks/use-session.ts` guarda en memoria el token de Sanctum que devuelve `POST /api/login`, y `src/services/api.ts` lo manda en cada petición. "Cerrar sesión" llama a `POST /api/logout` y regresa al login. Pendiente: el token se pierde al recargar; falta guardarlo con `expo-secure-store`.
 </Callout>
 
 ## Accesibilidad

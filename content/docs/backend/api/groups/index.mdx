@@ -1,0 +1,187 @@
+---
+title: "Grupos"
+description: "Explorar, crear y administrar grupos, unirse y salir, y publicar actividades (T-17, RF-11 y RF-12)."
+---
+
+Los grupos y clubes reúnen a estudiantes por intereses: deportivos, culturales, académicos o sociales (RF-11). Cualquier estudiante verificado crea un grupo, y sus administradores publican actividades (RF-12).
+
+<Callout title="Estado">
+  En `develop` desde el 3 de noviembre con T-17 ([PR #35](https://github.com/WilbertDevMx/backend-kampus/pull/35)). La aprobación de grupos y los grupos oficiales del staff llegaron con T-42 ([PR #36](https://github.com/WilbertDevMx/backend-kampus/pull/36)); ver [Administración: grupos](/docs/backend/api/admin/group-review). Las pantallas de grupos de la app llegan con T-18 (Sprint 4).
+</Callout>
+
+Todas las rutas de esta página requieren un token de Sanctum, un correo verificado y una cuenta `student`. El staff recibe `403`: revisa los grupos desde el [panel de administración](/docs/backend/api/admin/group-review) (T-42).
+
+## Reglas
+
+- **[Nuevo]** El grupo que crea un estudiante queda **en revisión** (`pending`) hasta que lo aprueba un moderador de su universidad o un administrador (RF-23). Solo los grupos **aprobados** aparecen al explorar y aceptan integrantes y actividades.
+- El grupo es de la universidad de quien lo crea, y esa persona queda como su **administrador**.
+- Un grupo aprobado lo ve cualquier estudiante. Uno en revisión o rechazado **solo lo ven sus integrantes**; para los demás, la API responde `404`, como si no existiera.
+- Un estudiante se puede unir a grupos aprobados de **cualquier** universidad participante.
+- Editar un grupo aprobado **no** lo regresa a revisión.
+
+| Rol en el grupo (`my_role`) | Qué puede hacer |
+| --- | --- |
+| `admin` | Editar el grupo, cambiar su imagen, borrarlo y publicar, editar o borrar actividades. |
+| `member` | Ver la lista de integrantes y salir del grupo. |
+| `null` | No es integrante: puede ver el grupo (si está aprobado), sus actividades y unirse. |
+
+## El objeto grupo
+
+Todas las rutas que devuelven un grupo usan este formato:
+
+```json
+{
+  "id": 3,
+  "name": "Club de Fotografía",
+  "description": "Salidas a fotografiar el campus.",
+  "category": "cultural",
+  "university": { "id": 1, "name": "Universidad Tecnológica de Torreón", "short_name": "UTT" },
+  "status": "approved",
+  "is_official": false,
+  "rejection_reason": null,
+  "image_url": "https://<bucket>/groups/3/9a1e...jpg?X-Amz-Expires=900&X-Amz-Signature=...",
+  "members_count": 12,
+  "my_role": "member",
+  "created_at": "2026-11-02T17:00:00+00:00"
+}
+```
+
+| Campo | Descripción |
+| --- | --- |
+| `category` | `deportivo`, `cultural`, `academico` o `social`. |
+| `status` | `pending` (en revisión), `approved` o `rejected`. |
+| `is_official` | `true` en los grupos que crea el staff (T-42), con la insignia "Oficial". |
+| `rejection_reason` | Motivo del rechazo. Solo lo reciben los administradores del grupo; para los demás es `null`. |
+| `image_url` | URL firmada que **vence a los 15 minutos** (RNF-03), o `null` si no tiene imagen. |
+| `my_role` | Rol de quien hace la petición: `admin`, `member` o `null`. |
+
+## Explorar grupos
+
+```http
+GET /api/groups?university_id=1&category=deportivo&page=1
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+Devuelve los grupos **aprobados**, de 20 en 20: primero los oficiales y después por nombre. Los dos filtros son opcionales. Una categoría que no existe da `422`.
+
+La respuesta trae `data` (lista de grupos) y la paginación estándar de Laravel (`links` y `meta`), igual que la [lista de matches](/docs/backend/api/social/matches#lista-de-matches).
+
+### Mis grupos
+
+```http
+GET /api/groups/mine
+```
+
+Devuelve los grupos de los que el alumno es integrante, **en cualquier estado**. Así puede seguir los suyos que están en revisión y ver el motivo si se los rechazan.
+
+## Crear un grupo
+
+```http
+POST /api/groups
+Content-Type: application/json
+
+{
+  "name": "Club de Fotografía",
+  "description": "Salidas a fotografiar el campus.",
+  "category": "cultural"
+}
+```
+
+| Campo | Reglas |
+| --- | --- |
+| `name` | Obligatorio, hasta 120 caracteres. |
+| `description` | Opcional, hasta 1000 caracteres. |
+| `category` | Obligatoria: `deportivo`, `cultural`, `academico` o `social`. |
+
+Responde `201` con el grupo en `pending`, `my_role: "admin"` y `members_count: 1`. Si la petición manda `status`, `is_official` o `university_id`, se ignoran. Hay un límite de 10 grupos por minuto.
+
+## Ver, editar y borrar
+
+| Ruta | Quién | Qué hace |
+| --- | --- | --- |
+| `GET /api/groups/{id}` | Quien puede ver el grupo | Responde `200` con el grupo, o `404`. |
+| `PATCH /api/groups/{id}` | Administrador del grupo | Cambia `name`, `description` o `category` (cada uno opcional, con las mismas reglas que al crear). |
+| `DELETE /api/groups/{id}` | Administrador del grupo | Borra el grupo, sus integrantes, sus actividades y su imagen. Responde `204`. |
+
+Un integrante que no es administrador recibe `403` (`Solo los administradores del grupo pueden hacerlo.`).
+
+### Imagen del grupo
+
+```http
+POST /api/groups/{id}/image
+Content-Type: multipart/form-data
+
+image=<archivo>
+```
+
+Solo el administrador del grupo. Acepta JPG, PNG o WebP de hasta 5 MB. Igual que las fotos de perfil, la API quita los metadatos EXIF y GPS y guarda la imagen en el bucket privado. Si ya había una imagen, la reemplaza. Responde `200` con el grupo; un archivo que no es imagen da `422` (`El archivo no es una imagen válida.`).
+
+## Integrantes
+
+| Ruta | Quién | Qué hace |
+| --- | --- | --- |
+| `POST /api/groups/{id}/members` | Estudiante | Se une a un grupo aprobado. Responde `201` con el grupo y `my_role: "member"`. `409` si ya es integrante (`Ya eres integrante de este grupo.`); `404` si el grupo no está aprobado. |
+| `DELETE /api/groups/{id}/members/me` | Integrante | Sale del grupo. Responde `204`. |
+| `GET /api/groups/{id}/members` | Integrantes | Lista con los administradores primero y después por antigüedad, de 50 en 50. Solo nombre, rol y fecha de ingreso; nunca el correo. |
+
+```json
+{
+  "data": [
+    { "id": 12, "name": "Ana López", "role": "admin", "joined_at": "2026-11-02T17:00:00+00:00" },
+    { "id": 15, "name": "Luis Pérez", "role": "member", "joined_at": "2026-11-03T09:30:00+00:00" }
+  ]
+}
+```
+
+Al salir del grupo:
+
+- si se va el **último administrador**, el integrante más antiguo pasa a ser administrador;
+- el **único integrante** no puede salir: responde `422` con `Eres el único integrante. Si ya no quieres el grupo, bórralo.`;
+- quien no es integrante recibe `422` con `No eres integrante de este grupo.`
+
+Quien no es integrante recibe `403` al pedir la lista de un grupo aprobado (`Solo los integrantes ven la lista del grupo.`).
+
+## Actividades
+
+### Listar
+
+```http
+GET /api/groups/{id}/activities
+GET /api/groups/{id}/activities?past=1
+```
+
+Las ve quien puede ver el grupo. Sin `past`, devuelve las **próximas**, de la más cercana a la más lejana; con `past=1`, las **pasadas**, de la más reciente a la más antigua. Van de 20 en 20.
+
+```json
+{
+  "data": [
+    {
+      "id": 8,
+      "group_id": 3,
+      "title": "Torneo relámpago",
+      "description": "Equipos de cinco.",
+      "location": "Cancha 2, UTT",
+      "starts_at": "2026-11-07T17:00:00+00:00",
+      "created_by": { "id": 12, "name": "Ana López" }
+    }
+  ]
+}
+```
+
+### Publicar, editar y borrar
+
+| Ruta | Qué hace |
+| --- | --- |
+| `POST /api/groups/{id}/activities` | Publica una actividad. Responde `201`. |
+| `PATCH /api/groups/{id}/activities/{activity}` | Edita los campos que se manden. |
+| `DELETE /api/groups/{id}/activities/{activity}` | Borra la actividad. Responde `204`. |
+
+Solo los administradores del grupo, y solo en grupos **aprobados**: en uno en revisión, publicar da `422` con `El grupo todavía no está aprobado.` Una actividad de otro grupo responde `404`.
+
+| Campo | Reglas |
+| --- | --- |
+| `title` | Obligatorio al publicar, hasta 150 caracteres. |
+| `starts_at` | Obligatorio al publicar; fecha y hora **futuras** (ISO 8601). |
+| `description` | Opcional, hasta 1000 caracteres. |
+| `location` | Opcional, en texto libre y hasta 255 caracteres, por ejemplo "Cancha 2, UTT". Nunca una coordenada (RNF-11). |

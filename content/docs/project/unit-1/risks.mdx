@@ -13,6 +13,10 @@ description: "Riesgos del proyecto, su puntaje y el plan para mitigarlos."
   Se agregan los riesgos **R12** (escalada de privilegios del staff) y **R13** (cambio de alcance a mitad del proyecto), y se ajusta el plan de R3 ([cambio de alcance del 19 de octubre de 2026](/docs/project/unit-1/methodology#94-cambios-de-alcance)).
 </Callout>
 
+<Callout type="warn" title="Nuevo · Sprint 3: seguimiento de riesgos">
+  Al cierre del Sprint 3 se agregan **R14** (la app no alcanza al backend) y **R15** (PR revisados por lotes). Los puntajes actualizados de cada sprint están en [Seguimiento por sprint](/docs/project/sprints/sprint-3#riesgos-al-cierre-del-sprint-3); esta tabla conserva los valores del anteproyecto.
+</Callout>
+
 <RiskTable
   items={[
     {
@@ -131,6 +135,24 @@ description: "Riesgos del proyecto, su puntaje y el plan para mitigarlos."
       consecuencia: "Retraso en los sprints 3 y 4 y menos tiempo para pruebas y correcciones.",
       respuesta: "Mitigar",
       plan: "Cambio aprobado por el Product Owner y el profesor; T-32 (ubicación en el chat, 10 h) pasa a fase 2; el trabajo se reparte entre backend y frontend; si hay retraso se recortan primero las funciones Could.",
+    },
+    {
+      id: "R14",
+      riesgo: "[Nuevo] La app no alcanza al backend: las pantallas de chat, mapa y grupos quedan sin terminar",
+      prob: 4,
+      impacto: 5,
+      consecuencia: "El MVP no se puede demostrar completo y las pruebas de usabilidad (T-25) no tienen chat ni grupos que probar.",
+      respuesta: "Mitigar",
+      plan: "Priorizar en la app las funciones de prioridad Alta (chat, match, perfil expandible, zona, bloqueo y Ajustes), reforzar el frontend con quien termine el backend y mover a fase 2 las de prioridad Media que no alcancen.",
+    },
+    {
+      id: "R15",
+      riesgo: "[Nuevo] Pull requests acumulados que se revisan por lotes",
+      prob: 4,
+      impacto: 3,
+      consecuencia: "Los sprints cierran sin trabajo fusionado, el avance real no se ve hasta tarde y crecen los conflictos entre ramas.",
+      respuesta: "Mitigar",
+      plan: "Revisar cada PR en menos de 48 horas, abrir PR pequeños por tarea y fusionar en cuanto pasen CI y la revisión.",
     },
   ]}
 />

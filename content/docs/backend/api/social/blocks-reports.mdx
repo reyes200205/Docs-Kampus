@@ -1,0 +1,129 @@
+---
+title: "Bloqueo y reporte"
+description: "Bloquear y desbloquear estudiantes y reportarlos a moderación (T-21, RF-13 y RF-14)."
+---
+
+Un estudiante puede **bloquear** a otro para dejar de verlo (RF-13) y **reportarlo** para que lo revise el equipo de moderación (RF-14). Las dos acciones se pueden hacer en un solo paso.
+
+<Callout title="Estado">
+  En `develop` desde el 5 de noviembre con T-21 ([PR #42](https://github.com/WilbertDevMx/backend-kampus/pull/42)), que estaba planeada para el Sprint 4 y se adelantó. La revisión de los reportes por el staff llega con T-37 y la interfaz de la app con T-22 y T-38.
+</Callout>
+
+Las rutas de esta página requieren un token de Sanctum, un correo verificado y una cuenta `student`. El staff recibe `403`.
+
+## Qué hace un bloqueo
+
+Un bloqueo, **en cualquier sentido**, separa a las dos personas:
+
+- Desaparecen del [descubrimiento](/docs/backend/api/social/discovery) de ambos.
+- Su match deja de aparecer en la [lista de matches](/docs/backend/api/social/matches#quién-no-aparece) de los dos.
+- Ninguno de los dos puede entrar al canal de chat `chat.{matchId}` ([Tiempo real](/docs/backend/api/chat/realtime#canales-privados)).
+
+A la persona bloqueada **no se le avisa**. Desbloquear la regresa al descubrimiento; el match, si existía, vuelve a aparecer.
+
+Solo se puede bloquear o reportar a **otro estudiante**. Si el `user_id` no existe, es staff o es el propio alumno, la API responde con el mismo error de validación, para no revelar qué cuentas existen:
+
+```json
+{
+  "message": "Este perfil no está disponible.",
+  "errors": { "user_id": ["Este perfil no está disponible."] }
+}
+```
+
+## Bloquear
+
+```http
+POST /api/blocks
+Accept: application/json
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{ "user_id": 12 }
+```
+
+Responde `201` la primera vez y `200` si ya estaba bloqueado (no se duplica):
+
+```json
+{
+  "data": {
+    "user_id": 12,
+    "blocked_at": "2026-11-05T18:20:00+00:00"
+  }
+}
+```
+
+## Usuarios bloqueados
+
+```http
+GET /api/blocks?page=1
+```
+
+Lista las personas que bloqueó el alumno, de la más reciente a la más antigua, de 50 en 50. Es la lista que mostrará Ajustes (T-38).
+
+```json
+{
+  "data": [
+    { "user_id": 12, "name": "Ana López", "blocked_at": "2026-11-05T18:20:00+00:00" }
+  ],
+  "meta": { "current_page": 1, "last_page": 1, "per_page": 50, "total": 1 }
+}
+```
+
+## Desbloquear
+
+```http
+DELETE /api/blocks/{userId}
+```
+
+Responde `204`. Si el alumno no tenía bloqueada a esa persona, responde `404` con `No tienes bloqueada a esta persona.`
+
+## Reportar
+
+```http
+POST /api/reports
+Accept: application/json
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "user_id": 12,
+  "reason": "acoso",
+  "description": "Me escribió insultos después del match.",
+  "match_id": 7,
+  "block": true
+}
+```
+
+| Campo | Obligatorio | Descripción |
+| --- | --- | --- |
+| `user_id` | Sí | Estudiante reportado. |
+| `reason` | Sí | `acoso`, `perfil_falso`, `contenido_inapropiado`, `spam` u `otro`. |
+| `description` | Solo con `otro` | Hasta 1000 caracteres. |
+| `match_id` | No | Conversación que sirve de evidencia. Tiene que ser un match **entre las dos personas**; si no, responde `422` con `La conversación no es entre ustedes dos.` |
+| `block` | No | `true` también bloquea al reportado, en la misma operación. |
+
+El reporte guarda la **universidad del reportado** (`reports.university_id`): así lo atiende el moderador de esa universidad, o un administrador (T-37).
+
+### Respuesta `201`
+
+```json
+{
+  "message": "Recibimos tu reporte. Lo revisará el equipo de moderación.",
+  "data": { "id": 31, "reason": "acoso", "status": "pending", "blocked": true }
+}
+```
+
+Mientras un reporte del mismo alumno contra la misma persona siga en `pending`, otro reporte responde `409` con `Ya reportaste a esta persona y tu reporte está en revisión.` La ruta permite **10 reportes por minuto**.
+
+Los estados del reporte son `pending`, `reviewed` y `dismissed`; solo el staff los cambia (T-37).
+
+## Errores
+
+| Código | Cuándo |
+| --- | --- |
+| `401` | Sin token o con un token vencido. |
+| `403` | El correo no está verificado, o la cuenta es de staff. |
+| `404` | Desbloquear a alguien que no estaba bloqueado. |
+| `409` | Ya hay un reporte pendiente contra esa persona. |
+| `422` | `user_id` no disponible, `reason` inválido, falta `description` con `otro`, o `match_id` ajeno. |
+| `429` | Más de 10 reportes en un minuto. |

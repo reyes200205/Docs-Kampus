@@ -2,5 +2,13 @@
   "title": "API REST",
   "icon": "Braces",
   "defaultOpen": true,
-  "pages": ["index", "authentication"]
+  "pages": [
+    "index",
+    "auth",
+    "profile",
+    "social",
+    "chat",
+    "groups",
+    "admin"
+  ]
 }

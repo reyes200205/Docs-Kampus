@@ -1,0 +1,148 @@
+---
+title: "Perfil, intereses y fotos"
+description: "Leer y editar el perfil, elegir intereses y subir fotos al bucket privado (T-07, RF-03 y RNF-03)."
+---
+
+El perfil es lo que los demás ven en el [descubrimiento](/docs/backend/api/social/discovery): carrera, semestre, bio, intereses y hasta 5 fotos (RF-03).
+
+<Callout title="Estado">
+  En `develop` desde el 29 de octubre con T-07 ([PR #29](https://github.com/WilbertDevMx/backend-kampus/pull/29)). La app ya usa estas rutas en las pantallas de perfil (T-08). **[Nuevo]** El género, la edad mínima y el [perfil completo](#perfil-completo) llegan con T-49 ([PR #44](https://github.com/WilbertDevMx/backend-kampus/pull/44), en revisión).
+</Callout>
+
+Las rutas de esta página requieren un token de Sanctum, un correo verificado y una cuenta `student`. El staff recibe `403`.
+
+## Ver el perfil
+
+```http
+GET /api/profile
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+### Respuesta `200`
+
+```json
+{
+  "data": {
+    "user": { "id": 1, "name": "Ana López", "email": "ana.lopez@utt.edu.mx" },
+    "profile": {
+      "career": "Ingeniería en Software",
+      "semester": 7,
+      "birthdate": "2004-05-12",
+      "gender": "mujer",
+      "bio": "Me gusta el fútbol y el café.",
+      "zone_id": 3,
+      "nearby_enabled": false,
+      "discovery_filters": { "universities": [1, 2], "career": null, "interests": [] },
+      "completion": { "completed": false, "missing": ["photos", "bio"] },
+      "interests": [
+        { "id": 4, "name": "Fútbol", "category": "deportes" }
+      ],
+      "photos": [
+        { "id": 9, "position": 1, "temporary_url": "https://<bucket>/profiles/1/5f1c...jpg?X-Amz-Expires=900&X-Amz-Signature=..." }
+      ]
+    }
+  }
+}
+```
+
+`profile` es `null` mientras el alumno no ha guardado ningún dato. Las fotos se sirven con **URL firmada que vence a los 15 minutos** (RNF-03): la app no debe guardarlas, sino volver a pedir el perfil.
+
+## Editar el perfil
+
+```http
+PATCH /api/profile
+Content-Type: application/json
+
+{ "career": "Ingeniería en Software", "semester": 7, "bio": "Me gusta el fútbol y el café." }
+```
+
+Solo se cambian los campos que se envían. Responde `200` con el perfil completo, igual que `GET`.
+
+| Campo | Reglas |
+| --- | --- |
+| `name` | De 2 a 255 caracteres; no puede quedar vacío. Se guarda en el usuario. |
+| `career` | Hasta 120 caracteres, o `null`. |
+| `semester` | Entero de 1 a 12, o `null`. |
+| `birthdate` | Fecha (`AAAA-MM-DD`) de alguien con **al menos 17 años** (**[Nuevo]** T-49), o `null`. Si no, `Debes tener al menos 17 años para usar Kampus.` |
+| `gender` | **[Nuevo]** `mujer`, `hombre`, `no_binario` o `prefiero_no_decir`, o `null`. Solo se muestra en el perfil; no filtra el descubrimiento. |
+| `bio` | Hasta 300 caracteres, o `null`. |
+| `zone_id` | Una zona del [catálogo](/docs/backend/api/profile/location#catálogo-de-zonas), o `null`. |
+| `discovery_filters` | Mismo formato que [`PUT /api/discover/filters`](/docs/backend/api/social/discovery#filtros). |
+
+"Cerca de ti" **no** se activa aquí: va por [`PUT /api/location/nearby`](/docs/backend/api/profile/location#activar-cerca-de-ti). Si la petición no trae ningún campo, responde `422` con `Debes enviar al menos un dato de perfil.`
+
+## Perfil completo
+
+**[Nuevo]** Con T-49 el perfil es obligatorio: hasta completarlo, el estudiante **no aparece en el descubrimiento** y `GET /api/discover` y `POST /api/swipes` le responden `403` con `"code": "profile_incomplete"`. La app lo guía por pasos al entrar.
+
+Cada respuesta del perfil trae `completion`:
+
+| Campo | Descripción |
+| --- | --- |
+| `completed` | `true` cuando no falta ningún paso. |
+| `missing` | Pasos pendientes, en el orden en que la app los pide. |
+
+| Paso | Qué pide |
+| --- | --- |
+| `basics` | Nombre y fecha de nacimiento (mínimo 17 años). |
+| `gender` | Género. |
+| `studies` | Carrera y semestre. |
+| `interests` | Al menos 3 intereses. |
+| `photos` | Al menos 1 foto. |
+| `bio` | "Sobre mí". |
+
+El estado se recalcula después de cada cambio del perfil, de los intereses o de las fotos: si se borra la única foto o la bio, el perfil vuelve a estar incompleto y sale del descubrimiento. El usuario de `POST /api/login` y `GET /api/user` trae el mismo dato como `profile_completed`.
+
+## Intereses
+
+```http
+GET /api/interests
+```
+
+Devuelve el catálogo completo, ordenado por nombre: `{ "data": [{ "id": 4, "name": "Fútbol", "category": "deportes" }] }`.
+
+```http
+PUT /api/profile/interests
+Content-Type: application/json
+
+{ "interest_ids": [4, 7, 12] }
+```
+
+**Reemplaza** todos los intereses del perfil. Se piden **de 3 a 20**, sin repetir y todos del catálogo. Responde `200` con el perfil completo.
+
+## Fotos
+
+```http
+POST /api/profile/photos
+Content-Type: multipart/form-data
+
+photo=<archivo>
+position=2
+```
+
+| Campo | Reglas |
+| --- | --- |
+| `photo` | JPG, PNG o WebP de hasta **5 MB**. |
+| `position` | Opcional, de 1 a 5. Sin ella, la foto toma el primer lugar libre. |
+
+Responde `201` con el perfil completo. Antes de guardarla, la API **vuelve a codificar la imagen y le quita los metadatos EXIF**, incluida la ubicación GPS que traen las fotos del celular (RNF-11). El archivo original nunca se guarda. Las fotos van a un bucket **privado**.
+
+```http
+DELETE /api/profile/photos/{photoId}
+```
+
+Borra la foto del bucket y del perfil, y responde `200` con el perfil actualizado. Solo se pueden borrar las fotos propias.
+
+La subida permite **10 fotos por minuto**.
+
+## Errores
+
+| Código | Cuándo |
+| --- | --- |
+| `401` | Sin token o con un token vencido. |
+| `403` | El correo no está verificado, o la cuenta es de staff. |
+| `404` | La foto no existe o es de otro perfil. |
+| `422` | Un campo no cumple sus reglas, ya hay 5 fotos (`El perfil no puede tener más de 5 fotos.`), la posición está ocupada o el archivo no es una imagen válida. |
+| `429` | Más de 10 fotos subidas en un minuto. |
+| `503` | No se pudo guardar o borrar la foto en el bucket. |

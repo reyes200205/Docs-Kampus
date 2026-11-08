@@ -1,16 +1,16 @@
 ---
-title: "Autenticación"
-description: "Cómo se autentica la app contra la API con Laravel Sanctum: inicio de sesión, token, cierre de sesión y registro."
+title: "Inicio de sesión"
+description: "Laravel Sanctum: iniciar sesión, enviar el token, cerrar sesión y roles (T-05 y T-40, RF-02)."
 ---
 
 La API usa **Laravel Sanctum** con tokens personales (Bearer). La app obtiene un token al iniciar sesión y lo envía en cada petición protegida. Los tokens **expiran a los 7 días** (RNF-02).
 
 <Callout title="Estado">
-  El inicio y el cierre de sesión ya están en `develop` ([PR #7](https://github.com/WilbertDevMx/backend-kampus/pull/7), T-05). El formato de `/api/user` y las cabeceras de seguridad llegan con el [PR #11](https://github.com/WilbertDevMx/backend-kampus/pull/11), que está en revisión; esta página describe cómo queda al fusionarse.
+  En `develop`: el inicio y el cierre de sesión ([PR #7](https://github.com/WilbertDevMx/backend-kampus/pull/7), T-05), el formato de `/api/user` y las cabeceras de seguridad ([PR #11](https://github.com/WilbertDevMx/backend-kampus/pull/11)), los roles ([PR #23](https://github.com/WilbertDevMx/backend-kampus/pull/23), T-40) y el rechazo de cuentas suspendidas ([PR #33](https://github.com/WilbertDevMx/backend-kampus/pull/33), T-41). El [registro](/docs/backend/api/auth/register) y la [recuperación de contraseña](/docs/backend/api/auth/password) tienen su propia página.
 </Callout>
 
 <Callout type="warn" title="Nuevo · Sprint 2: Módulo de Administración">
-  Kampus tendrá tres roles: `student`, `moderator` y `admin`. Con T-40, el objeto `user` de las respuestas incluye `role` para que la app muestre la vista correcta. Ver [Roles](#roles) ([cambio de alcance del 19 de octubre de 2026](/docs/project/unit-1/methodology#94-cambios-de-alcance)).
+  Kampus tiene tres roles: `student`, `moderator` y `admin`. Desde T-40, el objeto `user` de las respuestas incluye `role` y `university_id` para que la app muestre la vista correcta. Ver [Roles](#roles) ([cambio de alcance del 19 de octubre de 2026](/docs/project/unit-1/methodology#94-cambios-de-alcance)).
 </Callout>
 
 ## Iniciar sesión
@@ -41,12 +41,16 @@ Content-Type: application/json
     "name": "Ana López",
     "email": "ana.lopez@utt.edu.mx",
     "email_verified_at": "2026-10-01T18:00:00+00:00",
-    "role": "student"
+    "role": "student",
+    "university_id": 1,
+    "profile_completed": true
   }
 }
 ```
 
-**[Nuevo]** El campo `role` se agrega con T-40.
+**[Nuevo]** Los campos `role` y `university_id` se agregaron con T-40. Un administrador tiene `university_id` en `null`, porque ve todas las universidades.
+
+**[Nuevo]** `profile_completed` (T-49) es `false` mientras el estudiante no termina su perfil: la app lo manda a completarlo por pasos antes de dejarlo usar Descubrir. Para el staff siempre es `true`. Ver [Perfil completo](/docs/backend/api/profile/profile#perfil-completo).
 
 ### Errores
 
@@ -54,6 +58,7 @@ Content-Type: application/json
 | --- | --- | --- |
 | `422` | Faltan campos, la contraseña es incorrecta o el correo no existe. Los dos últimos casos dan **el mismo mensaje**, para no revelar qué correos están registrados. | `Las credenciales no son correctas.` |
 | `403` | El correo todavía no se verifica (RF-01). | `Verifica tu correo institucional antes de iniciar sesión.` |
+| `403` | **[Nuevo]** La cuenta está suspendida por moderación o es de staff desactivado (RF-15, [T-41](/docs/backend/api/admin/staff#desactivar-o-reactivar-una-cuenta)). Con la contraseña incorrecta se recibe el `422` de siempre, sin revelar la suspensión. | `Tu cuenta está suspendida.` |
 | `429` | Hubo **5 intentos fallidos** con el mismo correo desde la misma IP. El bloqueo dura **15 minutos**, aunque luego se ponga la contraseña correcta. Un inicio de sesión correcto reinicia el contador. | `Demasiados intentos fallidos. Intenta de nuevo en 15 minutos.` |
 
 Cada intento fallido y cada bloqueo se registran en `storage/logs/security.log`, con el correo enmascarado (`an****@utt.edu.mx`).
@@ -77,7 +82,9 @@ Solo trae los campos públicos del usuario (`UserResource`):
     "name": "Ana López",
     "email": "ana.lopez@utt.edu.mx",
     "email_verified_at": "2026-10-01T18:00:00+00:00",
-    "role": "student"
+    "role": "student",
+    "university_id": 1,
+    "profile_completed": true
   }
 }
 ```
@@ -113,11 +120,3 @@ Responde `204` sin contenido. Revoca **solo el token de esa petición**: las ses
 | `admin` | Staff con acceso a todas las universidades. Lo crea otro administrador. | El panel completo, incluida la gestión de staff. |
 
 Los permisos se validan en la API con *Policies*: si un moderador pide datos de otra universidad, la API responde `403`, aunque la app no muestre esa opción. El staff no puede usar las rutas sociales (swipe, match, chat). El primer administrador se crea en el servidor con `php artisan kampus:create-admin` (T-40).
-
-## Registro
-
-Solo se aceptan correos institucionales (RF-01). En T-04 (rama `feature/T-04-registro`, en preparación), los dominios aceptados salen de la tabla `universities` (columna `email_domains`), ya no de la variable `KAMPUS_ALLOWED_EMAIL_DOMAINS`. Ver [El proyecto](/docs/project/kampus#instituciones). **[Nuevo]** El registro público siempre crea cuentas `student`; las cuentas de staff solo las crea un administrador (T-41).
-
-<Callout title="Pendiente">
-  Los endpoints de registro (`POST /api/register`) y de verificación de correo se documentarán aquí cuando se integre T-04.
-</Callout>

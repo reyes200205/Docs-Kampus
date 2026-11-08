@@ -86,8 +86,54 @@ Con base `main` y compare `develop`, este mensaje significa que **`main` ya tien
 ## Revisión
 
 - Al menos **otro integrante** revisa y aprueba el PR.
-- CI debe pasar. En el backend: formato, migraciones y pruebas (ver [Integración continua](/docs/backend/continuous-integration)). En la documentación: la convención de commits.
+- CI debe pasar. En el backend: formato, migraciones y pruebas (ver [Integración continua](/docs/backend/installation#integración-continua)). En la documentación: la convención de commits.
 - Cómo se calcula la versión: ver [Versiones y changelog](/docs/development/releases).
+
+## Resolver conflictos
+
+Hay conflicto cuando tu rama y `develop` cambiaron las mismas líneas. GitHub lo avisa en el PR con **This branch has conflicts that must be resolved** y no deja mergear.
+
+1. Trae `develop` a tu rama. Usa `merge`, no `rebase`: así no se reescriben commits que ya están en el PR.
+
+   ```bash
+   git switch develop
+   git pull
+   git switch feature/T-05-api-login
+   git merge develop
+   ```
+
+2. Git marca cada archivo en conflicto (`git status` los lista como *both modified*). En cada uno, busca los bloques:
+
+   ```text
+   <<<<<<< HEAD
+   lo que tiene tu rama
+   =======
+   lo que llegó de develop
+   >>>>>>> develop
+   ```
+
+   Deja el código correcto, que muchas veces es **una combinación de los dos**, y borra las marcas. Si el conflicto es en código de otra persona, pregúntale en Slack antes de elegir.
+
+3. Casos frecuentes:
+
+   | Archivo | Qué hacer |
+   | --- | --- |
+   | `composer.lock` o `pnpm-lock.yaml` | No se editan a mano: toma el de `develop` (`git checkout --theirs <archivo>`) y vuelve a correr `composer update <paquete>` o `pnpm install`. |
+   | Migraciones | Nunca cambies una migración que ya está en `develop`; crea una nueva con fecha posterior. |
+   | `routes/api.php`, `meta.json` o tablas de endpoints | Casi siempre se conservan las dos partes: cada rama agregó sus propias líneas. |
+
+4. Comprueba que todo sigue funcionando y termina el merge:
+
+   ```bash
+   php artisan test && ./vendor/bin/pint --test   # backend; en la app y en la documentación, pnpm lint
+   git add .
+   git commit                                      # Git propone "Merge branch 'develop' into ..."
+   git push
+   ```
+
+5. El PR se actualiza solo y CI vuelve a correr. Si cambió mucho, pide otra revisión.
+
+Para tener menos conflictos: PR pequeños, una tarea por rama y traer `develop` a tu rama seguido, no solo al final.
 
 ## Definition of Done
 

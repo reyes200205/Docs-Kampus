@@ -1,0 +1,72 @@
+---
+title: "Registro y verificación"
+description: "Crear la cuenta con el correo institucional y verificarlo (T-04, RF-01)."
+---
+
+<Callout title="Estado">
+  En `develop` con T-04 ([PR #28](https://github.com/WilbertDevMx/backend-kampus/pull/28) y [PR #30](https://github.com/WilbertDevMx/backend-kampus/pull/30)). La app ya tiene las pantallas de registro y de verificación (T-06).
+</Callout>
+
+Solo se aceptan correos institucionales (RF-01). Los dominios aceptados salen de la tabla `universities` (columna `email_domains`, solo universidades activas); ya no existe la variable `KAMPUS_ALLOWED_EMAIL_DOMAINS`. Ver [El proyecto](/docs/project/kampus#instituciones). **[Nuevo]** El registro público siempre crea cuentas `student`: si la petición manda `role`, se ignora. Las cuentas de staff solo las crea un administrador (T-41).
+
+## Crear la cuenta
+
+```http
+POST /api/register
+Accept: application/json
+Content-Type: application/json
+
+{
+  "name": "Ana López",
+  "email": "ana.lopez@utt.edu.mx",
+  "password": "********",
+  "password_confirmation": "********"
+}
+```
+
+| Campo | Reglas |
+| --- | --- |
+| `name` | Obligatorio, hasta 255 caracteres. |
+| `email` | Obligatorio, correo válido de un dominio institucional y que no esté registrado. Se guarda sin espacios y en minúsculas, igual que en el login, así que `Ana.Lopez@UTT.edu.mx` cuenta como el mismo correo. |
+| `password` | Obligatoria, con `password_confirmation` igual. Mínimo 8 caracteres, con mayúsculas, minúsculas y números (en producción también se rechazan contraseñas filtradas). |
+
+La cuenta queda asignada a la universidad de su dominio. La API manda un correo con el enlace de verificación (por la cola de trabajos) y responde `201`:
+
+```json
+{
+  "message": "Registro exitoso. Revisa tu correo para verificar tu cuenta.",
+  "user": {
+    "id": 1,
+    "name": "Ana López",
+    "email": "ana.lopez@utt.edu.mx",
+    "email_verified_at": null,
+    "role": "student",
+    "university_id": 1
+  }
+}
+```
+
+La cuenta todavía **no puede iniciar sesión**: el login responde `403` hasta que se verifique el correo.
+
+### Errores
+
+| Código | Cuándo |
+| --- | --- |
+| `422` | Falta un campo, el correo ya está registrado, la contraseña no cumple la política o el dominio no es de una universidad participante (`El dominio del correo no está permitido.`). |
+| `429` | Más de **6 registros por minuto** desde la misma IP. |
+
+## Verificar el correo
+
+El enlace del correo apunta a la API y **vence a los 60 minutos**:
+
+```http
+GET /api/email/verify/{id}/{hash}?expires=...&signature=...
+```
+
+| Código | Cuándo | Mensaje |
+| --- | --- | --- |
+| `200` | El enlace es válido. También si la cuenta ya estaba verificada. | `Correo verificado correctamente.` |
+| `403` | El enlace venció o se modificó (la firma no coincide). | |
+| `403` | El `hash` no corresponde al correo de esa cuenta. | `El enlace de verificación no es válido.` |
+
+Después de verificar, el usuario ya puede [iniciar sesión](/docs/backend/api/auth/login#iniciar-sesión).

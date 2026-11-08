@@ -1,0 +1,98 @@
+---
+title: "Despliegue"
+description: "Entorno de pruebas en AWS con Docker: servicios, preparación, despliegue, HTTPS y monitoreo (T-24, RNF-05 y RNF-06)."
+---
+
+El entorno de pruebas corre en **un solo servidor de AWS (EC2) con Docker Compose**. Toda la definición está en `compose.prod.yaml` del backend.
+
+<Callout type="warn" title="Estado">
+  La configuración está en `develop` desde el 8 de noviembre con T-24 ([PR #43](https://github.com/WilbertDevMx/backend-kampus/pull/43)). Para dar T-24 por terminada falta, según su criterio de terminado: la **URL pública con HTTPS** funcionando, la **app web** publicada y el monitor externo de `/up` registrado. Cuando estén, agrega la URL a la tabla de [URL base](/docs/backend/api#url-base).
+</Callout>
+
+## Servicios
+
+<Mermaid chart={`
+flowchart LR
+    Usuario((App)) -->|HTTPS 443| nginx
+    nginx -->|/app WebSocket| reverb
+    nginx -->|resto| app[app · PHP-FPM]
+    app --> db[(PostgreSQL)]
+    queue --> db
+    queue -->|eventos| reverb
+    app --> S3[(S3 privado)]
+    queue -->|correos| Resend
+    certbot -.->|certificado| nginx
+`} />
+
+| Servicio | Qué hace |
+| --- | --- |
+| `nginx` | Entrada pública con HTTPS. Manda `/app` al WebSocket y lo demás a PHP. |
+| `certbot` | Renueva el certificado de Let's Encrypt; Nginx toma el nuevo cada 6 horas. |
+| `app` | La API (PHP-FPM 8.3). |
+| `queue` | La cola: correos de verificación y recuperación, y eventos como `match.created`. |
+| `scheduler` | Las tareas programadas de Laravel. |
+| `reverb` | El WebSocket ([Tiempo real](/docs/backend/api/chat/realtime)); solo se ve dentro de la red de Docker. |
+| `db` | PostgreSQL 16, con los datos en el volumen `pgdata`. |
+
+Las imágenes se guardan en **S3** (bucket privado, con URLs firmadas) y los correos salen por **Resend**.
+
+## Antes de desplegar (una sola vez)
+
+1. **Servidor:** una instancia EC2 con Ubuntu 24.04 y al menos 2 GB de RAM (`t3.small` o `t4g.small`), con IP elástica. En su grupo de seguridad solo se abren 22 (SSH), 80 y 443.
+2. **Dominio:** un registro DNS `A` del dominio de la API a la IP elástica.
+3. **S3:** un bucket **privado** ("Block all public access" activado) y un usuario de IAM con permiso solo sobre ese bucket (`s3:GetObject`, `s3:PutObject` y `s3:DeleteObject`). Nunca se usan las llaves de la cuenta.
+4. **Resend:** el dominio verificado y una API key con permiso **solo de envío**. Sin dominio verificado, Resend solo entrega correos a la cuenta dueña y los alumnos no recibirían la verificación.
+
+## Variables de producción
+
+Se copian de `.env.production.example` a `.env.production`, que **nunca** se sube al repositorio. Las que cambian respecto a local:
+
+| Variable | Valor |
+| --- | --- |
+| `API_DOMAIN` · `ACME_EMAIL` | Dominio de la API y correo para Let's Encrypt. |
+| `APP_ENV` · `APP_DEBUG` | `production` · `false` |
+| `APP_URL` | `https://<dominio-de-la-API>` |
+| `FRONTEND_URLS` | Origen de la app web, para CORS. |
+| `PASSWORD_RESET_URL` | Pantalla de la app que abre el enlace de recuperación (`/auth/reset-password`). |
+| `TRUSTED_PROXIES` | `172.16.0.0/12`, la red de Docker, para leer la IP real detrás de Nginx. |
+| `SANCTUM_TOKEN_EXPIRATION` | `10080` minutos (7 días). |
+| `BROADCAST_CONNECTION` · `REVERB_*` | `reverb` y credenciales propias del entorno. |
+| `PROFILE_PHOTOS_DISK` · `GROUP_IMAGES_DISK` · `AWS_*` | `s3` y las llaves del usuario de IAM. |
+| `MAIL_*` | SMTP de Resend. |
+| `LOG_LEVEL` · `LOG_SECURITY_DAYS` | `warning` · `90` días de `security.log`. |
+
+## Desplegar
+
+```bash
+git clone https://github.com/WilbertDevMx/backend-kampus.git && cd backend-kampus
+cp .env.production.example .env.production   # y llena los valores marcados con <...>
+docker compose -f compose.prod.yaml --env-file .env.production run --rm app php artisan key:generate --show
+docker compose -f compose.prod.yaml --env-file .env.production up -d --build db app
+docker compose -f compose.prod.yaml --env-file .env.production exec app php artisan migrate --force
+docker compose -f compose.prod.yaml --env-file .env.production exec app php artisan db:seed --class=CatalogSeeder --force
+docker compose -f compose.prod.yaml --env-file .env.production exec app php artisan db:seed --class=ZoneSeeder --force
+docker compose -f compose.prod.yaml --env-file .env.production up -d --build
+docker compose -f compose.prod.yaml --env-file .env.production exec app php artisan kampus:create-admin
+```
+
+- La llave que imprime `key:generate --show` va en `APP_KEY` antes del `up`.
+- La primera vez se levantan solo `db` y `app` para migrar: la cola y el scheduler fallan si arrancan antes de que existan las tablas.
+- En producción **no** se corre `db:seed` sin `--class`: `DatabaseSeeder` crea un usuario de prueba.
+
+Para actualizar: `git pull`, el mismo `up -d --build` y después `migrate --force`.
+
+## Certificado HTTPS (solo la primera vez)
+
+Nginx arranca con un certificado autofirmado temporal. Con el DNS ya apuntando al servidor:
+
+```bash
+docker compose -f compose.prod.yaml --env-file .env.production run --rm --entrypoint sh certbot -c 'certbot certonly --webroot -w /var/www/certbot -d "$API_DOMAIN" --email "$ACME_EMAIL" --agree-tos --no-eff-email'
+docker compose -f compose.prod.yaml --env-file .env.production exec nginx kampus-reload
+```
+
+Desde ahí `certbot` lo renueva solo. Si el primer comando falla, revisa que el DNS ya apunte a la IP elástica y que el puerto 80 esté abierto.
+
+## Monitoreo básico
+
+- `https://<dominio-de-la-API>/up` responde `200` mientras la API está arriba. Se registra en un monitor externo gratuito (por ejemplo, UptimeRobot) para recibir un aviso si se cae.
+- Logs: `docker compose -f compose.prod.yaml logs -f app queue reverb`. Los de Laravel, incluido `security.log`, quedan en el volumen `logs`.

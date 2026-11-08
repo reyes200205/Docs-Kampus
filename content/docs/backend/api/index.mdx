@@ -3,7 +3,16 @@ title: "Introducción a la API"
 description: "Referencia de la API de Kampus: convenciones, autenticación y endpoints."
 ---
 
-Esta sección documenta los endpoints de la API, con ejemplos de petición y respuesta.
+Esta sección documenta los endpoints de la API, con ejemplos de petición y respuesta. Está dividida por módulo:
+
+| Carpeta | Qué cubre |
+| --- | --- |
+| **Autenticación** | [Inicio de sesión](/docs/backend/api/auth/login), [registro y verificación](/docs/backend/api/auth/register) y [recuperar la contraseña](/docs/backend/api/auth/password). |
+| **Perfil** | [Perfil, intereses y fotos](/docs/backend/api/profile/profile) y [zonas y ubicación](/docs/backend/api/profile/location). |
+| **Descubrimiento y matches** | [Descubrimiento y swipe](/docs/backend/api/social/discovery), [matches](/docs/backend/api/social/matches) y [bloqueo y reporte](/docs/backend/api/social/blocks-reports). |
+| **Chat** | [Tiempo real](/docs/backend/api/chat/realtime). Los mensajes (T-14) se agregan aquí. |
+| **Grupos** | [Grupos, integrantes y actividades](/docs/backend/api/groups). |
+| **Administración** | [Staff](/docs/backend/api/admin/staff) y [revisión de grupos](/docs/backend/api/admin/group-review). |
 
 ## URL base
 
@@ -11,12 +20,13 @@ Esta sección documenta los endpoints de la API, con ejemplos de petición y res
 | --- | --- |
 | Local | `http://localhost:8000/api` |
 | Local desde el celular | `http://<IP-de-tu-PC>:8000/api` (ver [App móvil](/docs/mobile/device#conectar-con-el-backend)) |
+| Entorno de pruebas | Pendiente: se agrega cuando T-24 publique la URL con HTTPS (ver [Despliegue](/docs/backend/deployment)) |
 
 ## Convenciones
 
 - Todas las peticiones y respuestas usan **JSON**. Envía siempre `Accept: application/json`.
 - Los errores de cualquier ruta bajo `/api/*` se devuelven en JSON, nunca como página HTML.
-- Las rutas protegidas requieren un token de Sanctum. Ver [Autenticación](/docs/backend/api/authentication).
+- Las rutas protegidas requieren un token de Sanctum. Ver [Autenticación](/docs/backend/api/auth/login).
 - El idioma de los mensajes de validación es español (`APP_LOCALE=es`).
 
 ## Estado del servicio
@@ -31,11 +41,61 @@ Responde `200` cuando la aplicación está arriba. Útil para monitoreo.
 
 | Método | Ruta | Auth | Descripción |
 | --- | --- | --- | --- |
+| `POST` | `/api/register` | No | Crea una cuenta de estudiante con correo institucional ([Autenticación](/docs/backend/api/auth/register#crear-la-cuenta)) |
+| `GET` | `/api/email/verify/{id}/{hash}` | Enlace firmado | Verifica el correo; el enlace llega por correo y vence a los 60 minutos ([Autenticación](/docs/backend/api/auth/register#verificar-el-correo)) |
+| `POST` | `/api/login` | No | Inicia sesión y devuelve el token ([Autenticación](/docs/backend/api/auth/login#iniciar-sesión)) |
+| `POST` | `/api/logout` | Token | Revoca el token de la petición ([Autenticación](/docs/backend/api/auth/login#cerrar-sesión)) |
+| `POST` | `/api/forgot-password` | No | Manda el enlace para restablecer la contraseña; responde igual exista o no el correo ([Autenticación](/docs/backend/api/auth/password#pedir-el-enlace)) |
+| `POST` | `/api/reset-password` | No | Restablece la contraseña con el token del correo y cierra todas las sesiones ([Autenticación](/docs/backend/api/auth/password#restablecer-la-contraseña)) |
 | `GET` | `/api/user` | Sí | Usuario autenticado |
+| `GET` · `PATCH` | `/api/profile` | Estudiante | Lee o actualiza el perfil: nombre, carrera, semestre, fecha de nacimiento, **[Nuevo]** género, bio, zona y filtros de descubrimiento; trae qué le falta para estar completo (T-49) ([Perfil](/docs/backend/api/profile/profile#editar-el-perfil)) |
+| `GET` | `/api/interests` | Estudiante | Catálogo de intereses ([Perfil](/docs/backend/api/profile/profile#intereses)) |
+| `PUT` | `/api/profile/interests` | Estudiante | Reemplaza los intereses del perfil, de 3 a 20 ([Perfil](/docs/backend/api/profile/profile#intereses)) |
+| `POST` | `/api/profile/photos` | Estudiante | Sube una foto JPG, PNG o WebP de hasta 5 MB, con un máximo de 5 por perfil. Se le quitan los metadatos EXIF y GPS ([Perfil](/docs/backend/api/profile/profile#fotos)) |
+| `DELETE` | `/api/profile/photos/{photo}` | Estudiante | Borra una foto del propio perfil ([Perfil](/docs/backend/api/profile/profile#fotos)) |
+| `GET` | `/api/zones` | Estudiante | Catálogo de zonas: campus y colonias ([Zonas y ubicación](/docs/backend/api/profile/location#catálogo-de-zonas)) |
+| `GET` | `/api/location` | Estudiante | Zona declarada y celda de Cerca de ti ([Zonas y ubicación](/docs/backend/api/profile/location#ver-la-ubicación-del-alumno)) |
+| `PUT` | `/api/location/zone` | Estudiante | Declara o quita la zona ([Zonas y ubicación](/docs/backend/api/profile/location#declarar-la-zona)) |
+| `PUT` · `DELETE` | `/api/location/nearby` | Estudiante | Activa Cerca de ti con un geohash de 6 caracteres, o lo desactiva y borra la celda ([Zonas y ubicación](/docs/backend/api/profile/location#activar-cerca-de-ti)) |
+| `GET` | `/api/discover` | Estudiante | Siguiente tanda de perfiles por evaluar ([Descubrimiento](/docs/backend/api/social/discovery#obtener-perfiles)) |
+| `GET` · `PUT` | `/api/discover/filters` | Estudiante | Lee o reemplaza los filtros guardados ([Descubrimiento](/docs/backend/api/social/discovery#filtros)) |
+| `POST` | `/api/swipes` | Estudiante | Me interesa o Pasar sobre un perfil; si el Me interesa es mutuo, devuelve el match ([Descubrimiento](/docs/backend/api/social/discovery#evaluar-un-perfil)) |
+| `GET` | `/api/matches` | Estudiante | Lista de matches, del más reciente al más antiguo ([Matches](/docs/backend/api/social/matches#lista-de-matches)) |
+| `GET` · `POST` | `/api/groups` | Estudiante | Explora los grupos aprobados o crea uno, que queda en revisión ([Grupos](/docs/backend/api/groups#explorar-grupos)) |
+| `GET` | `/api/groups/mine` | Estudiante | Grupos del alumno, en cualquier estado ([Grupos](/docs/backend/api/groups#mis-grupos)) |
+| `GET` · `PATCH` · `DELETE` | `/api/groups/{id}` | Estudiante | Ver un grupo; editarlo o borrarlo, si es su administrador ([Grupos](/docs/backend/api/groups#ver-editar-y-borrar)) |
+| `POST` | `/api/groups/{id}/image` | Estudiante | Imagen del grupo, sin EXIF y en el bucket privado ([Grupos](/docs/backend/api/groups#imagen-del-grupo)) |
+| `GET` · `POST` | `/api/groups/{id}/members` | Estudiante | Lista de integrantes o unirse al grupo ([Grupos](/docs/backend/api/groups#integrantes)) |
+| `DELETE` | `/api/groups/{id}/members/me` | Estudiante | Salir del grupo ([Grupos](/docs/backend/api/groups#integrantes)) |
+| `GET` · `POST` | `/api/groups/{id}/activities` | Estudiante | Próximas (o pasadas) actividades, o publicar una ([Grupos](/docs/backend/api/groups#actividades)) |
+| `PATCH` · `DELETE` | `/api/groups/{id}/activities/{activity}` | Estudiante | Editar o borrar una actividad ([Grupos](/docs/backend/api/groups#publicar-editar-y-borrar)) |
+| `GET` · `POST` | `/api/blocks` | Estudiante | Usuarios bloqueados o bloquear a alguien ([Bloqueo y reporte](/docs/backend/api/social/blocks-reports#bloquear)) |
+| `DELETE` | `/api/blocks/{userId}` | Estudiante | Desbloquear ([Bloqueo y reporte](/docs/backend/api/social/blocks-reports#desbloquear)) |
+| `POST` | `/api/reports` | Estudiante | Reporta a un estudiante y, si se pide, lo bloquea ([Bloqueo y reporte](/docs/backend/api/social/blocks-reports#reportar)) |
+| `POST` | `/api/broadcasting/auth` | Sí | Autoriza la suscripción a un canal privado de WebSocket ([Tiempo real](/docs/backend/api/chat/realtime#canales-privados)) |
 
-### Módulo de Administración (planeado)
+En la columna **Auth**:
 
-Rutas propuestas para T-41 a T-43. Todas requieren token de una cuenta de staff; el moderador solo recibe datos de su universidad. Cada ruta se confirma y se documenta en su PR.
+- **Token**: basta con el token de Sanctum.
+- **Sí**: token y correo verificado.
+- **Estudiante**: además, la cuenta debe ser `student`. **[Nuevo]** El staff recibe `403` en esas rutas.
+
+### Módulo de Administración
+
+Todas requieren el token de una cuenta de staff; el moderador solo recibe datos de su universidad.
+
+**En `develop`** (T-41 y T-42):
+
+| Método | Ruta | Rol | Descripción | Tarea |
+| --- | --- | --- | --- | --- |
+| `GET` | `/api/admin/groups?status=pending` | Moderador, admin | Cola de grupos en revisión, o historial con `status` ([Administración: grupos](/docs/backend/api/admin/group-review#cola-de-revisión)) | T-42 |
+| `POST` | `/api/admin/groups/{id}/approve` | Moderador, admin | Aprueba un grupo ([Administración: grupos](/docs/backend/api/admin/group-review#aprobar-o-rechazar)) | T-42 |
+| `POST` | `/api/admin/groups/{id}/reject` | Moderador, admin | Rechaza un grupo, con `reason` obligatorio ([Administración: grupos](/docs/backend/api/admin/group-review#aprobar-o-rechazar)) | T-42 |
+| `POST` | `/api/admin/groups` | Moderador, admin | Crea un grupo oficial, ya aprobado ([Administración: grupos](/docs/backend/api/admin/group-review#crear-un-grupo-oficial)) | T-42 |
+| `GET` · `POST` | `/api/admin/staff` | Admin | Lista o crea cuentas de staff ([Administración: staff](/docs/backend/api/admin/staff)) | T-41 |
+| `PATCH` | `/api/admin/staff/{id}` | Admin | Desactiva o reactiva una cuenta de staff, con `reason`. La universidad no se cambia ([Administración: staff](/docs/backend/api/admin/staff#desactivar-o-reactivar-una-cuenta)) | T-41 |
+
+**Planeado** (T-37 y T-43, Sprint 4). Son rutas propuestas; cada una se confirma y se documenta en su PR.
 
 | Método | Ruta | Rol | Descripción | Tarea |
 | --- | --- | --- | --- | --- |
@@ -45,12 +105,7 @@ Rutas propuestas para T-41 a T-43. Todas requieren token de una cuenta de staff;
 | `POST` | `/api/admin/users/{id}/reactivate` | Moderador, admin | Reactiva una cuenta suspendida, con `reason` | T-43 |
 | `GET` | `/api/admin/reports` | Moderador, admin | Reportes por estado | T-37 |
 | `PATCH` | `/api/admin/reports/{id}` | Moderador, admin | Resuelve o descarta un reporte | T-37 |
-| `GET` | `/api/admin/groups?status=pending` | Moderador, admin | Grupos pendientes de aprobación | T-42 |
-| `POST` | `/api/admin/groups/{id}/approve` | Moderador, admin | Aprueba un grupo | T-42 |
-| `POST` | `/api/admin/groups/{id}/reject` | Moderador, admin | Rechaza un grupo, con `reason` | T-42 |
-| `GET` · `POST` | `/api/admin/staff` | Admin | Lista o crea cuentas de staff | T-41 |
-| `PATCH` | `/api/admin/staff/{id}` | Admin | Cambia la universidad o desactiva una cuenta de staff | T-41 |
 
-<Callout title="En construcción">
-  La API está en sus primeras tareas. Cada endpoint nuevo se documenta aquí como parte de la [Definition of Done](/docs/development/pull-requests#definition-of-done).
+<Callout title="Mantener al día">
+  Cada endpoint nuevo se documenta aquí como parte de la [Definition of Done](/docs/development/pull-requests#definition-of-done).
 </Callout>
