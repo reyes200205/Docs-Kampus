@@ -1,6 +1,6 @@
 ---
-title: "Instalación"
-description: "Cómo levantar el backend en tu computadora."
+title: "Instalación y comandos"
+description: "Cómo levantar el backend en tu computadora, los comandos del día a día y lo que revisa CI."
 ---
 
 ## Requisitos
@@ -45,3 +45,22 @@ Y en la app usa la IP local de tu PC (por ejemplo `http://192.168.1.50:8000`). V
 <Callout title="PostgreSQL o MySQL">
   El proyecto está configurado para PostgreSQL porque la vista **Cerca** trabaja con datos geográficos. Si el equipo decide usar MySQL, basta con cambiar `DB_CONNECTION=mysql` y `DB_PORT=3306` en `.env`, y el servicio de base de datos en `.github/workflows/ci.yml`.
 </Callout>
+
+## Comandos útiles
+
+```bash
+php artisan test                 # Ejecuta las pruebas
+./vendor/bin/pint                # Corrige el formato del código
+./vendor/bin/pint --test         # Solo revisa el formato (lo mismo que hace CI)
+php artisan migrate:fresh --seed # Reinicia la base de datos con datos de prueba
+```
+
+## Integración continua
+
+Cada push y cada pull request hacia `main` o `develop` ejecuta `.github/workflows/ci.yml` en `ubuntu-latest` con PHP 8.3:
+
+1. **Formato:** `./vendor/bin/pint --test`.
+2. **Migraciones:** `php artisan migrate --force` contra un servicio `postgres:16` real (base `kampus_test`).
+3. **Pruebas:** `php artisan test`.
+
+Corre lo mismo en tu computadora antes de abrir el PR: si un paso falla, el PR no está listo para revisión. `vendor/` se guarda en caché según el hash de `composer.lock`, y si empujas otro commit a la misma rama, la ejecución anterior se cancela. La convención de commits la revisa otro workflow (`commits.yml`); ver [Pull requests](/docs/development/pull-requests).

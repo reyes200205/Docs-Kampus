@@ -6,17 +6,17 @@ description: "Perfiles por evaluar, filtros guardados y registro de Me interesa 
 El descubrimiento muestra perfiles de estudiantes de las instituciones participantes para que el alumno responda **Me interesa** o **Pasar** (RF-05). Los filtros por universidad, carrera e intereses se guardan en el perfil y se conservan entre sesiones (RF-06).
 
 <Callout title="Estado">
-  Llega con T-09 en el [PR #31](https://github.com/WilbertDevMx/backend-kampus/pull/31), y el campo `match` de [`POST /api/swipes`](#evaluar-un-perfil) con T-10 en el [PR #32](https://github.com/WilbertDevMx/backend-kampus/pull/32). Los dos están en revisión; esta página describe cómo queda la API al fusionarse.
+  En `develop` desde el 2 de noviembre: T-09 en el [PR #31](https://github.com/WilbertDevMx/backend-kampus/pull/31) y el campo `match` de [`POST /api/swipes`](#evaluar-un-perfil) con T-10 en el [PR #32](https://github.com/WilbertDevMx/backend-kampus/pull/32).
 </Callout>
 
-Todas las rutas de esta página requieren un token de Sanctum, un correo verificado y una cuenta `student` (ver [Autenticación](/docs/backend/api/authentication)). **[Nuevo]** Una cuenta de staff (`moderator` o `admin`) recibe `403` en todas ellas, igual que en las rutas de perfil.
+Todas las rutas de esta página requieren un token de Sanctum, un correo verificado y una cuenta `student` (ver [Autenticación](/docs/backend/api/auth/login)). **[Nuevo]** Una cuenta de staff (`moderator` o `admin`) recibe `403` en todas ellas, igual que en las rutas de perfil.
 
 ## Quién aparece
 
 Un perfil sale en el descubrimiento solo si cumple todo esto:
 
 - es de un **estudiante** con el correo verificado y sin suspensión. **[Nuevo]** Nunca aparecen moderadores ni administradores;
-- tiene perfil creado;
+- tiene el **perfil completo** (**[Nuevo]** T-49): nombre, fecha de nacimiento, género, carrera y semestre, al menos 3 intereses, al menos 1 foto y "Sobre mí". Ver [Perfil completo](/docs/backend/api/profile/profile#perfil-completo);
 - **no hay bloqueo** entre los dos, en ningún sentido (RF-13);
 - quien busca **todavía no lo evalúa**. Un perfil al que ya se le dio Me interesa o Pasar no vuelve a salir.
 
@@ -100,6 +100,7 @@ La tarjeta no trae correo, fecha de nacimiento ni zona: solo lo que se muestra e
 | --- | --- |
 | `401` | Sin token o con un token vencido. |
 | `403` | El correo no está verificado, o la cuenta es de staff (`Tu cuenta no tiene acceso a esta sección.`). |
+| `403` | **[Nuevo]** Quien busca no ha completado su perfil (T-49). Trae `"code": "profile_incomplete"` para que la app lo mande a terminarlo. También aplica a `POST /api/swipes`. |
 | `422` | `limit` no es un entero de 1 a 20. |
 
 ## Filtros
@@ -183,7 +184,7 @@ Si todavía no hay match, `match` viene en `null`:
 }
 ```
 
-Si la otra persona ya había dado Me interesa, este swipe **crea el match** (T-10, RF-07) y la respuesta lo trae, con el mismo formato que la [lista de matches](/docs/backend/api/matches#lista-de-matches). Así la app muestra "Es un match" en ese momento:
+Si la otra persona ya había dado Me interesa, este swipe **crea el match** (T-10, RF-07) y la respuesta lo trae, con el mismo formato que la [lista de matches](/docs/backend/api/social/matches#lista-de-matches). Así la app muestra "Es un match" en ese momento:
 
 ```json
 {
@@ -204,7 +205,7 @@ Si la otra persona ya había dado Me interesa, este swipe **crea el match** (T-1
 }
 ```
 
-La otra persona se entera por WebSocket con el evento [`match.created`](/docs/backend/api/matches#aviso-en-tiempo-real).
+La otra persona se entera por WebSocket con el evento [`match.created`](/docs/backend/api/social/matches#aviso-en-tiempo-real).
 
 ### Errores
 

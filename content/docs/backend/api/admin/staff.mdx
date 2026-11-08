@@ -1,12 +1,12 @@
 ---
-title: "Administración: staff"
+title: "Staff"
 description: "Alta, desactivación y reactivación de moderadores y administradores, con su bitácora (T-41, RF-22)."
 ---
 
-**[Nuevo]** Un administrador da de alta a moderadores y a otros administradores desde el panel, y puede desactivar o reactivar sus cuentas (RF-22). Nadie se registra como staff por su cuenta: el [registro público](/docs/backend/api/authentication#crear-la-cuenta) siempre crea estudiantes, y el primer administrador se crea en el servidor con `php artisan kampus:create-admin`.
+**[Nuevo]** Un administrador da de alta a moderadores y a otros administradores desde el panel, y puede desactivar o reactivar sus cuentas (RF-22). Nadie se registra como staff por su cuenta: el [registro público](/docs/backend/api/auth/register#crear-la-cuenta) siempre crea estudiantes, y el primer administrador se crea en el servidor con `php artisan kampus:create-admin`.
 
 <Callout title="Estado">
-  Llega con T-41 en el [PR #33](https://github.com/WilbertDevMx/backend-kampus/pull/33), que está en revisión. Esta página describe cómo queda la API al fusionarse. La moderación de usuarios, reportes y grupos llega con T-37, T-42 y T-43.
+  En `develop` desde el 3 de noviembre con T-41 ([PR #33](https://github.com/WilbertDevMx/backend-kampus/pull/33)). La moderación de reportes y usuarios llega con T-37 y T-43; la aprobación de grupos ya está, con T-42.
 </Callout>
 
 Todas las rutas de esta página requieren un token de Sanctum, un correo verificado y una cuenta **`admin`**. Un moderador o un estudiante recibe `403` (`Tu cuenta no tiene acceso a esta sección.`), y sin token la respuesta es `401`.
@@ -141,7 +141,7 @@ Al desactivar una cuenta:
 
 1. se marca como suspendida (`users.suspended_at`) y queda en la lista con `active: false`;
 2. **se cierran todas sus sesiones**: se revocan sus tokens, así que la app pierde el acceso en la siguiente petición;
-3. el [login](/docs/backend/api/authentication#iniciar-sesión) le responde `403` con `Tu cuenta está suspendida.` hasta que se reactive.
+3. el [login](/docs/backend/api/auth/login#iniciar-sesión) le responde `403` con `Tu cuenta está suspendida.` hasta que se reactive.
 
 ### Errores
 
