@@ -1,0 +1,210 @@
+---
+title: "Verificación en dos pasos"
+description: "Activar la verificación en dos pasos con una app de autenticación, iniciar sesión con el código y códigos de respaldo (T-47, RF-02 y RNF-02)."
+---
+
+**[Nuevo]** La **verificación en dos pasos** pide, además de la contraseña, un código de 6 dígitos que genera una app de autenticación del celular y que cambia cada 30 segundos (TOTP). Sirve con Google Authenticator, Microsoft Authenticator, Authy y cualquier app compatible. Cubre los criterios "Autenticación de Usuario" y "Recuperación de Contraseñas" de la rúbrica de la Unidad 3.
+
+<Callout title="Estado">
+  En revisión con T-47 ([PR #49](https://github.com/WilbertDevMx/backend-kampus/pull/49)), que va después de [Sesiones](/docs/backend/api/auth/sessions) (T-46). Las pantallas de la app todavía no tienen tarea.
+</Callout>
+
+Es **opcional** y sirve para **estudiantes y staff**. Las rutas de configuración requieren un token de Sanctum y un correo verificado.
+
+<Callout type="warn" title="Cambio en el inicio de sesión">
+  Con la verificación activa, `POST /api/login` **ya no entrega el token** al primer paso: responde `200` con `two_factor_required: true`. La pantalla de login tiene que manejar las dos respuestas. Ver [Iniciar sesión con la verificación activa](#iniciar-sesión-con-la-verificación-activa).
+</Callout>
+
+## Ver el estado
+
+```http
+GET /api/two-factor
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+```json
+{
+  "data": {
+    "enabled": true,
+    "pending_confirmation": false,
+    "confirmed_at": "2026-11-10T16:20:00+00:00",
+    "recovery_codes_left": 8
+  }
+}
+```
+
+| Campo | Qué es |
+| --- | --- |
+| `enabled` | `true` si la verificación está activa y el login pide el código. |
+| `pending_confirmation` | `true` si se empezó a configurar y todavía falta confirmar con el primer código. |
+| `confirmed_at` | Cuándo se activó. |
+| `recovery_codes_left` | Cuántos códigos de respaldo quedan sin usar. |
+
+## Activar
+
+Se activa en dos pasos, para que nadie se quede fuera de su cuenta por escanear mal el QR.
+
+### 1. Empezar la configuración
+
+```http
+POST /api/two-factor
+Accept: application/json
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "password": "********"
+}
+```
+
+Pide la **contraseña actual**: un token robado no basta para cambiar la seguridad de la cuenta. Responde `201`:
+
+```json
+{
+  "data": {
+    "secret": "JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP",
+    "otpauth_url": "otpauth://totp/Kampus:ana.lopez%40utt.edu.mx?secret=JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP&issuer=Kampus&algorithm=SHA1&digits=6&period=30"
+  }
+}
+```
+
+- La app convierte `otpauth_url` en un **código QR** para escanearlo con la app de autenticación. La API no genera la imagen.
+- `secret` sirve para escribirlo a mano si no se puede escanear.
+- Todavía **no está activa**. Si se vuelve a llamar antes de confirmar, se genera un secreto nuevo y el anterior deja de servir.
+
+### 2. Confirmar con el primer código
+
+```http
+POST /api/two-factor/confirm
+Accept: application/json
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "code": "482913"
+}
+```
+
+Con un código correcto, la verificación queda activa y responde los **8 códigos de respaldo**:
+
+```json
+{
+  "data": {
+    "recovery_codes": ["k3j9a-x8p2m", "q7d4w-z1n6b", "..."]
+  }
+}
+```
+
+<Callout type="warn" title="Los códigos de respaldo se muestran una sola vez">
+  La API solo guarda su hash: no se pueden volver a consultar. La app tiene que pedirle al usuario que los guarde (copiarlos o descargarlos) antes de cerrar la pantalla.
+</Callout>
+
+Si el código no es correcto, responde `422` con `El código no es correcto. Revisa que la hora de tu celular esté bien.` (en `errors.code`).
+
+## Iniciar sesión con la verificación activa
+
+1. `POST /api/login` con correo y contraseña, igual que siempre. Si son correctos y la verificación está activa, responde `200`:
+
+   ```json
+   {
+     "message": "Escribe el código de tu app de autenticación.",
+     "two_factor_required": true,
+     "challenge_token": "Xr4…64 caracteres…",
+     "expires_in": 300
+   }
+   ```
+
+2. Con el código de la app, el segundo paso entrega el token:
+
+   ```http
+   POST /api/login/two-factor
+   Accept: application/json
+   Content-Type: application/json
+
+   {
+     "challenge_token": "Xr4…",
+     "code": "482913"
+   }
+   ```
+
+   Responde `201` con lo mismo que un [inicio de sesión normal](/docs/backend/api/auth/login#respuesta-201): `token`, `token_type`, `expires_at` y `user`. El `device_name` que se mandó en el primer paso se conserva.
+
+Si el usuario no tiene la app a la mano, puede mandar `recovery_code` en lugar de `code`. Cada código de respaldo sirve **una sola vez**.
+
+Sobre el `challenge_token`:
+
+- Vence a los **5 minutos** (`expires_in`).
+- Es de **un solo uso**.
+- Se invalida después de **5 códigos equivocados**. Desde ahí hay que volver a escribir correo y contraseña.
+
+### Errores del segundo paso
+
+| Código | Cuándo | Mensaje |
+| --- | --- | --- |
+| `422` | Falta el código. | `Escribe el código de tu app o un código de respaldo.` |
+| `422` | El código o el código de respaldo no es correcto. | `El código no es correcto.` (en `errors.code` o `errors.recovery_code`) |
+| `422` | El reto venció, ya se usó o se agotaron los 5 intentos. | `El inicio de sesión venció. Vuelve a escribir tu correo y contraseña.` o `Demasiados códigos incorrectos…` (en `errors.challenge_token`) |
+| `429` | Más de 10 peticiones por minuto. | |
+
+## Desactivar
+
+```http
+DELETE /api/two-factor
+Accept: application/json
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "password": "********"
+}
+```
+
+Pide la contraseña actual y responde `204`. Desde ahí, el login vuelve a entregar el token con la contraseña sola.
+
+## Generar códigos de respaldo nuevos
+
+```http
+POST /api/two-factor/recovery-codes
+Accept: application/json
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "password": "********"
+}
+```
+
+Pide la contraseña actual y responde 8 códigos nuevos, igual que al confirmar. **Los anteriores dejan de servir.** Conviene ofrecerlo cuando `recovery_codes_left` sea bajo.
+
+### Errores de la configuración
+
+| Código | Cuándo |
+| --- | --- |
+| `409` | Activar cuando ya está activa, confirmar sin una configuración pendiente o generar códigos sin tenerla activa. |
+| `422` | La contraseña no es correcta (`La contraseña no es correcta.`) o el código no es correcto. |
+| `429` | Más de 6 peticiones por minuto en activar, confirmar, desactivar o generar códigos. |
+
+## Al recuperar la contraseña
+
+Si la cuenta tiene la verificación activa, [restablecer la contraseña](/docs/backend/api/auth/password#restablecer-la-contraseña) también pide `code` o `recovery_code`. Así, quien entre al correo del alumno no se queda con la cuenta: le falta el celular.
+
+## Seguridad
+
+- **El secreto se guarda cifrado** con la llave de la aplicación (`APP_KEY`). Los códigos de respaldo se guardan solo como hash, y también cifrados. Ninguno sale en `/api/user`.
+- **Un código no se puede usar dos veces:** la API recuerda el último periodo de 30 segundos aceptado de cada usuario. Se aceptan los códigos del periodo anterior y del siguiente, por si la hora del celular va desfasada.
+- Activar, desactivar, generar códigos, entrar con un código de respaldo y los códigos incorrectos quedan en `security.log`.
+- El cálculo lo hace `App\Support\Security\TwoFactor` con la librería `pragmarx/google2fa`, la misma que usa Laravel Fortify.
+
+## Flujo sugerido en la app
+
+**En Ajustes → Seguridad:**
+
+1. Con `GET /api/two-factor`, muestra si está activa.
+2. Para activarla: pide la contraseña, llama a `POST /api/two-factor`, muestra el QR de `otpauth_url` (y `secret` para copiarlo) y pide el primer código.
+3. Con `POST /api/two-factor/confirm`, muestra los códigos de respaldo y no dejes cerrar la pantalla hasta que el usuario confirme que los guardó.
+
+**En el login:**
+
+1. Si `POST /api/login` responde `two_factor_required: true`, guarda el `challenge_token` y muestra el campo del código, con un enlace "Usar un código de respaldo".
+2. Llama a `POST /api/login/two-factor`. Si responde un error en `challenge_token`, regresa a la pantalla de correo y contraseña.
