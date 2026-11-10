@@ -7,7 +7,7 @@ Esta sección documenta los endpoints de la API, con ejemplos de petición y res
 
 | Carpeta | Qué cubre |
 | --- | --- |
-| **Autenticación** | [Inicio de sesión](/docs/backend/api/auth/login), [registro y verificación](/docs/backend/api/auth/register) y [recuperar la contraseña](/docs/backend/api/auth/password). |
+| **Autenticación** | [Inicio de sesión](/docs/backend/api/auth/login), **[Nuevo]** [sesiones](/docs/backend/api/auth/sessions), [registro y verificación](/docs/backend/api/auth/register) y [recuperar la contraseña](/docs/backend/api/auth/password). |
 | **Perfil** | [Perfil, intereses y fotos](/docs/backend/api/profile/profile) y [zonas y ubicación](/docs/backend/api/profile/location). |
 | **Descubrimiento y matches** | [Descubrimiento y swipe](/docs/backend/api/social/discovery), [matches](/docs/backend/api/social/matches) y [bloqueo y reporte](/docs/backend/api/social/blocks-reports). |
 | **Chat** | [Tiempo real](/docs/backend/api/chat/realtime). Los mensajes (T-14) se agregan aquí. |
@@ -45,6 +45,8 @@ Responde `200` cuando la aplicación está arriba. Útil para monitoreo.
 | `GET` | `/api/email/verify/{id}/{hash}` | Enlace firmado | Verifica el correo; el enlace llega por correo y vence a los 60 minutos ([Autenticación](/docs/backend/api/auth/register#verificar-el-correo)) |
 | `POST` | `/api/login` | No | Inicia sesión y devuelve el token ([Autenticación](/docs/backend/api/auth/login#iniciar-sesión)) |
 | `POST` | `/api/logout` | Token | Revoca el token de la petición ([Autenticación](/docs/backend/api/auth/login#cerrar-sesión)) |
+| `GET` | `/api/sessions` | Sí | **[Nuevo]** Sesiones activas con dispositivo, último uso y cuál es la actual ([Sesiones](/docs/backend/api/auth/sessions#ver-las-sesiones-activas)) |
+| `DELETE` | `/api/sessions/{id}` · `/api/sessions` | Sí | **[Nuevo]** Cierra una sesión, o todas menos la actual ([Sesiones](/docs/backend/api/auth/sessions#cerrar-una-sesión)) |
 | `POST` | `/api/forgot-password` | No | Manda el enlace para restablecer la contraseña; responde igual exista o no el correo ([Autenticación](/docs/backend/api/auth/password#pedir-el-enlace)) |
 | `POST` | `/api/reset-password` | No | Restablece la contraseña con el token del correo y cierra todas las sesiones ([Autenticación](/docs/backend/api/auth/password#restablecer-la-contraseña)) |
 | `GET` | `/api/user` | Sí | Usuario autenticado |

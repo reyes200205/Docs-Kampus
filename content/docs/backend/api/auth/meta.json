@@ -2,6 +2,7 @@
   "title": "Autenticación",
   "pages": [
     "login",
+    "sessions",
     "register",
     "password"
   ]
