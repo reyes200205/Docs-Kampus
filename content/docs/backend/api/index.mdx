@@ -9,7 +9,7 @@ Esta sección documenta los endpoints de la API, con ejemplos de petición y res
 | --- | --- |
 | **Autenticación** | [Inicio de sesión](/docs/backend/api/auth/login), [registro y verificación](/docs/backend/api/auth/register) y [recuperar la contraseña](/docs/backend/api/auth/password). |
 | **Perfil** | [Perfil, intereses y fotos](/docs/backend/api/profile/profile) y [zonas y ubicación](/docs/backend/api/profile/location). |
-| **Descubrimiento y matches** | [Descubrimiento y swipe](/docs/backend/api/social/discovery), [matches](/docs/backend/api/social/matches) y [bloqueo y reporte](/docs/backend/api/social/blocks-reports). |
+| **Descubrimiento y matches** | [Descubrimiento y swipe](/docs/backend/api/social/discovery), **[Nuevo]** [vista Cerca](/docs/backend/api/social/nearby), [matches](/docs/backend/api/social/matches) y [bloqueo y reporte](/docs/backend/api/social/blocks-reports). |
 | **Chat** | [Tiempo real](/docs/backend/api/chat/realtime). Los mensajes (T-14) se agregan aquí. |
 | **Grupos** | [Grupos, integrantes y actividades](/docs/backend/api/groups). |
 | **Administración** | [Staff](/docs/backend/api/admin/staff) y [revisión de grupos](/docs/backend/api/admin/group-review). |
@@ -59,6 +59,7 @@ Responde `200` cuando la aplicación está arriba. Útil para monitoreo.
 | `PUT` · `DELETE` | `/api/location/nearby` | Estudiante | Activa Cerca de ti con un geohash de 6 caracteres, o lo desactiva y borra la celda ([Zonas y ubicación](/docs/backend/api/profile/location#activar-cerca-de-ti)) |
 | `GET` | `/api/discover` | Estudiante | Siguiente tanda de perfiles por evaluar ([Descubrimiento](/docs/backend/api/social/discovery#obtener-perfiles)) |
 | `GET` · `PUT` | `/api/discover/filters` | Estudiante | Lee o reemplaza los filtros guardados ([Descubrimiento](/docs/backend/api/social/discovery#filtros)) |
+| `GET` | `/api/discover/nearby` | Estudiante | **[Nuevo]** Estudiantes cercanos con Cerca de ti activo, con posición difuminada y distancia aproximada ([Vista Cerca](/docs/backend/api/social/nearby)) |
 | `POST` | `/api/swipes` | Estudiante | Me interesa o Pasar sobre un perfil; si el Me interesa es mutuo, devuelve el match ([Descubrimiento](/docs/backend/api/social/discovery#evaluar-un-perfil)) |
 | `GET` | `/api/matches` | Estudiante | Lista de matches, del más reciente al más antiguo ([Matches](/docs/backend/api/social/matches#lista-de-matches)) |
 | `GET` · `POST` | `/api/groups` | Estudiante | Explora los grupos aprobados o crea uno, que queda en revisión ([Grupos](/docs/backend/api/groups#explorar-grupos)) |
