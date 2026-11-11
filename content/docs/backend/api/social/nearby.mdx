@@ -1,0 +1,125 @@
+---
+title: "Vista Cerca"
+description: "Estudiantes cercanos para el mapa por zonas, con posición difuminada y distancia aproximada (T-35, RF-19 y RNF-11)."
+---
+
+**[Nuevo]** La vista **Cerca** es un modo del [descubrimiento](/docs/backend/api/social/discovery): muestra en un mapa a los estudiantes que activaron **Cerca de ti**, en el centro de su zona y con la distancia aproximada ("≈ 2 km") (RF-19).
+
+<Callout title="Estado">
+  Terminada con T-35 ([PR #45](https://github.com/WilbertDevMx/backend-kampus/pull/45)), en la versión v0.2.0 del backend. **[Nuevo]** El requisito del perfil completo está en revisión ([PR #56](https://github.com/WilbertDevMx/backend-kampus/pull/56)). La pantalla de la app es T-30 y usa el mapa de T-29.
+</Callout>
+
+<Callout type="warn" title="Privacidad (RNF-11)">
+  La respuesta **nunca trae la celda de nadie ni una coordenada real**. El punto del mapa es el centro **público** de la zona del estudiante más un desplazamiento, y la distancia se redondea a kilómetros enteros. Ver [Privacidad de la ubicación](/docs/project/location-privacy).
+</Callout>
+
+La ruta requiere un token de Sanctum, un correo verificado y una cuenta `student`. El staff recibe `403`.
+
+## Quién puede verla
+
+Solo quien también tiene **Cerca de ti** activo y una celda guardada ([Activar Cerca de ti](/docs/backend/api/profile/location#activar-cerca-de-ti)). Así nadie ve a los demás sin compartir también su ubicación aproximada. Si no lo tiene activo, la API responde `403`:
+
+```json
+{
+  "message": "Activa \"Cerca de ti\" para ver quién está cerca.",
+  "code": "nearby_disabled"
+}
+```
+
+La app usa `code` para llevar al alumno a activar Cerca de ti.
+
+**[Nuevo]** Además, igual que en el descubrimiento, tiene que haber [completado su perfil](/docs/backend/api/profile/profile) (T-49). Si no, responde `403` con `"code": "profile_incomplete"`.
+
+## Quién aparece
+
+Un estudiante aparece si:
+
+- tiene **Cerca de ti** activo;
+- está a **10 km o menos** de quien consulta;
+- cumple las mismas reglas del [descubrimiento](/docs/backend/api/social/discovery#quién-aparece): es un estudiante disponible, no hay un bloqueo entre los dos en ningún sentido y quien consulta todavía no lo evalúa;
+- pasa los [filtros guardados](/docs/backend/api/social/discovery#filtros) (universidades, carrera e intereses).
+
+Salen ordenados del más cercano al más lejano.
+
+## Obtener a quién tienes cerca
+
+```http
+GET /api/discover/nearby?limit=30
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+| Parámetro | Descripción |
+| --- | --- |
+| `limit` | Opcional, de 1 a 50. Por defecto, 30. |
+
+Límite de 30 peticiones por minuto.
+
+### Respuesta `200`
+
+Cada estudiante trae la misma [tarjeta del descubrimiento](/docs/backend/api/social/discovery#respuesta-200) más el bloque `nearby`:
+
+```json
+{
+  "data": [
+    {
+      "id": 12,
+      "name": "Ana López",
+      "university": { "id": 1, "name": "Universidad Tecnológica de Torreón", "short_name": "UTT" },
+      "career": "Ingeniería en Software",
+      "semester": 5,
+      "age": 21,
+      "bio": "Me gusta el fútbol y el café.",
+      "shared_interests": 2,
+      "interests": [{ "id": 3, "name": "Fútbol", "category": "Deportes" }],
+      "photos": [{ "id": 40, "position": 1, "temporary_url": "https://..." }],
+      "nearby": {
+        "position": { "lat": 25.54213, "lng": -103.40871 },
+        "distance_km": 3,
+        "distance_label": "≈ 3 km"
+      }
+    }
+  ],
+  "meta": {
+    "radius_km": 10,
+    "center": { "lat": 25.53962, "lng": -103.41207 }
+  }
+}
+```
+
+| Campo | Qué es |
+| --- | --- |
+| `nearby.position` | Dónde dibujar su avatar: el centro de su zona (campus o colonia) más un desplazamiento fijo de 150 a 500 m. Si no declaró zona, el centro de un área de unos 5 km. |
+| `nearby.distance_km` | Distancia aproximada en kilómetros enteros. `0` significa menos de 1 km. |
+| `nearby.distance_label` | El texto para la ficha: `"≈ 3 km"` o `"Menos de 1 km"`. |
+| `meta.radius_km` | Radio de búsqueda, 10 km. |
+| `meta.center` | El punto de quien consulta, calculado igual que el de los demás. Sirve para centrar el mapa. |
+
+### Errores
+
+| Código | Cuándo |
+| --- | --- |
+| `403` con `code: "nearby_disabled"` | Quien consulta no tiene Cerca de ti activo. |
+| `403` con `code: "profile_incomplete"` | **[Nuevo]** Quien consulta no ha completado su perfil (T-49). |
+| `403` | La cuenta es de staff. |
+| `422` | `limit` fuera de 1 a 50. |
+| `429` | Más de 30 peticiones en un minuto. |
+
+## Cómo se calcula
+
+1. **Búsqueda.** Se toma la celda de quien consulta, se recorta a 5 caracteres (unos 5 km) y se buscan estudiantes en esa área y sus 8 vecinas, unos 15 km × 15 km. Luego se descartan los que quedan a más de 10 km.
+2. **Distancia.** Es la distancia en línea recta entre los centros de las dos celdas de ~1 km, redondeada a kilómetros. Como ya se guarda con esa precisión, no deja ubicar a nadie con más detalle que su celda.
+3. **Posición en el mapa.** Es el centro de su zona más un desplazamiento que sale de su id y de la llave de la aplicación. Siempre es el mismo para la misma persona, así que su punto no "brinca" entre consultas ni se puede promediar para acercarse a su ubicación.
+
+El cálculo vive en `App\Support\Location\Geohash` (centro de una celda, celdas vecinas y distancia con la fórmula del haversine) y `App\Discovery\NearbyPlacement` (posición y distancia). La consulta reutiliza el Builder `DiscoveryQuery` con el método `inCells()` (ver [Patrones de diseño](/docs/project/unit-1/design-patterns)).
+
+## Flujo sugerido en la app
+
+1. Al entrar al modo Cerca, llama a `GET /api/discover/nearby`.
+2. Si responde `nearby_disabled`, muestra la explicación y el botón para activar Cerca de ti. **[Nuevo]** Si responde `profile_incomplete`, mándalo a terminar su perfil, igual que en Descubrir.
+3. Centra el mapa en `meta.center` y dibuja un avatar por estudiante en `nearby.position`.
+4. Al tocar un avatar, abre la ficha con la tarjeta y `nearby.distance_label`. Desde ahí se puede evaluar con `POST /api/swipes`, igual que en el descubrimiento.
+
+## Rendimiento
+
+Con 1,000 estudiantes con Cerca de ti activo en la misma área y 50 resultados, la respuesta tarda unos 210 ms. El criterio de T-35 pide menos de 500 ms.
