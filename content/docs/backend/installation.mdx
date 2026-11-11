@@ -32,6 +32,20 @@ php artisan serve
 
 La API queda disponible en `http://localhost:8000/api`.
 
+## Límites de PHP en local
+
+**[Nuevo]** El PHP de una instalación local suele traer `upload_max_filesize = 2M` y `memory_limit = 128M`. Con eso, cualquier foto de más de 2 MB falla con "La imagen no se pudo subir", aunque la API acepte hasta 5 MB. Para que se comporte como el servidor, ubica tu `php.ini` con `php --ini` y deja:
+
+```ini
+upload_max_filesize = 6M
+post_max_size = 8M
+memory_limit = 256M
+```
+
+Son los mismos valores de `docker/php/production.ini`. Reinicia `php artisan serve` después de cambiarlos.
+
+Si tienes Xdebug en modo `coverage`, las pruebas tardan hasta 10 veces más. Córrelas con `XDEBUG_MODE=off php artisan test` (en PowerShell: `$env:XDEBUG_MODE="off"; php artisan test`). Ver [Errores resueltos](/docs/project/bug-log#entorno-local).
+
 ## Usar la API desde el celular
 
 En el celular, `localhost` apunta al propio celular. Para que la app pueda consumir la API, levanta el servidor escuchando en la red:
@@ -54,20 +68,6 @@ php artisan test                 # Ejecuta las pruebas
 ./vendor/bin/pint --test         # Solo revisa el formato (lo mismo que hace CI)
 php artisan migrate:fresh --seed # Reinicia la base de datos con datos de prueba
 ```
-
-## Límites de PHP en local
-
-**[Nuevo]** El PHP de una instalación local suele traer `upload_max_filesize = 2M` y `memory_limit = 128M`. Con eso, cualquier foto de más de 2 MB falla con "La imagen no se pudo subir", aunque la API acepte hasta 5 MB. Para que se comporte como el servidor, ubica tu `php.ini` con `php --ini` y deja:
-
-```ini
-upload_max_filesize = 6M
-post_max_size = 8M
-memory_limit = 256M
-```
-
-Son los mismos valores de `docker/php/production.ini`. Reinicia `php artisan serve` después de cambiarlos.
-
-Si tienes Xdebug en modo `coverage`, las pruebas tardan hasta 10 veces más. Córrelas con `XDEBUG_MODE=off php artisan test` (en PowerShell: `$env:XDEBUG_MODE="off"; php artisan test`). Ver [Errores resueltos](/docs/project/bug-log#entorno-local).
 
 ## Integración continua
 
