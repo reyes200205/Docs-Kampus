@@ -61,3 +61,6 @@ Estas variables llegan con el [PR #7](https://github.com/WilbertDevMx/backend-ka
 | `BROADCAST_CONNECTION` | `log` | Se cambiará a Reverb para el chat |
 | `MAIL_MAILER` | `log` | Los correos se escriben en `storage/logs` |
 | `FILESYSTEM_DISK` | `local` | En producción, el bucket S3 (`AWS_*`) |
+| `LIVEKIT_URL` | vacío | **[Nuevo]** Dirección `wss://` del proyecto de LiveKit Cloud para la [videollamada](/docs/backend/api/chat/video-call#configuración) (T-19) |
+| `LIVEKIT_API_KEY` | vacío | **[Nuevo]** API key del proyecto de LiveKit Cloud |
+| `LIVEKIT_API_SECRET` | vacío | **[Nuevo]** API secret del proyecto. Solo va en el servidor. Sin las tres variables, la videollamada responde `503` |

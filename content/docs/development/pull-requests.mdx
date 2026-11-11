@@ -89,6 +89,18 @@ Con base `main` y compare `develop`, este mensaje significa que **`main` ya tien
 - CI debe pasar. En el backend: formato, migraciones y pruebas (ver [Integración continua](/docs/backend/installation#integración-continua)). En la documentación: la convención de commits.
 - Cómo se calcula la versión: ver [Versiones y changelog](/docs/development/releases).
 
+## Si tu PR arregla un error
+
+**[Nuevo]** Anótalo en [Errores resueltos](/docs/project/bug-log), en el mismo PR de la documentación que lo acompaña:
+
+- **Qué pasaba:** lo que veía el usuario o la CI.
+- **Causa:** por qué pasaba.
+- **Solución:** qué se cambió.
+- **Para que no vuelva:** la prueba o la regla que lo detecta. Si se puede, agrega una prueba que falle sin el arreglo.
+- **Dónde:** el PR o el commit.
+
+También va si el error se encontró en la revisión, antes de fusionar: así queda registro de lo que detectó la revisión.
+
 ## Resolver conflictos
 
 Hay conflicto cuando tu rama y `develop` cambiaron las mismas líneas. GitHub lo avisa en el PR con **This branch has conflicts that must be resolved** y no deja mergear.

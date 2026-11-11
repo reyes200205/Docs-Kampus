@@ -81,6 +81,19 @@ docker compose -f compose.prod.yaml --env-file .env.production exec app php arti
 
 Para actualizar: `git pull`, el mismo `up -d --build` y después `migrate --force`.
 
+## Datos de demostración
+
+**[Nuevo]** Para la demostración, el entorno de pruebas puede cargar los estudiantes ficticios de `DemoSeeder` (T-34, [PR #46](https://github.com/WilbertDevMx/backend-kampus/pull/46), en la v0.2.0). Ver [qué crea](/docs/backend/installation#datos-de-demostración).
+
+Como el servidor usa `APP_ENV=production`, el seeder se niega a correr salvo que `.env.production` tenga `DEMO_DATA_ENABLED=true`. Pon también una contraseña en `DEMO_PASSWORD` y vuelve a levantar `app`, porque la configuración se cachea al arrancar el contenedor:
+
+```bash
+docker compose -f compose.prod.yaml --env-file .env.production up -d app
+docker compose -f compose.prod.yaml --env-file .env.production exec app php artisan db:seed --class=DemoSeeder --force
+```
+
+En una producción real, `DEMO_DATA_ENABLED` se queda en `false`.
+
 ## Certificado HTTPS (solo la primera vez)
 
 Nginx arranca con un certificado autofirmado temporal. Con el DNS ya apuntando al servidor:

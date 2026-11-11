@@ -32,6 +32,20 @@ php artisan serve
 
 La API queda disponible en `http://localhost:8000/api`.
 
+## Límites de PHP en local
+
+**[Nuevo]** El PHP de una instalación local suele traer `upload_max_filesize = 2M` y `memory_limit = 128M`. Con eso, cualquier foto de más de 2 MB falla con "La imagen no se pudo subir", aunque la API acepte hasta 5 MB. Para que se comporte como el servidor, ubica tu `php.ini` con `php --ini` y deja:
+
+```ini
+upload_max_filesize = 6M
+post_max_size = 8M
+memory_limit = 256M
+```
+
+Son los mismos valores de `docker/php/production.ini`. Reinicia `php artisan serve` después de cambiarlos.
+
+Si tienes Xdebug en modo `coverage`, las pruebas tardan hasta 10 veces más. Córrelas con `XDEBUG_MODE=off php artisan test` (en PowerShell: `$env:XDEBUG_MODE="off"; php artisan test`). Ver [Errores resueltos](/docs/project/bug-log#entorno-local).
+
 ## Usar la API desde el celular
 
 En el celular, `localhost` apunta al propio celular. Para que la app pueda consumir la API, levanta el servidor escuchando en la red:
@@ -52,8 +66,26 @@ Y en la app usa la IP local de tu PC (por ejemplo `http://192.168.1.50:8000`). V
 php artisan test                 # Ejecuta las pruebas
 ./vendor/bin/pint                # Corrige el formato del código
 ./vendor/bin/pint --test         # Solo revisa el formato (lo mismo que hace CI)
-php artisan migrate:fresh --seed # Reinicia la base de datos con datos de prueba
+php artisan migrate:fresh --seed # Reinicia la base de datos con catálogos y datos de demostración
+php artisan db:seed --class=DemoSeeder # Solo vuelve a crear los datos de demostración
 ```
+
+## Datos de demostración
+
+<Callout title="Estado">
+  Terminados con T-34 ([PR #46](https://github.com/WilbertDevMx/backend-kampus/pull/46)), en la versión v0.2.0 del backend. Con T-49, cada estudiante de demostración tiene género y el perfil completo, así que todos salen en Descubrir.
+</Callout>
+
+**[Nuevo]** `DemoSeeder` crea **67 estudiantes ficticios** para demostrar el descubrimiento, la vista Cerca y los matches: 22 por universidad y una cuenta para presentar. `migrate:fresh --seed` lo corre después de los catálogos (`CatalogSeeder` y `ZoneSeeder`).
+
+- Todos tienen el correo verificado y el perfil completo: carrera de su universidad, semestre, edad de 18 a 25 años, bio, de 3 a 5 intereses, 1 o 2 fotos y una zona (su campus o una colonia de Torreón).
+- Más o menos la mitad tiene **Cerca de ti** activo, con una celda cerca de su zona.
+- Las fotos son siluetas que dibuja el propio seeder: no hay fotos de personas reales ni licencias de terceros.
+- **Cuenta para presentar: `demo@demo.kampus.test`.** Vive en una colonia céntrica, así que en la vista Cerca ve a unas 30 personas. Ya tiene 3 matches, y 8 personas le dieron "Me interesa": al evaluarlas en Descubrir, el match sale al momento.
+- Los correos usan el dominio reservado `demo.kampus.test`, que nunca recibe correo.
+- La contraseña de todas las cuentas es la de `DEMO_PASSWORD` en `.env`. Si no está definida, cada corrida genera una nueva y la muestra en la consola.
+- Se puede correr varias veces: borra los usuarios de demostración anteriores y sus fotos, y no toca a nadie más.
+- **Nunca corre con `APP_ENV=production`**, salvo en el entorno de pruebas con `DEMO_DATA_ENABLED=true` (ver [Despliegue](/docs/backend/deployment#datos-de-demostración)).
 
 ## Integración continua
 

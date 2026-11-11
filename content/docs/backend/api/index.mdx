@@ -7,10 +7,10 @@ Esta sección documenta los endpoints de la API, con ejemplos de petición y res
 
 | Carpeta | Qué cubre |
 | --- | --- |
-| **Autenticación** | [Inicio de sesión](/docs/backend/api/auth/login), [registro y verificación](/docs/backend/api/auth/register) y [recuperar la contraseña](/docs/backend/api/auth/password). |
+| **Autenticación** | [Inicio de sesión](/docs/backend/api/auth/login), **[Nuevo]** [sesiones](/docs/backend/api/auth/sessions), **[Nuevo]** [verificación en dos pasos](/docs/backend/api/auth/two-factor), [registro y verificación](/docs/backend/api/auth/register) y [recuperar la contraseña](/docs/backend/api/auth/password). |
 | **Perfil** | [Perfil, intereses y fotos](/docs/backend/api/profile/profile) y [zonas y ubicación](/docs/backend/api/profile/location). |
-| **Descubrimiento y matches** | [Descubrimiento y swipe](/docs/backend/api/social/discovery), [matches](/docs/backend/api/social/matches) y [bloqueo y reporte](/docs/backend/api/social/blocks-reports). |
-| **Chat** | [Tiempo real](/docs/backend/api/chat/realtime). Los mensajes (T-14) se agregan aquí. |
+| **Descubrimiento y matches** | [Descubrimiento y swipe](/docs/backend/api/social/discovery), **[Nuevo]** [vista Cerca](/docs/backend/api/social/nearby), [matches](/docs/backend/api/social/matches) y [bloqueo y reporte](/docs/backend/api/social/blocks-reports). |
+| **Chat** | **[Nuevo]** [Mensajes e imágenes](/docs/backend/api/chat/messages), [videollamada](/docs/backend/api/chat/video-call) y [tiempo real](/docs/backend/api/chat/realtime). |
 | **Grupos** | [Grupos, integrantes y actividades](/docs/backend/api/groups). |
 | **Administración** | [Staff](/docs/backend/api/admin/staff) y [revisión de grupos](/docs/backend/api/admin/group-review). |
 
@@ -43,10 +43,15 @@ Responde `200` cuando la aplicación está arriba. Útil para monitoreo.
 | --- | --- | --- | --- |
 | `POST` | `/api/register` | No | Crea una cuenta de estudiante con correo institucional ([Autenticación](/docs/backend/api/auth/register#crear-la-cuenta)) |
 | `GET` | `/api/email/verify/{id}/{hash}` | Enlace firmado | Verifica el correo; el enlace llega por correo y vence a los 60 minutos ([Autenticación](/docs/backend/api/auth/register#verificar-el-correo)) |
-| `POST` | `/api/login` | No | Inicia sesión y devuelve el token ([Autenticación](/docs/backend/api/auth/login#iniciar-sesión)) |
+| `POST` | `/api/login` | No | Inicia sesión y devuelve el token, o **[Nuevo]** el reto del segundo paso si la verificación en dos pasos está activa ([Autenticación](/docs/backend/api/auth/login#iniciar-sesión)) |
+| `POST` | `/api/login/two-factor` | No | **[Nuevo]** Segundo paso del login: el código de la app o un código de respaldo ([Verificación en dos pasos](/docs/backend/api/auth/two-factor#iniciar-sesión-con-la-verificación-activa)) |
 | `POST` | `/api/logout` | Token | Revoca el token de la petición ([Autenticación](/docs/backend/api/auth/login#cerrar-sesión)) |
+| `GET` | `/api/sessions` | Sí | **[Nuevo]** Sesiones activas con dispositivo, último uso y cuál es la actual ([Sesiones](/docs/backend/api/auth/sessions#ver-las-sesiones-activas)) |
+| `DELETE` | `/api/sessions/{id}` · `/api/sessions` | Sí | **[Nuevo]** Cierra una sesión, o todas menos la actual ([Sesiones](/docs/backend/api/auth/sessions#cerrar-una-sesión)) |
+| `GET` · `POST` · `DELETE` | `/api/two-factor` | Sí | **[Nuevo]** Estado, activar (con la contraseña) o desactivar la verificación en dos pasos ([Verificación en dos pasos](/docs/backend/api/auth/two-factor)) |
+| `POST` | `/api/two-factor/confirm` · `/api/two-factor/recovery-codes` | Sí | **[Nuevo]** Confirma con el primer código, o genera códigos de respaldo nuevos ([Verificación en dos pasos](/docs/backend/api/auth/two-factor#activar)) |
 | `POST` | `/api/forgot-password` | No | Manda el enlace para restablecer la contraseña; responde igual exista o no el correo ([Autenticación](/docs/backend/api/auth/password#pedir-el-enlace)) |
-| `POST` | `/api/reset-password` | No | Restablece la contraseña con el token del correo y cierra todas las sesiones ([Autenticación](/docs/backend/api/auth/password#restablecer-la-contraseña)) |
+| `POST` | `/api/reset-password` | No | Restablece la contraseña con el token del correo y cierra todas las sesiones; **[Nuevo]** con la verificación en dos pasos activa, también pide el código ([Autenticación](/docs/backend/api/auth/password#restablecer-la-contraseña)) |
 | `GET` | `/api/user` | Sí | Usuario autenticado |
 | `GET` · `PATCH` | `/api/profile` | Estudiante | Lee o actualiza el perfil: nombre, carrera, semestre, fecha de nacimiento, **[Nuevo]** género, bio, zona y filtros de descubrimiento; trae qué le falta para estar completo (T-49) ([Perfil](/docs/backend/api/profile/profile#editar-el-perfil)) |
 | `GET` | `/api/interests` | Estudiante | Catálogo de intereses ([Perfil](/docs/backend/api/profile/profile#intereses)) |
@@ -59,8 +64,13 @@ Responde `200` cuando la aplicación está arriba. Útil para monitoreo.
 | `PUT` · `DELETE` | `/api/location/nearby` | Estudiante | Activa Cerca de ti con un geohash de 6 caracteres, o lo desactiva y borra la celda ([Zonas y ubicación](/docs/backend/api/profile/location#activar-cerca-de-ti)) |
 | `GET` | `/api/discover` | Estudiante | Siguiente tanda de perfiles por evaluar ([Descubrimiento](/docs/backend/api/social/discovery#obtener-perfiles)) |
 | `GET` · `PUT` | `/api/discover/filters` | Estudiante | Lee o reemplaza los filtros guardados ([Descubrimiento](/docs/backend/api/social/discovery#filtros)) |
+| `GET` | `/api/discover/nearby` | Estudiante | **[Nuevo]** Estudiantes cercanos con Cerca de ti activo, con posición difuminada y distancia aproximada ([Vista Cerca](/docs/backend/api/social/nearby)) |
 | `POST` | `/api/swipes` | Estudiante | Me interesa o Pasar sobre un perfil; si el Me interesa es mutuo, devuelve el match ([Descubrimiento](/docs/backend/api/social/discovery#evaluar-un-perfil)) |
 | `GET` | `/api/matches` | Estudiante | Lista de matches, del más reciente al más antiguo ([Matches](/docs/backend/api/social/matches#lista-de-matches)) |
+| `GET` · `POST` | `/api/matches/{id}/messages` | Estudiante | **[Nuevo]** Historial del chat, o enviar un mensaje de texto o una imagen ([Mensajes](/docs/backend/api/chat/messages)) |
+| `PATCH` | `/api/matches/{id}/messages/read` | Estudiante | **[Nuevo]** Marca como leídos los mensajes recibidos ([Mensajes](/docs/backend/api/chat/messages#marcar-como-leído)) |
+| `POST` · `DELETE` | `/api/matches/{id}/call` | Estudiante | **[Nuevo]** Empieza una videollamada (token de LiveKit y aviso a la otra persona) o cuelga ([Videollamada](/docs/backend/api/chat/video-call)) |
+| `POST` | `/api/matches/{id}/call/token` | Estudiante | **[Nuevo]** Token para contestar o volver a entrar a la videollamada ([Videollamada](/docs/backend/api/chat/video-call#contestar-o-volver-a-entrar)) |
 | `GET` · `POST` | `/api/groups` | Estudiante | Explora los grupos aprobados o crea uno, que queda en revisión ([Grupos](/docs/backend/api/groups#explorar-grupos)) |
 | `GET` | `/api/groups/mine` | Estudiante | Grupos del alumno, en cualquier estado ([Grupos](/docs/backend/api/groups#mis-grupos)) |
 | `GET` · `PATCH` · `DELETE` | `/api/groups/{id}` | Estudiante | Ver un grupo; editarlo o borrarlo, si es su administrador ([Grupos](/docs/backend/api/groups#ver-editar-y-borrar)) |

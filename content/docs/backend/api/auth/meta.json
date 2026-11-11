@@ -2,6 +2,8 @@
   "title": "Autenticación",
   "pages": [
     "login",
+    "sessions",
+    "two-factor",
     "register",
     "password"
   ]
