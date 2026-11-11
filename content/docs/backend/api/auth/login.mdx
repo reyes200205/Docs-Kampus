@@ -21,7 +21,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "email": "ana.lopez@utt.edu.mx",
+  "email": "ana.lopez@uttcampus.edu.mx",
   "password": "********",
   "device_name": "iphone-ana"
 }
@@ -39,7 +39,7 @@ Content-Type: application/json
   "user": {
     "id": 1,
     "name": "Ana López",
-    "email": "ana.lopez@utt.edu.mx",
+    "email": "ana.lopez@uttcampus.edu.mx",
     "email_verified_at": "2026-10-01T18:00:00+00:00",
     "role": "student",
     "university_id": 1,
@@ -61,7 +61,7 @@ Content-Type: application/json
 | `403` | **[Nuevo]** La cuenta está suspendida por moderación o es de staff desactivado (RF-15, [T-41](/docs/backend/api/admin/staff#desactivar-o-reactivar-una-cuenta)). Con la contraseña incorrecta se recibe el `422` de siempre, sin revelar la suspensión. | `Tu cuenta está suspendida.` |
 | `429` | Hubo **5 intentos fallidos** con el mismo correo desde la misma IP. El bloqueo dura **15 minutos**, aunque luego se ponga la contraseña correcta. Un inicio de sesión correcto reinicia el contador. | `Demasiados intentos fallidos. Intenta de nuevo en 15 minutos.` |
 
-Cada intento fallido y cada bloqueo se registran en `storage/logs/security.log`, con el correo enmascarado (`an****@utt.edu.mx`).
+Cada intento fallido y cada bloqueo se registran en `storage/logs/security.log`, con el correo enmascarado (`an****@uttcampus.edu.mx`).
 
 ## Enviar el token
 
@@ -80,7 +80,7 @@ Solo trae los campos públicos del usuario (`UserResource`):
   "data": {
     "id": 1,
     "name": "Ana López",
-    "email": "ana.lopez@utt.edu.mx",
+    "email": "ana.lopez@uttcampus.edu.mx",
     "email_verified_at": "2026-10-01T18:00:00+00:00",
     "role": "student",
     "university_id": 1,
