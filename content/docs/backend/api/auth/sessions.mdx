@@ -1,0 +1,116 @@
+---
+title: "Sesiones"
+description: "Ver las sesiones activas y cerrar las de otros dispositivos (T-46, RF-02 y RNF-02)."
+---
+
+**[Nuevo]** Cada vez que alguien [inicia sesión](/docs/backend/api/auth/login#iniciar-sesión), la API crea un token de Sanctum: eso es una **sesión**. Desde la app, el usuario puede ver en qué dispositivos tiene la sesión abierta y cerrar las que no reconozca (criterio "Manejo de Multisesiones" de la rúbrica de la Unidad 3).
+
+<Callout title="Estado">
+  Terminada con T-46 ([PR #48](https://github.com/WilbertDevMx/backend-kampus/pull/48)), en la versión v0.2.0 del backend. La pantalla de la app todavía no tiene tarea.
+</Callout>
+
+Las rutas de esta página requieren un token de Sanctum y un correo verificado. Sirven para **estudiantes y staff**.
+
+**Cada quien solo ve y cierra sus propias sesiones.** Una sesión de otra persona responde `404`, igual que una que no existe, para no revelar qué sesiones hay.
+
+## Ver las sesiones activas
+
+```http
+GET /api/sessions
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+Devuelve las sesiones que no han vencido: **la actual primero** y luego las demás, de la usada más recientemente a la más antigua.
+
+### Respuesta `200`
+
+```json
+{
+  "data": [
+    {
+      "id": 41,
+      "name": "iphone-ana",
+      "device": "Safari en iOS",
+      "current": true,
+      "created_at": "2026-11-10T15:20:00+00:00",
+      "last_used_at": "2026-11-10T16:01:12+00:00",
+      "expires_at": "2026-11-17T15:20:00+00:00"
+    },
+    {
+      "id": 38,
+      "name": "api",
+      "device": "Chrome en Windows",
+      "current": false,
+      "created_at": "2026-11-08T21:02:44+00:00",
+      "last_used_at": "2026-11-09T02:10:05+00:00",
+      "expires_at": "2026-11-15T21:02:44+00:00"
+    }
+  ]
+}
+```
+
+| Campo | Qué es |
+| --- | --- |
+| `id` | Id de la sesión, para cerrarla. |
+| `name` | El `device_name` que mandó la app al iniciar sesión; `api` si no mandó ninguno. |
+| `device` | Navegador o app y sistema, por ejemplo `"Chrome en Windows"`, `"Safari en iOS"` o `"App de Kampus"`. Si no se reconoce, `"Dispositivo desconocido"`. |
+| `current` | `true` en la sesión con la que se hizo la petición. |
+| `created_at` | Cuándo se inició la sesión. |
+| `last_used_at` | Última petición con esa sesión. |
+| `expires_at` | Cuándo vence: 7 días después de iniciar sesión. |
+
+La respuesta **nunca trae el token ni su hash**.
+
+## Cerrar una sesión
+
+```http
+DELETE /api/sessions/38
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+Responde `204` sin contenido. Ese token deja de funcionar de inmediato: la siguiente petición desde ese dispositivo responde `401`. Si el id es el de la sesión actual, equivale a [cerrar sesión](/docs/backend/api/auth/login#cerrar-sesión).
+
+Límite de 30 peticiones por minuto.
+
+## Cerrar todas las demás
+
+```http
+DELETE /api/sessions
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+Cierra todas las sesiones **menos la actual** y responde cuántas cerró:
+
+```json
+{ "closed": 2 }
+```
+
+Límite de 10 peticiones por minuto.
+
+### Errores
+
+| Código | Cuándo |
+| --- | --- |
+| `401` | Sin token, o con un token que ya se cerró o venció. |
+| `404` | La sesión no existe, ya venció o es de otra persona. |
+| `429` | Se pasó el límite de peticiones. |
+
+## Cómo se obtiene el dispositivo
+
+Al [iniciar sesión](/docs/backend/api/auth/login#iniciar-sesión), la API guarda en el token el `User-Agent` del navegador o de la app. Con eso, `App\Support\Security\DeviceLabel` arma el texto de `device`.
+
+- **No se guarda la IP**: el criterio de la tarea no la pide, y no se guardan datos que los requisitos no piden.
+- El `User-Agent` lo manda el cliente, así que solo sirve para que el usuario reconozca sus sesiones; la API no lo usa para ninguna decisión de seguridad.
+- Para que la lista sea más clara, la app puede mandar un `device_name` legible al iniciar sesión, por ejemplo `"iPhone de Ana"`.
+
+Cerrar una sesión o todas las demás queda registrado en `security.log`. Además, [restablecer la contraseña](/docs/backend/api/auth/password#restablecer-la-contraseña) cierra todas las sesiones, y [desactivar una cuenta de staff](/docs/backend/api/admin/staff) también.
+
+## Flujo sugerido en la app
+
+1. En Ajustes → Sesiones, llama a `GET /api/sessions`.
+2. Muestra cada sesión con `device`, `name` y `last_used_at`, y marca la que tiene `current: true` como "Este dispositivo".
+3. Junto a cada una de las demás, un botón "Cerrar sesión" que llama a `DELETE /api/sessions/{id}` y la quita de la lista.
+4. Abajo, "Cerrar todas las demás sesiones", con una confirmación previa, que llama a `DELETE /api/sessions`.
