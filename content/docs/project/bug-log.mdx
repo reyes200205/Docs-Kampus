@@ -1,0 +1,218 @@
+---
+title: "Errores resueltos"
+description: "Registro de los errores que han salido en el proyecto: qué pasaba, por qué, cómo se arregló y qué evita que vuelva."
+---
+
+**[Nuevo]** Aquí se anota cada error que encontramos y cómo lo resolvimos, en los tres repositorios. Sirve para no repetirlos, para que quien llegue a una parte del código sepa por qué está como está y como evidencia del seguimiento del proyecto.
+
+<Callout title="Cómo agregar uno">
+  Si tu PR arregla un error, agrega una fila al resumen y una entrada en su sección con estos cinco puntos: **qué pasaba** (lo que veía el usuario o la CI), **causa**, **solución**, **para que no vuelva** (la prueba o la regla que lo detecta) y **dónde** (PR o commit). Ver [Pull requests](/docs/development/pull-requests#si-tu-pr-arregla-un-error).
+</Callout>
+
+## Resumen
+
+| Fecha | Error | Área | Dónde |
+| --- | --- | --- | --- |
+| 9 oct | El changelog no mostraba las versiones nuevas | Documentación | Docs `fe0cfdc` |
+| 12 oct | El build de Cloudflare usaba pnpm 10 y fallaba | Documentación | Docs `047fa9f` |
+| 12 oct | El diagrama entidad-relación salía recortado | Documentación | Docs `c6058ae` |
+| 13 – 20 oct | La API no tenía cabeceras de seguridad, CORS abierto y contraseñas débiles | Seguridad | Backend #10 y #11 |
+| 18 oct | `composer.lock` con paquetes que exigen PHP 8.4 | CI | Backend `5ef1d25` |
+| 28 oct | Las fotos de perfil se guardaban con la ubicación GPS del EXIF | Privacidad | Backend #29 |
+| 28 oct | El correo no se normalizaba y el registro no fijaba el rol | Seguridad | Backend #28 |
+| 28 oct | El motivo de una acción de moderación era opcional | Moderación | Backend #27 |
+| 29 oct | `composer audit` fallaba por una vulnerabilidad en `symfony/mime` | CI | Backend #25 |
+| 29 oct | Se perdió un `import` al traer `develop` a una rama | Backend | Backend `33fb232` |
+| 28 – 29 oct | commitlint rechazaba commits viejos que no se pueden cambiar | CI | Backend `e1d07fe` y `c58e0b4` |
+| 3 nov | El canal del chat no revisaba si la otra persona estaba suspendida | Seguridad | Backend #41 |
+| 4 nov | El enlace de verificación dependía del host con que la app llamaba a la API | Registro | Backend #40 |
+| 4 nov | commitlint fallaba en todos los PR por una dependencia de Tailwind | CI | Backend #38 |
+| 8 nov | La cola fallaba si arrancaba antes de las migraciones | Despliegue | Backend #43 |
+| 8 nov | La API respondía `validation.required` en lugar del mensaje | Despliegue | Backend #43 y #58 |
+| 8 nov | La pantalla de zona no cabía en el celular | Frontend | Frontend `35eefaf` |
+| 8 nov | El nombre no se guardaba con mayúscula en cada palabra | Frontend | Frontend #13 |
+| 9 nov | Los perfiles que ya existían quedaban "incompletos" con T-49 | Perfil | Backend #44 |
+| 10 nov | CI en rojo por los avisos de seguridad de Symfony del 4 nov | CI | Backend #47 |
+| 10 nov | Una prueba de migraciones se rompía al agregar migraciones nuevas | CI | Backend #44 y #48 |
+| 10 nov | Un código de verificación en dos pasos se podía usar dos veces | Seguridad | Backend #49 |
+| 10 nov | Los estudiantes de demostración no salían en Descubrir | Datos de demostración | Backend `c5f3d1b` |
+| 10 nov | Las pruebas tardaban 10 veces más en local | Entorno local | [Instalación](/docs/backend/installation#límites-de-php-en-local) |
+| 11 nov | La sesión se perdía al recargar la app | Frontend | Frontend #17 |
+| 11 nov | La vista Cerca no pedía el perfil completo | Perfil | Backend #56 |
+| 11 nov | Una imagen enorme tumbaba la petición (error 500) | Imágenes | Backend #58 |
+| 11 nov | Las imágenes no se reducían y las verticales podían quedar de lado | Imágenes | Backend #58 |
+| 11 nov | Los errores al subir imágenes salían en inglés o en HTML | Imágenes | Backend #58 |
+| 11 nov | En local no se podían subir fotos de más de 2 MB | Entorno local | [Instalación](/docs/backend/installation#límites-de-php-en-local) |
+
+## Seguridad y privacidad
+
+### Cabeceras, CORS, contraseñas y límites (13 – 20 oct)
+
+- **Qué pasaba:** en la revisión de programación segura (OWASP) salió que la API no mandaba cabeceras de seguridad, aceptaba peticiones de cualquier origen (CORS `*`), pedía contraseñas de solo 8 caracteres, no tenía un límite general de peticiones y `/api/user` devolvía el modelo completo.
+- **Solución:** middleware `SecurityHeaders`, CORS limitado a `FRONTEND_URLS`, `Password::defaults()` (mayúsculas, números y revisión contra contraseñas filtradas), 120 peticiones por minuto, `UserResource`, el canal de log `security` y `composer audit` en la CI.
+- **Para que no vuelva:** `SecurityHardeningTest`, y la sección **Seguridad** de la plantilla de PR.
+- **Dónde:** backend #10 y #11.
+
+### Fotos guardadas con la ubicación GPS (28 oct)
+
+- **Qué pasaba:** las fotos del celular traen en el EXIF la coordenada exacta de donde se tomaron. `ImageSanitizer` ya existía (#10), pero la subida de fotos de perfil (T-07) guardaba el archivo tal cual. Eso rompía RNF-11.
+- **Solución:** toda foto pasa por `ImageSanitizer`, que la vuelve a codificar sin metadatos, antes de guardarse en el bucket privado.
+- **Para que no vuelva:** una prueba revisa que la foto guardada no traiga EXIF, y la plantilla de PR lo pregunta en cada cambio con imágenes.
+- **Dónde:** backend #29 (`f9ab716`).
+
+### Registro: correo y rol (28 oct)
+
+- **Qué pasaba:** el correo se guardaba como llegaba, así que `Ana@utt.edu.mx` y `ana@utt.edu.mx` podían ser dos cuentas, y el registro no fijaba el rol de la cuenta nueva.
+- **Solución:** el correo se guarda en minúsculas, la contraseña usa `Password::defaults()` y el registro **siempre** crea cuentas `student`. El staff solo se crea con `kampus:create-admin` o desde la gestión de staff.
+- **Dónde:** backend #28 (`f879ed0`).
+
+### Motivo obligatorio en moderación (28 oct)
+
+- **Qué pasaba:** `moderation_actions` aceptaba acciones sin motivo, y no había índice en `actor_id`.
+- **Solución:** el motivo es obligatorio en la base de datos y se agregó el índice, con pruebas.
+- **Dónde:** backend #27 (`be0b9f4`).
+
+### El canal del chat y las cuentas suspendidas (3 nov)
+
+- **Qué pasaba:** en la revisión de T-13, el canal `chat.{matchId}` revisaba que quien entra fuera del match, pero no que la otra persona siguiera activa.
+- **Solución:** `ChatChannel` usa `UserMatch::visibleTo()`, las mismas reglas que la lista de matches: nadie suspendido y sin bloqueo en ningún sentido.
+- **Para que no vuelva:** `BroadcastChannelAuthTest` cubre el caso de la otra persona suspendida.
+- **Dónde:** backend #41 (`5f18c16`).
+
+### Un código de dos pasos usado dos veces (10 nov, antes de fusionar)
+
+- **Qué pasaba:** al desarrollar T-47, la prueba de "un código no se puede usar dos veces" falló. `pragmarx/google2fa` devuelve `true` (y no el periodo del código) cuando el punto de partida es nulo, así que no había con qué comparar el siguiente intento.
+- **Solución:** se le pasa `0` como punto de partida, y el periodo aceptado se guarda en caché por usuario.
+- **Para que no vuelva:** `TwoFactorApiTest::test_a_code_cannot_be_used_twice`.
+- **Dónde:** backend #49.
+
+### La vista Cerca sin perfil completo (11 nov)
+
+- **Qué pasaba:** con T-49, Descubrir y swipe responden `403 profile_incomplete` hasta completar el perfil, pero `/api/discover/nearby` (T-35) se había quedado sin esa regla.
+- **Solución:** la ruta usa el middleware `profile.complete`.
+- **Para que no vuelva:** `NearbyApiTest::test_it_requires_a_complete_profile_like_discover`.
+- **Dónde:** backend #56.
+
+## Imágenes (11 nov)
+
+Salieron juntos, al revisar qué pasa cuando alguien sube una foto de más de 5 MB. Se arreglaron en el backend #58, que afecta las fotos de perfil, la imagen de grupo y las imágenes del chat.
+
+### Una imagen enorme tumbaba la petición
+
+- **Qué pasaba:** un PNG de **231 KB** que declara **9000 × 9000 píxeles** agotó la memoria de PHP con el límite de producción (256 MB) y la API respondió `500`. Cualquiera podía provocarlo a propósito.
+- **Causa:** GD ocupa unos 4 bytes por píxel al abrir una imagen, y la imagen se abría antes de revisar nada.
+- **Solución:** `ImageSanitizer` lee las dimensiones del encabezado **antes** de abrirla y rechaza con `422` las de más de 20 megapíxeles. El formato también se revisa antes.
+- **Para que no vuelva:** `ImageSanitizerTest::test_it_rejects_huge_dimensions_before_opening_the_image` y `ImageUploadValidationTest`.
+
+### Sin reducción de peso, y fotos de lado
+
+- **Qué pasaba:**
+  - Se guardaban y se descargaban las fotos completas: una de celular de 12 MP pesa 3 a 5 MB, y cada tarjeta de Descubrir trae hasta 5.
+  - Además, el celular guarda la foto "acostada" y anota en el EXIF cómo girarla. Al quitar el EXIF (por el GPS) también se perdía esa nota, y las fotos verticales podían quedar de lado.
+- **Solución:**
+  - El lado largo se reduce a 2048 px y el JPEG se recomprime con calidad 82. Una foto de 4032 × 3024 queda en 2048 × 1536.
+  - Antes de quitar el EXIF se lee la orientación y se endereza la imagen. Se lee a mano porque la imagen de Docker no trae la extensión `exif`.
+- **Para que no vuelva:** pruebas de reducción y de orientación en `ImageSanitizerTest`.
+
+### Los errores de subida en inglés o en HTML
+
+| Peso | Antes | Ahora |
+| --- | --- | --- |
+| 5 a 6 MB | `The photo field must not be greater than 5120 kilobytes.` | `La imagen no puede pesar más de 5 MB.` |
+| 6 a 8 MB (PHP descarta el archivo) | `The photo failed to upload.` | `La imagen no se pudo subir. Revisa que pese menos de 5 MB.` |
+| Más de 8 MB (Nginx corta la petición) | `413` con una página HTML que la app no puede leer | `413` en JSON con el mismo mensaje |
+
+- **Causa:** el backend no tiene traducciones al español, y Nginx responde sus errores en HTML.
+- **Solución:** `App\Support\Images\ImageUpload` reúne las reglas y los mensajes en español, y Nginx responde el `413` en JSON con `error_page`. La respuesta de Nginx se probó en Docker con la configuración real.
+
+## Backend
+
+### Un `import` perdido al traer `develop` (29 oct)
+
+- **Qué pasaba:** al resolver un conflicto para traer `develop` a la rama de T-04 se borró `use App\Enums\UserRole;` de `User`, y la rama dejó de funcionar.
+- **Solución:** se restauró el `import`.
+- **Para que no vuelva:** después de resolver un conflicto, correr `php artisan test` antes de subir. Ver [Resolver conflictos](/docs/development/pull-requests#resolver-conflictos).
+- **Dónde:** backend `33fb232`.
+
+### El enlace de verificación y el host (4 nov)
+
+- **Qué pasaba:** la firma del enlace de verificación incluía el host de la API, así que el enlace dejaba de ser válido si la app llamaba a la API con otro host (por ejemplo, `localhost` contra la IP de la red desde el celular).
+- **Solución:** la ruta usa `signed:relative`, que firma solo la ruta y los parámetros.
+- **Dónde:** backend #40.
+
+### Perfiles "incompletos" que ya estaban completos (9 nov, antes de fusionar)
+
+- **Qué pasaba:** en la revisión de T-49, la migración dejaba `completed_at` en `null` en los perfiles que ya existían, y solo se recalculaba al cambiar algo. Un estudiante con todos sus datos recibía `403` en Descubrir y `missing: []`, sin ningún paso que completar.
+- **Solución:** el perfil se recalcula también al consultarlo (`ProfileController`).
+- **Dónde:** backend #44.
+
+### Estudiantes de demostración fuera de Descubrir (10 nov)
+
+- **Qué pasaba:** con T-49, Descubrir solo muestra perfiles completos, y los de `DemoSeeder` no tenían género.
+- **Solución:** el seeder asigna género y recalcula el perfil de cada estudiante.
+- **Dónde:** backend `c5f3d1b`.
+
+## Despliegue
+
+### La cola antes de las migraciones (8 nov)
+
+- **Qué pasaba:** en la prueba local con Docker, el contenedor de la cola arrancaba antes de que existieran las tablas y fallaba.
+- **Solución:** el README levanta primero `db` y `app`, corre las migraciones y luego levanta lo demás.
+- **Dónde:** backend #43. Ver [Despliegue](/docs/backend/deployment).
+
+### Claves de traducción en lugar de mensajes (8 nov)
+
+- **Qué pasaba:** la API respondía `validation.required` en lugar de un mensaje.
+- **Causa:** `APP_FALLBACK_LOCALE=es` sin traducciones al español en `lang/`: Laravel no encuentra el texto y devuelve la clave.
+- **Solución:** `APP_FALLBACK_LOCALE=en`, en `.env.production.example` (#43) y en `.env.example` (#58). Los mensajes que ve el usuario se escriben en español en cada validación.
+
+## CI y dependencias
+
+### Vulnerabilidades en dependencias (29 oct y 10 nov)
+
+- **Qué pasaba:** "Formato y pruebas" fallaba en `composer audit`. Primero fue `symfony/mime` (CVE-2026-45070). Luego, los avisos de Symfony del 4 de noviembre dejaron en rojo todos los PR.
+- **Solución:** actualizar solo los paquetes afectados en `composer.lock`, en un PR aparte que se fusiona primero.
+- **Dónde:** backend #25 y #47.
+
+### commitlint (29 oct y 4 nov)
+
+- **Commits viejos:** commitlint revisa todos los commits del PR, y había dos anteriores a la convención: el "Initial plan" que generó Copilot y el primero de T-07. Como no se pueden reescribir sin forzar el push, se agregaron a `legacyCommits` en `commitlint.config.mjs` (`c58e0b4` y `e1d07fe`).
+- **Dependencia de Tailwind:** el job instalaba commitlint dentro del proyecto, y npm resolvía también las dependencias de la app. Tailwind publicó una versión que dependía de un paquete inexistente (`ETARGET`), y el check falló en todos los PR. Ahora commitlint se instala de forma global (backend #38).
+
+### PHP 8.4 en `composer.lock` (18 oct)
+
+- **Qué pasaba:** el `CLAUDE.md` y el `AGENTS.md` que trae Laravel le piden al asistente de IA instalar PHP 8.5 y `laravel/boost`. Con otra versión de PHP, `composer update` dejaba paquetes que exigen PHP 8.4, y la CI (con PHP 8.3) fallaba.
+- **Solución:** `composer.json` fija `"platform": { "php": "8.3.0" }`, y en T-13 se quitó `laravel/boost` (`5f18c16`).
+- **Para que no vuelva:** el aviso en [Instalación](/docs/backend/installation#requisitos).
+
+### La prueba del esquema de moderación (10 nov)
+
+- **Qué pasaba:** `ModerationSchemaTest` deshacía la migración con `--step`. Al agregar migraciones nuevas, deshacía la que no era y fallaba.
+- **Solución:** deshace la migración por su ruta (`--path`).
+- **Dónde:** backend #44 y #48.
+
+## Entorno local
+
+### Límites de PHP y Xdebug (10 y 11 nov)
+
+- **Fotos de más de 2 MB:** el PHP de una instalación local trae `upload_max_filesize = 2M` y `memory_limit = 128M`. Con `php artisan serve`, cualquier foto de más de 2 MB falla con "no se pudo subir", y una de 12 MP no cabe en memoria al reducirla. En producción son 6 MB y 256 MB. `ImageSanitizer` sube la memoria solo si hace falta, y [Instalación](/docs/backend/installation#límites-de-php-en-local) explica cómo subir los demás límites.
+- **Pruebas lentas:** con Xdebug en modo `coverage`, una consulta de la vista Cerca medía 2 s en lugar de 210 ms. Se corren con `XDEBUG_MODE=off`.
+
+## Frontend
+
+Los arregla el equipo de frontend. Se anotan aquí para tener el registro completo.
+
+| Fecha | Qué pasaba | Dónde |
+| --- | --- | --- |
+| 13 oct | Textos y enlaces equivocados en las pantallas de acceso | `1fe8d7d` |
+| 8 nov | La pantalla de zona no cabía en el celular y no tenía botón de regresar | `35eefaf` |
+| 8 nov | El nombre y el apellido no se guardaban con mayúscula en cada palabra | Frontend #13 |
+| 11 nov | La sesión se perdía al recargar, aunque el token siguiera vigente | Frontend #17 (`991bcca`) |
+
+## Documentación
+
+| Fecha | Qué pasaba | Solución | Dónde |
+| --- | --- | --- | --- |
+| 9 oct | La página de changelog no mostraba las versiones nuevas | Lee los GitHub Releases en cada build | `fe0cfdc` |
+| 12 oct | El build de Cloudflare usaba pnpm 10 y fallaba | Se fijó pnpm 12.5.1 en `package.json` | `047fa9f` |
+| 12 oct | El diagrama entidad-relación salía recortado | Se muestra a tamaño real con scroll horizontal | `c6058ae` |
