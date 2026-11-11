@@ -1,0 +1,150 @@
+---
+title: "Videollamada"
+description: "Videollamada 1 a 1 entre matches con LiveKit Cloud detrás de un Adapter: empezar, contestar y colgar (T-19 y RF-10)."
+---
+
+**[Nuevo]** Los dos estudiantes de un [match](/docs/backend/api/social/matches) pueden hacer una videollamada. El video no pasa por nuestra API: va por **LiveKit Cloud**. La API solo decide quién puede entrar y le da a la app un token para su sala.
+
+<Callout title="Estado">
+  En revisión con T-19 ([PR #60](https://github.com/WilbertDevMx/backend-kampus/pull/60)). Las pruebas simulan la API de LiveKit; falta probarla con un proyecto real de LiveKit Cloud. La pantalla de la app es T-20.
+</Callout>
+
+Las rutas requieren un token de Sanctum, un correo verificado y una cuenta `student`. Solo las pueden usar **los dos del match**, y solo si ninguno está suspendido y **no hay un bloqueo** entre ellos. Para cualquier otra persona responden `404`, igual que el [chat](/docs/backend/api/chat/messages).
+
+## Cómo funciona
+
+<Mermaid chart={`
+sequenceDiagram
+    participant A as App de Ana
+    participant API as API (Laravel)
+    participant LK as LiveKit Cloud
+    participant B as App de Beto
+    A->>API: POST /api/matches/12/call
+    API->>LK: Crea la sala match-12 (máximo 2)
+    API-->>A: url + token de Ana
+    API-->>B: call.started (canal user.{id})
+    A->>LK: Entra con su token
+    B->>API: POST /api/matches/12/call/token
+    API-->>B: url + token de Beto
+    B->>LK: Entra con su token
+    Note over A,B: El video va directo entre la app y LiveKit
+    A->>API: DELETE /api/matches/12/call
+    API->>LK: Cierra la sala
+    API-->>B: call.ended
+`} />
+
+- **Una sala por match**, llamada `match-{id}`, con un máximo de **2 participantes**.
+- **El token dura 15 minutos para entrar.** Una vez dentro, LiveKit renueva la sesión solo, así que la llamada puede durar más.
+- **Si nadie entra, LiveKit cierra la sala a los 5 minutos.**
+- **La API secret de LiveKit nunca sale del servidor.** El token de la app solo sirve para entrar a esa sala, no para crear ni cerrar salas.
+
+## Empezar una llamada
+
+```http
+POST /api/matches/{matchId}/call
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+Prepara la sala, avisa a la otra persona con [`call.started`](#avisos-en-tiempo-real) y responde `201`:
+
+```json
+{
+  "data": {
+    "url": "wss://kampus.livekit.cloud",
+    "room": "match-12",
+    "token": "eyJhbGciOiJIUzI1NiIs…",
+    "expires_at": "2026-11-11T18:15:00+00:00"
+  }
+}
+```
+
+| Campo | Qué es |
+| --- | --- |
+| `url` | Servidor de LiveKit al que se conecta la app. |
+| `room` | Nombre de la sala. |
+| `token` | Token de LiveKit para entrar. Es personal: no se comparte con la otra persona. |
+| `expires_at` | Hasta cuándo sirve el token para entrar. Si vence antes de conectarse, se pide otro. |
+
+## Contestar o volver a entrar
+
+```http
+POST /api/matches/{matchId}/call/token
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+Responde `200` con lo mismo, pero **sin avisar a nadie**. Se usa al contestar una llamada entrante o para reconectarse.
+
+## Colgar o rechazar
+
+```http
+DELETE /api/matches/{matchId}/call
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+Cierra la sala para los dos, avisa a la otra persona con [`call.ended`](#avisos-en-tiempo-real) y responde `204`. Sirve igual para colgar una llamada en curso que para rechazar una entrante. Si la sala ya no existía, también responde `204`.
+
+### Errores
+
+| Código | Cuándo |
+| --- | --- |
+| `403` | La cuenta es de staff. |
+| `404` | El match no existe, no es tuyo, hay un bloqueo o alguno está suspendido. |
+| `429` | Más de 10 llamadas por minuto al empezar, o más de 20 al pedir token o colgar. |
+| `503` con `code: "video_unavailable"` | LiveKit no está configurado o no respondió. El mensaje sugiere seguir por el chat. |
+
+## Avisos en tiempo real
+
+Llegan por el canal privado **`user.{id}`** de la otra persona, el mismo de `match.created` (ver [Tiempo real](/docs/backend/api/chat/realtime)).
+
+| Evento | Cuándo | Payload |
+| --- | --- | --- |
+| `call.started` | Alguien empezó una llamada contigo. | `call.match_id` y `call.caller` (id, nombre, universidad y foto). **No trae el token.** |
+| `call.ended` | La otra persona colgó o rechazó. | `call.match_id` y `call.ended_by`. |
+
+```ts
+echo.private(`user.${miId}`)
+  .listen(".call.started", ({ call }) => {
+    // Mostrar la llamada entrante de call.caller con "Contestar" y "Rechazar".
+  })
+  .listen(".call.ended", ({ call }) => {
+    // Cerrar la pantalla de llamada.
+  });
+```
+
+## El Adapter
+
+El código no depende de LiveKit directamente: usa la interfaz `App\Video\VideoCallProvider`, con tres operaciones.
+
+| Operación | Qué hace en LiveKit |
+| --- | --- |
+| `openRoom($room, $maxParticipants)` | `CreateRoom` en la API de salas, con `max_participants`. Si la sala ya existe, la deja igual. |
+| `accessFor($room, $identity, $name)` | Firma un JWT (HS256) con la API key y la API secret, con permiso solo para entrar a esa sala. |
+| `closeRoom($room)` | `DeleteRoom`, que saca a quien siga conectado. |
+
+La implementación es `App\Video\LiveKit\LiveKitProvider`, y el binding está en `AppServiceProvider`. Para cambiar de proveedor (Daily, Agora o LiveKit autoalojado), basta escribir otra clase que implemente la interfaz y cambiar esa línea. Ver [Patrones de diseño](/docs/project/unit-1/design-patterns).
+
+## Configuración
+
+| Variable | Qué es |
+| --- | --- |
+| `LIVEKIT_URL` | Dirección `wss://<proyecto>.livekit.cloud` del proyecto en LiveKit Cloud. |
+| `LIVEKIT_API_KEY` | API key del proyecto (cloud.livekit.io, en **Settings → API Keys**). |
+| `LIVEKIT_API_SECRET` | API secret del proyecto. **Solo va en el servidor.** |
+
+Sin estas variables, las rutas de la llamada responden `503` y todo lo demás funciona igual. El plan gratuito de LiveKit Cloud incluye 5,000 minutos al mes.
+
+### Probarlo sin la app
+
+1. Pon las tres variables en `.env`.
+2. Con dos estudiantes que tengan match, pide un token con cada uno: `POST /api/matches/{id}/call` con uno y `POST .../call/token` con el otro.
+3. Abre [meet.livekit.io](https://meet.livekit.io) en dos pestañas y, en **Custom**, pega la `url` y el token de cada uno. Los dos tienen que quedar en la misma sala.
+
+## Flujo sugerido en la app (T-20)
+
+1. En el chat, el botón de videollamada llama a `POST /api/matches/{id}/call` y conecta el SDK de LiveKit con `url` y `token`.
+2. Al recibir `call.started`, muestra la llamada entrante con **Contestar** (pide token y se conecta) y **Rechazar** (`DELETE .../call`).
+3. Al colgar, llama a `DELETE .../call`. Al recibir `call.ended`, cierra la pantalla.
+4. Si responde `503`, muestra el mensaje y deja seguir por el chat.

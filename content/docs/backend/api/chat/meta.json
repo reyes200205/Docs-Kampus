@@ -2,6 +2,7 @@
   "title": "Chat",
   "pages": [
     "messages",
+    "video-call",
     "realtime"
   ]
 }
