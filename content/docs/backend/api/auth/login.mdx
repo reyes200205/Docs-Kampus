@@ -29,6 +29,10 @@ Content-Type: application/json
 
 `device_name` es opcional y sirve para identificar la sesión (por defecto, `api`). **[Nuevo]** La API también guarda el `User-Agent` de la petición, y los dos aparecen en la [lista de sesiones](/docs/backend/api/auth/sessions) (T-46). El correo se compara sin importar mayúsculas ni espacios.
 
+<Callout type="warn" title="Nuevo · Verificación en dos pasos (T-47)">
+  Si la cuenta tiene la [verificación en dos pasos](/docs/backend/api/auth/two-factor) activa, esta petición no entrega el token: responde `200` con `two_factor_required: true` y un `challenge_token`, y el token llega en `POST /api/login/two-factor` con el código de la app. Ver [Iniciar sesión con la verificación activa](/docs/backend/api/auth/two-factor#iniciar-sesión-con-la-verificación-activa).
+</Callout>
+
 ### Respuesta `201`
 
 ```json
