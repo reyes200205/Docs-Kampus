@@ -6,7 +6,7 @@ description: "Estudiantes cercanos para el mapa por zonas, con posición difumin
 **[Nuevo]** La vista **Cerca** es un modo del [descubrimiento](/docs/backend/api/social/discovery): muestra en un mapa a los estudiantes que activaron **Cerca de ti**, en el centro de su zona y con la distancia aproximada ("≈ 2 km") (RF-19).
 
 <Callout title="Estado">
-  En revisión con T-35 ([PR #45](https://github.com/WilbertDevMx/backend-kampus/pull/45)). La pantalla de la app es T-30 y usa el mapa de T-29.
+  Terminada con T-35 ([PR #45](https://github.com/WilbertDevMx/backend-kampus/pull/45)), en la versión v0.2.0 del backend. **[Nuevo]** El requisito del perfil completo está en revisión ([PR #56](https://github.com/WilbertDevMx/backend-kampus/pull/56)). La pantalla de la app es T-30 y usa el mapa de T-29.
 </Callout>
 
 <Callout type="warn" title="Privacidad (RNF-11)">
@@ -27,6 +27,8 @@ Solo quien también tiene **Cerca de ti** activo y una celda guardada ([Activar 
 ```
 
 La app usa `code` para llevar al alumno a activar Cerca de ti.
+
+**[Nuevo]** Además, igual que en el descubrimiento, tiene que haber [completado su perfil](/docs/backend/api/profile/profile) (T-49). Si no, responde `403` con `"code": "profile_incomplete"`.
 
 ## Quién aparece
 
@@ -98,6 +100,7 @@ Cada estudiante trae la misma [tarjeta del descubrimiento](/docs/backend/api/soc
 | Código | Cuándo |
 | --- | --- |
 | `403` con `code: "nearby_disabled"` | Quien consulta no tiene Cerca de ti activo. |
+| `403` con `code: "profile_incomplete"` | **[Nuevo]** Quien consulta no ha completado su perfil (T-49). |
 | `403` | La cuenta es de staff. |
 | `422` | `limit` fuera de 1 a 50. |
 | `429` | Más de 30 peticiones en un minuto. |
@@ -113,7 +116,7 @@ El cálculo vive en `App\Support\Location\Geohash` (centro de una celda, celdas 
 ## Flujo sugerido en la app
 
 1. Al entrar al modo Cerca, llama a `GET /api/discover/nearby`.
-2. Si responde `nearby_disabled`, muestra la explicación y el botón para activar Cerca de ti.
+2. Si responde `nearby_disabled`, muestra la explicación y el botón para activar Cerca de ti. **[Nuevo]** Si responde `profile_incomplete`, mándalo a terminar su perfil, igual que en Descubrir.
 3. Centra el mapa en `meta.center` y dibuja un avatar por estudiante en `nearby.position`.
 4. Al tocar un avatar, abre la ficha con la tarjeta y `nearby.distance_label`. Desde ahí se puede evaluar con `POST /api/swipes`, igual que en el descubrimiento.
 
