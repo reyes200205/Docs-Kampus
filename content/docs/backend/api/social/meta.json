@@ -2,6 +2,7 @@
   "title": "Descubrimiento y matches",
   "pages": [
     "discovery",
+    "nearby",
     "matches",
     "blocks-reports"
   ]
