@@ -29,6 +29,24 @@ Esta sección documenta los endpoints de la API, con ejemplos de petición y res
 - Las rutas protegidas requieren un token de Sanctum. Ver [Autenticación](/docs/backend/api/auth/login).
 - El idioma de los mensajes de validación es español (`APP_LOCALE=es`).
 
+## Contrato OpenAPI
+
+**[Nuevo]** Además de estas páginas, la API tiene un **contrato OpenAPI 3.1** que se genera desde el código con [Scramble](https://scramble.dedoc.co) (T-33, RNF-07). Describe cada ruta con sus parámetros, el cuerpo que acepta, sus respuestas y sus errores.
+
+<Callout title="Estado">
+  En revisión con T-33 ([PR #61](https://github.com/WilbertDevMx/backend-kampus/pull/61)).
+</Callout>
+
+| Dónde | Qué es |
+| --- | --- |
+| [`docs/openapi.json`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/docs/openapi.json) en el backend | El contrato. Se puede importar en Postman, Insomnia o un generador de tipos para la app. |
+| `http://localhost:8000/docs/api` | Documentación interactiva, con un botón para probar cada ruta con tu token. Funciona en local; en el entorno de pruebas, con `API_DOCS_ENABLED=true`. |
+| `http://localhost:8000/docs/api.json` | El mismo contrato, generado en el momento. |
+
+**Qué usar para cada cosa:** el contrato dice la forma exacta de cada petición y respuesta; estas páginas explican las reglas, los flujos y el porqué. Si no coinciden, manda el código: avisa para corregir la página.
+
+El contrato no se edita a mano. Si cambias una ruta, una validación o una respuesta, corre `composer openapi` en el backend y sube el `docs/openapi.json` en el mismo PR: la CI falla si no coincide con el código (ver [Pull requests](/docs/development/pull-requests#si-tu-pr-cambia-la-api)).
+
 ## Estado del servicio
 
 ```http
