@@ -33,10 +33,19 @@ sequenceDiagram
     API-->>B: call.ended
 `} />
 
-- **Una sala por match**, llamada `match-{id}`, con un máximo de **2 participantes**.
+- **Una sala por match**, llamada `match-{id}`, con un máximo de **2 participantes** (ver [Cómo se garantiza el límite de 2](#cómo-se-garantiza-el-límite-de-2)).
 - **El token dura 15 minutos para entrar.** Una vez dentro, LiveKit renueva la sesión solo, así que la llamada puede durar más.
 - **Si nadie entra, LiveKit cierra la sala a los 5 minutos.**
 - **La API secret de LiveKit nunca sale del servidor.** El token de la app solo sirve para entrar a esa sala, no para crear ni cerrar salas.
+
+### Cómo se garantiza el límite de 2
+
+El límite de 2 personas lo garantiza **nuestra API**, no LiveKit:
+
+1. Solo la API firma tokens, y solo se los da a los dos del match.
+2. Cada quien entra con su identidad fija, `user-{id}`. Si alguien vuelve a entrar desde otro dispositivo, LiveKit saca su sesión anterior: no se suma una tercera persona.
+
+La sala también se crea con `max_participants: 2` y el token lleva el mismo límite (`roomConfig`). Pero en las pruebas del 11 de noviembre contra LiveKit Cloud, con clientes WebRTC reales, **ninguno de los dos detuvo a un tercero con un token válido**: solo el límite de 1 se aplicó. Por eso no se depende de ellos. Ver [Errores resueltos](/docs/project/bug-log).
 
 ## Empezar una llamada
 
