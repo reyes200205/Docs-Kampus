@@ -43,6 +43,7 @@ description: "Registro de los errores que han salido en el proyecto: qué pasaba
 | 11 nov | Las imágenes no se reducían y las verticales podían quedar de lado | Imágenes | Backend #58 |
 | 11 nov | Los errores al subir imágenes salían en inglés o en HTML | Imágenes | Backend #58 |
 | 11 nov | En local no se podían subir fotos de más de 2 MB | Entorno local | [Instalación](/docs/backend/installation#límites-de-php-en-local) |
+| 11 nov | Los alumnos de la UTT no podían registrarse con su correo real | Registro | Backend #59 |
 
 ## Seguridad y privacidad
 
@@ -62,7 +63,7 @@ description: "Registro de los errores que han salido en el proyecto: qué pasaba
 
 ### Registro: correo y rol (28 oct)
 
-- **Qué pasaba:** el correo se guardaba como llegaba, así que `Ana@utt.edu.mx` y `ana@utt.edu.mx` podían ser dos cuentas, y el registro no fijaba el rol de la cuenta nueva.
+- **Qué pasaba:** el correo se guardaba como llegaba, así que `Ana@uttcampus.edu.mx` y `ana@uttcampus.edu.mx` podían ser dos cuentas, y el registro no fijaba el rol de la cuenta nueva.
 - **Solución:** el correo se guarda en minúsculas, la contraseña usa `Password::defaults()` y el registro **siempre** crea cuentas `student`. El staff solo se crea con `kampus:create-admin` o desde la gestión de staff.
 - **Dónde:** backend #28 (`f879ed0`).
 
@@ -145,6 +146,14 @@ Salieron juntos, al revisar qué pasa cuando alguien sube una foto de más de 5 
 - **Qué pasaba:** en la revisión de T-49, la migración dejaba `completed_at` en `null` en los perfiles que ya existían, y solo se recalculaba al cambiar algo. Un estudiante con todos sus datos recibía `403` en Descubrir y `missing: []`, sin ningún paso que completar.
 - **Solución:** el perfil se recalcula también al consultarlo (`ProfileController`).
 - **Dónde:** backend #44.
+
+### El dominio del correo de la UTT (11 nov)
+
+- **Qué pasaba:** el catálogo de universidades tenía a la UTT con el dominio `utt.edu.mx`, pero el correo institucional real es `@uttcampus.edu.mx`. Como el registro solo acepta los dominios del catálogo, un alumno de la UTT no podía registrarse con su correo.
+- **Causa:** el dominio se capturó mal al crear el catálogo, y las pruebas usaban el mismo dominio equivocado, así que nada lo detectó.
+- **Solución:** `CatalogSeeder` trae `uttcampus.edu.mx`, y una migración corrige las bases que ya se habían sembrado. Las pruebas y los ejemplos de la documentación usan el dominio real.
+- **Para que no vuelva:** `UttEmailDomainMigrationTest` revisa que el registro acepte `@uttcampus.edu.mx` y rechace `@utt.edu.mx`. Al agregar una universidad, hay que confirmar el dominio con alguien de esa escuela.
+- **Dónde:** backend #59.
 
 ### Estudiantes de demostración fuera de Descubrir (10 nov)
 
