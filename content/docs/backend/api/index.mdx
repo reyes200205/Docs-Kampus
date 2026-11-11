@@ -10,7 +10,7 @@ Esta sección documenta los endpoints de la API, con ejemplos de petición y res
 | **Autenticación** | [Inicio de sesión](/docs/backend/api/auth/login), **[Nuevo]** [sesiones](/docs/backend/api/auth/sessions), **[Nuevo]** [verificación en dos pasos](/docs/backend/api/auth/two-factor), [registro y verificación](/docs/backend/api/auth/register) y [recuperar la contraseña](/docs/backend/api/auth/password). |
 | **Perfil** | [Perfil, intereses y fotos](/docs/backend/api/profile/profile) y [zonas y ubicación](/docs/backend/api/profile/location). |
 | **Descubrimiento y matches** | [Descubrimiento y swipe](/docs/backend/api/social/discovery), **[Nuevo]** [vista Cerca](/docs/backend/api/social/nearby), [matches](/docs/backend/api/social/matches) y [bloqueo y reporte](/docs/backend/api/social/blocks-reports). |
-| **Chat** | [Tiempo real](/docs/backend/api/chat/realtime). Los mensajes (T-14) se agregan aquí. |
+| **Chat** | **[Nuevo]** [Mensajes e imágenes](/docs/backend/api/chat/messages) y [tiempo real](/docs/backend/api/chat/realtime). |
 | **Grupos** | [Grupos, integrantes y actividades](/docs/backend/api/groups). |
 | **Administración** | [Staff](/docs/backend/api/admin/staff) y [revisión de grupos](/docs/backend/api/admin/group-review). |
 
@@ -67,6 +67,8 @@ Responde `200` cuando la aplicación está arriba. Útil para monitoreo.
 | `GET` | `/api/discover/nearby` | Estudiante | **[Nuevo]** Estudiantes cercanos con Cerca de ti activo, con posición difuminada y distancia aproximada ([Vista Cerca](/docs/backend/api/social/nearby)) |
 | `POST` | `/api/swipes` | Estudiante | Me interesa o Pasar sobre un perfil; si el Me interesa es mutuo, devuelve el match ([Descubrimiento](/docs/backend/api/social/discovery#evaluar-un-perfil)) |
 | `GET` | `/api/matches` | Estudiante | Lista de matches, del más reciente al más antiguo ([Matches](/docs/backend/api/social/matches#lista-de-matches)) |
+| `GET` · `POST` | `/api/matches/{id}/messages` | Estudiante | **[Nuevo]** Historial del chat, o enviar un mensaje de texto o una imagen ([Mensajes](/docs/backend/api/chat/messages)) |
+| `PATCH` | `/api/matches/{id}/messages/read` | Estudiante | **[Nuevo]** Marca como leídos los mensajes recibidos ([Mensajes](/docs/backend/api/chat/messages#marcar-como-leído)) |
 | `GET` · `POST` | `/api/groups` | Estudiante | Explora los grupos aprobados o crea uno, que queda en revisión ([Grupos](/docs/backend/api/groups#explorar-grupos)) |
 | `GET` | `/api/groups/mine` | Estudiante | Grupos del alumno, en cualquier estado ([Grupos](/docs/backend/api/groups#mis-grupos)) |
 | `GET` · `PATCH` · `DELETE` | `/api/groups/{id}` | Estudiante | Ver un grupo; editarlo o borrarlo, si es su administrador ([Grupos](/docs/backend/api/groups#ver-editar-y-borrar)) |
