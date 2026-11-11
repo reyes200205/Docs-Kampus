@@ -39,7 +39,7 @@ Los permisos están en `routes/channels.php` y en las clases de `app/Broadcastin
 
 | Canal | Quién puede entrar | Eventos |
 | --- | --- | --- |
-| `user.{userId}` | Solo el propio usuario, si su cuenta no está suspendida (`UserChannel`). | `match.created` (T-10) |
+| `user.{userId}` | Solo el propio usuario, si su cuenta no está suspendida (`UserChannel`). | `match.created` (T-10) y **[Nuevo]** `call.started` y `call.ended` ([Videollamada](/docs/backend/api/chat/video-call#avisos-en-tiempo-real), T-19) |
 | `chat.{matchId}` | Solo los dos integrantes del match, ninguno suspendido y **sin bloqueo** en ningún sentido (`ChatChannel`, con las mismas reglas que la lista de matches). | **[Nuevo]** `message.sent` ([Mensajes](/docs/backend/api/chat/messages#en-tiempo-real), T-14 y T-15) |
 
 En `Echo.private()` el nombre va **sin** el prefijo `private-`: Laravel lo agrega solo.
