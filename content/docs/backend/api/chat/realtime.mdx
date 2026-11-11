@@ -6,7 +6,7 @@ description: "Servidor de WebSocket con Laravel Reverb, canales privados y cómo
 Los avisos que deben llegar sin recargar (un match nuevo y, con T-14, los mensajes del chat) viajan por **WebSocket**. El servidor es [Laravel Reverb](https://reverb.laravel.com) y la app se conecta con **Laravel Echo**.
 
 <Callout title="Estado">
-  El servidor y la autorización de canales están en `develop` desde el 3 de noviembre con T-13 ([PR #41](https://github.com/WilbertDevMx/backend-kampus/pull/41)). Hoy el único evento que se transmite es [`match.created`](/docs/backend/api/social/matches#aviso-en-tiempo-real); los eventos del chat llegan con T-14. La app todavía no instala Echo: lo hará T-16.
+  El servidor y la autorización de canales están en `develop` desde el 3 de noviembre con T-13 ([PR #41](https://github.com/WilbertDevMx/backend-kampus/pull/41)). Se transmiten [`match.created`](/docs/backend/api/social/matches#aviso-en-tiempo-real) y, **[Nuevo]** desde T-14, [`message.sent`](/docs/backend/api/chat/messages#en-tiempo-real). La app instala Echo con T-16.
 </Callout>
 
 ## Cómo funciona
@@ -40,7 +40,7 @@ Los permisos están en `routes/channels.php` y en las clases de `app/Broadcastin
 | Canal | Quién puede entrar | Eventos |
 | --- | --- | --- |
 | `user.{userId}` | Solo el propio usuario, si su cuenta no está suspendida (`UserChannel`). | `match.created` (T-10) |
-| `chat.{matchId}` | Solo los dos integrantes del match, ninguno suspendido y **sin bloqueo** en ningún sentido (`ChatChannel`, con las mismas reglas que la lista de matches). | Mensajes del chat (T-14, pendiente) |
+| `chat.{matchId}` | Solo los dos integrantes del match, ninguno suspendido y **sin bloqueo** en ningún sentido (`ChatChannel`, con las mismas reglas que la lista de matches). | **[Nuevo]** `message.sent` ([Mensajes](/docs/backend/api/chat/messages#en-tiempo-real), T-14 y T-15) |
 
 En `Echo.private()` el nombre va **sin** el prefijo `private-`: Laravel lo agrega solo.
 

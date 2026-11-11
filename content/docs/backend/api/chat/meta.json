@@ -1,6 +1,7 @@
 {
   "title": "Chat",
   "pages": [
+    "messages",
     "realtime"
   ]
 }

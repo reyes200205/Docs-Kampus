@@ -1,0 +1,139 @@
+---
+title: "Mensajes"
+description: "Enviar mensajes de texto e imágenes entre matches, leer el historial y marcarlo como leído (T-14, T-15, RF-08 y RF-09)."
+---
+
+**[Nuevo]** Dos estudiantes con un [match](/docs/backend/api/social/matches) pueden chatear. Los mensajes se guardan por la API y le llegan a la otra persona en tiempo real por el canal `chat.{matchId}` ([Tiempo real](/docs/backend/api/chat/realtime)).
+
+<Callout title="Estado">
+  Los mensajes de texto están en `develop` desde el 11 de noviembre con T-14 ([PR #55](https://github.com/WilbertDevMx/backend-kampus/pull/55)). Las imágenes están en revisión con T-15 ([PR #57](https://github.com/WilbertDevMx/backend-kampus/pull/57)). Las pantallas de la app son T-16.
+</Callout>
+
+Las rutas requieren un token de Sanctum, un correo verificado y una cuenta `student`. Solo los **dos integrantes del match** pueden usarlas, y solo si ninguno está suspendido y **no hay un bloqueo** entre ellos en ningún sentido. Para cualquier otra persona, la API responde `404`, como si el match no existiera.
+
+## Enviar un mensaje de texto
+
+```http
+POST /api/matches/{matchId}/messages
+Accept: application/json
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "body": "Hola, ¿vamos por un café?"
+}
+```
+
+`body` es obligatorio, de hasta 5000 caracteres. Responde `201` con el mensaje:
+
+```json
+{
+  "data": {
+    "id": 81,
+    "match_id": 12,
+    "sender_id": 7,
+    "type": "text",
+    "body": "Hola, ¿vamos por un café?",
+    "image_url": null,
+    "read_at": null,
+    "created_at": "2026-11-11T18:20:00+00:00"
+  }
+}
+```
+
+| Campo | Qué es |
+| --- | --- |
+| `type` | `text` o `image`. |
+| `body` | El texto. En una imagen es el texto opcional que la acompaña, o `null`. |
+| `image_url` | Solo en las imágenes: URL firmada que vence a los 15 minutos. En el texto es `null`. |
+| `read_at` | Cuándo lo leyó la otra persona, o `null`. |
+
+La API ignora cualquier otro campo que se mande, como `sender_id` o `type`: el remitente siempre es quien tiene la sesión.
+
+## Enviar una imagen
+
+**[Nuevo]** Con T-15, el mismo endpoint acepta una imagen en `multipart/form-data`:
+
+```http
+POST /api/matches/{matchId}/messages
+Accept: application/json
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+
+image=<archivo JPG o PNG>
+body=Mira el cartel del evento   (opcional)
+```
+
+- Solo **JPG o PNG** de hasta **5 MB**.
+- Antes de guardarla, la API la vuelve a codificar para **quitarle el EXIF**, que en las fotos del celular trae la ubicación GPS exacta (RNF-11). El archivo original nunca se guarda.
+- Se guarda en el **bucket privado** (`CHAT_IMAGES_DISK`). La ruta del archivo nunca sale en la API: solo `image_url`, que es una URL firmada de 15 minutos y únicamente la reciben los dos del match.
+
+Responde `201` con `type: "image"` e `image_url`. Desde la app se manda con `FormData`:
+
+```ts
+const form = new FormData();
+form.append("image", { uri: foto.uri, name: "foto.jpg", type: "image/jpeg" } as any);
+form.append("body", texto); // opcional
+
+await fetch(`${API_URL}/matches/${matchId}/messages`, {
+  method: "POST",
+  headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  body: form,
+});
+```
+
+No pongas el `Content-Type` a mano: `fetch` lo arma con el separador del formulario.
+
+### Errores al enviar
+
+| Código | Cuándo |
+| --- | --- |
+| `404` | El match no existe, no es tuyo, hay un bloqueo o alguno está suspendido. |
+| `422` | Falta el texto y la imagen (`El mensaje no puede estar vacío.`), el texto pasa de 5000 caracteres o la imagen no es JPG o PNG, pesa más de 5 MB (`La imagen no puede pesar más de 5 MB.`) o está dañada. |
+| `429` | Más de 30 mensajes por minuto, o **[Nuevo]** más de 10 imágenes por minuto. Al pasarse con las imágenes, el texto sigue funcionando. |
+| `503` | No se pudo guardar la imagen en el bucket. |
+
+## Historial
+
+```http
+GET /api/matches/{matchId}/messages?per_page=50&page=1
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+Devuelve los mensajes del **más reciente al más antiguo**, paginados (`per_page` de 1 a 100; por defecto, 50). Cada mensaje tiene la misma forma que al enviarlo, y las imágenes traen un `image_url` nuevo en cada consulta. La respuesta incluye `links` y `meta` con la paginación estándar de Laravel; para cargar mensajes más viejos, pide la página siguiente.
+
+## Marcar como leído
+
+```http
+PATCH /api/matches/{matchId}/messages/read
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+Marca como leídos todos los mensajes **que te mandó la otra persona** y que no habías leído. No toca los tuyos. Responde:
+
+```json
+{
+  "data": { "read_count": 3 }
+}
+```
+
+## En tiempo real
+
+Cada mensaje enviado se publica como `message.sent` en el canal privado `chat.{matchId}`. El payload es `{ message }`, con **lo mismo que responde la API**, incluido `image_url` en las imágenes:
+
+```ts
+echo.private(`chat.${matchId}`).listen(".message.sent", ({ message }) => {
+  // Agregar el mensaje a la conversación. Si message.type === "image", mostrar message.image_url.
+});
+```
+
+`image_url` vence a los 15 minutos. Si la conversación se queda abierta más tiempo o se vuelve a abrir, la app pide de nuevo el historial para tener URLs vigentes.
+
+## Flujo sugerido en la app
+
+1. Al abrir una conversación, pide `GET /api/matches/{matchId}/messages`, suscríbete a `chat.{matchId}` y llama a `PATCH .../messages/read`.
+2. Para enviar texto, `POST` con JSON. Para una imagen, muestra la vista previa local antes de enviar y manda `FormData`.
+3. Al recibir `message.sent` de la otra persona con la conversación abierta, agrégalo y vuelve a marcar como leído.
+4. Si la API responde `404`, el match ya no está disponible (por ejemplo, por un bloqueo): saca al usuario de la conversación.
