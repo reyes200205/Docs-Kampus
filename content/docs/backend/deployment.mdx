@@ -5,9 +5,18 @@ description: "Entorno de pruebas en AWS con Docker: servicios, preparación, des
 
 El entorno de pruebas corre en **un solo servidor de AWS (EC2) con Docker Compose**. Toda la definición está en `compose.prod.yaml` del backend.
 
-<Callout type="warn" title="Estado">
-  La configuración está en `develop` desde el 8 de noviembre con T-24 ([PR #43](https://github.com/WilbertDevMx/backend-kampus/pull/43)). Para dar T-24 por terminada falta, según su criterio de terminado: la **URL pública con HTTPS** funcionando, la **app web** publicada y el monitor externo de `/up` registrado. Cuando estén, agrega la URL a la tabla de [URL base](/docs/backend/api#url-base).
+<Callout title="Estado: en línea desde el 14 de noviembre">
+  **[Nuevo]** T-24 quedó terminada el 14 de noviembre. La configuración está en `develop` desde el 8 de noviembre ([PR #43](https://github.com/WilbertDevMx/backend-kampus/pull/43)).
 </Callout>
+
+| Qué | Dónde |
+| --- | --- |
+| API | `https://api-kampus.emulatornds.online` (EC2 `t3.small` en `us-east-2`, rama `develop`) |
+| WebSocket | `wss://api-kampus.emulatornds.online/app/{REVERB_APP_KEY}` |
+| App web | `https://app-kampus.emulatornds.online` (Vercel). Por ahora se publica a mano; falta que se publique sola con cada fusión del frontend. |
+| Imágenes | Bucket privado de S3 en `us-east-2` |
+| Correos | Resend, desde `no-reply@kampus.emulatornds.online` |
+| Monitoreo | UptimeRobot sobre `/up`, cada 5 minutos |
 
 ## Servicios
 
@@ -57,6 +66,7 @@ Se copian de `.env.production.example` a `.env.production`, que **nunca** se sub
 | `TRUSTED_PROXIES` | `172.16.0.0/12`, la red de Docker, para leer la IP real detrás de Nginx. |
 | `SANCTUM_TOKEN_EXPIRATION` | `10080` minutos (7 días). |
 | `BROADCAST_CONNECTION` · `REVERB_*` | `reverb` y credenciales propias del entorno. |
+| `REVERB_ALLOWED_ORIGINS` | **[Nuevo]** El dominio de la app web **y** el de la API, separados por coma. La app de celular manda como origen el dominio de la API; sin él, el chat en tiempo real no conecta en el celular. Ver [Tiempo real](/docs/backend/api/chat/realtime#variables-del-backend). |
 | `PROFILE_PHOTOS_DISK` · `GROUP_IMAGES_DISK` · `AWS_*` | `s3` y las llaves del usuario de IAM. |
 | `MAIL_*` | SMTP de Resend. |
 | `LOG_LEVEL` · `LOG_SECURITY_DAYS` | `warning` · `90` días de `security.log`. |
@@ -80,6 +90,15 @@ docker compose -f compose.prod.yaml --env-file .env.production exec app php arti
 - En producción **no** se corre `db:seed` sin `--class`: `DatabaseSeeder` crea un usuario de prueba.
 
 Para actualizar: `git pull`, el mismo `up -d --build` y después `migrate --force`.
+
+**[Nuevo]** Si cambias `.env.production`, recrea los contenedores que usan la API, porque la configuración se cachea al arrancar. Después reinicia Nginx: guarda la dirección interna de `app` de cuando arrancó, y si `app` se recrea responde `502` hasta reiniciarlo.
+
+```bash
+docker compose -f compose.prod.yaml --env-file .env.production up -d --force-recreate app queue scheduler reverb
+docker compose -f compose.prod.yaml --env-file .env.production restart nginx
+```
+
+Lo mismo aplica después de un `up -d --build` que recree `app`: si `/up` responde `502`, reinicia Nginx.
 
 ## Datos de demostración
 
@@ -105,7 +124,9 @@ docker compose -f compose.prod.yaml --env-file .env.production exec nginx kampus
 
 Desde ahí `certbot` lo renueva solo. Si el primer comando falla, revisa que el DNS ya apunte a la IP elástica y que el puerto 80 esté abierto.
 
+**[Nuevo]** Let's Encrypt ya no manda avisos de vencimiento por correo, así que `ACME_EMAIL` puede quedar vacío. En ese caso cambia `--email "$ACME_EMAIL"` por `--register-unsafely-without-email`. Así se sacó el certificado del entorno de pruebas.
+
 ## Monitoreo básico
 
-- `https://<dominio-de-la-API>/up` responde `200` mientras la API está arriba. Se registra en un monitor externo gratuito (por ejemplo, UptimeRobot) para recibir un aviso si se cae.
+- `https://<dominio-de-la-API>/up` responde `200` mientras la API está arriba. Se registra en un monitor externo gratuito para recibir un aviso si se cae. **[Nuevo]** En el entorno de pruebas es el monitor "Kampus API (/up)" de UptimeRobot: revisa cada 5 minutos, valida el certificado y avisa por correo a Wilbert.
 - Logs: `docker compose -f compose.prod.yaml logs -f app queue reverb`. Los de Laravel, incluido `security.log`, quedan en el volumen `logs`.

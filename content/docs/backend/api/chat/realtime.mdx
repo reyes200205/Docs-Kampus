@@ -86,7 +86,7 @@ echo.private(`user.${miId}`).listen(".match.created", ({ match }) => {
 | `REVERB_APP_ID` · `REVERB_APP_KEY` · `REVERB_APP_SECRET` | Vacías | Aleatorias | Credenciales de la app en Reverb. Se generan por entorno. |
 | `REVERB_HOST` · `REVERB_PORT` · `REVERB_SCHEME` | `127.0.0.1` · `8080` · `http` | `reverb` · `8080` · `http` | Adónde manda Laravel los eventos. En el servidor es el contenedor `reverb`, dentro de la red de Docker. |
 | `REVERB_SERVER_HOST` · `REVERB_SERVER_PORT` | `0.0.0.0` · `8080` | `0.0.0.0` · `8080` | Dónde escucha Reverb. |
-| `REVERB_ALLOWED_ORIGINS` | `*` | El dominio de la app | Orígenes que pueden abrir el WebSocket. |
+| `REVERB_ALLOWED_ORIGINS` | `*` | El dominio de la app web y el de la API | Hosts (sin `https://`) que pueden abrir el WebSocket. **[Nuevo]** Reverb rechaza las conexiones con un `Origin` que no esté en la lista y las que no mandan `Origin`. La app de celular manda como origen el dominio de la API, por eso ese dominio también va en la lista. |
 
 En el entorno de pruebas la app se conecta por `wss://<dominio-de-la-API>/app/{REVERB_APP_KEY}`: Nginx manda `/app` a Reverb (ver [Despliegue](/docs/backend/deployment)).
 
