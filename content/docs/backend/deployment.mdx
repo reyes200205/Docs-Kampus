@@ -13,7 +13,7 @@ El entorno de pruebas corre en **un solo servidor de AWS (EC2) con Docker Compos
 | --- | --- |
 | API | `https://api-kampus.emulatornds.online` (EC2 `t3.small` en `us-east-2`, rama `develop`) |
 | WebSocket | `wss://api-kampus.emulatornds.online/app/{REVERB_APP_KEY}` |
-| App web | `https://app-kampus.emulatornds.online` (Vercel). Por ahora se publica a mano; falta que se publique sola con cada fusión del frontend. |
+| App web | `https://app.kodev.online`, en el proyecto de Vercel de Alejandro conectado al repo del frontend. Los enlaces de los correos (`FRONTEND_URL` y `PASSWORD_RESET_URL`) apuntan ahí. La copia manual en `https://app-kampus.emulatornds.online` sigue permitida mientras se retira. |
 | Imágenes | Bucket privado de S3 en `us-east-2` |
 | Correos | Resend, desde `no-reply@kampus.emulatornds.online` |
 | Monitoreo | UptimeRobot sobre `/up`, cada 5 minutos |
