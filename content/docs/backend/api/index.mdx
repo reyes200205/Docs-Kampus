@@ -116,7 +116,7 @@ Todas requieren el token de una cuenta de staff; el moderador solo recibe datos 
 
 | Método | Ruta | Rol | Descripción | Tarea |
 | --- | --- | --- | --- | --- |
-| `GET` | `/api/admin/groups?status=pending` | Moderador, admin | Cola de grupos en revisión, o historial con `status` ([Administración: grupos](/docs/backend/api/admin/group-review#cola-de-revisión)) | T-42 |
+| `GET` | `/api/admin/groups?status=pending` | Moderador, admin | Cola de grupos en revisión, historial con `status` o todos con `status=all` (T-44) ([Administración: grupos](/docs/backend/api/admin/group-review#cola-de-revisión)) | T-42 |
 | `POST` | `/api/admin/groups/{id}/approve` | Moderador, admin | Aprueba un grupo ([Administración: grupos](/docs/backend/api/admin/group-review#aprobar-o-rechazar)) | T-42 |
 | `POST` | `/api/admin/groups/{id}/reject` | Moderador, admin | Rechaza un grupo, con `reason` obligatorio ([Administración: grupos](/docs/backend/api/admin/group-review#aprobar-o-rechazar)) | T-42 |
 | `POST` | `/api/admin/groups` | Moderador, admin | Crea un grupo oficial, ya aprobado ([Administración: grupos](/docs/backend/api/admin/group-review#crear-un-grupo-oficial)) | T-42 |
