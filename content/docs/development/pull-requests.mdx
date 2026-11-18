@@ -89,6 +89,16 @@ Con base `main` y compare `develop`, este mensaje significa que **`main` ya tien
 - CI debe pasar. En el backend: formato, migraciones y pruebas (ver [Integración continua](/docs/backend/installation#integración-continua)). En la documentación: la convención de commits.
 - Cómo se calcula la versión: ver [Versiones y changelog](/docs/development/releases).
 
+## Si tu PR cambia la API
+
+**[Nuevo]** En el backend, si agregas o cambias una ruta, una validación (`FormRequest` o `validate()`) o una respuesta (`API Resource` o `response()->json()`):
+
+1. Corre `composer openapi`. Regenera `docs/openapi.json` contra una base SQLite propia, así que no toca la tuya.
+2. Sube el `docs/openapi.json` en el mismo PR.
+3. Si la ruta no pide token, ponle `@unauthenticated` en el PHPDoc del método. Si el controlador es nuevo, ponle su sección con `#[Group('…')]`.
+
+La prueba `OpenApiContractTest` compara el contrato con el código, y la CI falla si no coinciden. Ver [Contrato OpenAPI](/docs/backend/api#contrato-openapi).
+
 ## Si tu PR arregla un error
 
 **[Nuevo]** Anótalo en [Errores resueltos](/docs/project/bug-log), en el mismo PR de la documentación que lo acompaña:

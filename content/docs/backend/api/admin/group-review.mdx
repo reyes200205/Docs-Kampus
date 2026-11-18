@@ -32,6 +32,9 @@ Authorization: Bearer <token>
 | --- | --- |
 | `pending` (por defecto) | Del más antiguo al más nuevo, para atenderlos en orden. |
 | `approved` o `rejected` | Del revisado más recientemente al más antiguo (historial). |
+| `all` | **[Nuevo]** Todos los grupos de su alcance, en cualquier estado, del creado más recientemente al más antiguo. Es el filtro "Todos" del panel (T-44). |
+
+Otro valor responde `422` con el error en `status`.
 
 Van de 20 en 20, con la paginación estándar de Laravel. Cada grupo trae lo mismo que ve el estudiante, más quién lo creó y quién lo revisó:
 

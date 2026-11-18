@@ -45,6 +45,9 @@ description: "Registro de los errores que han salido en el proyecto: qué pasaba
 | 11 nov | En local no se podían subir fotos de más de 2 MB | Entorno local | [Instalación](/docs/backend/installation#límites-de-php-en-local) |
 | 11 nov | Los alumnos de la UTT no podían registrarse con su correo real | Registro | Backend #59 |
 | 11 nov | LiveKit Cloud no aplica el límite de 2 personas por videollamada | Videollamada | Backend #60 |
+| 14 nov | El WebSocket rechazaba a la app de celular en el servidor | Despliegue | Backend #63 |
+| 14 nov | La app web publicada en Vercel salía en blanco | Despliegue | [Despliegue](/docs/backend/deployment) |
+| 14 nov | La API respondía `502` después de recrear el contenedor `app` | Despliegue | [Despliegue](/docs/backend/deployment#desplegar) |
 
 ## Seguridad y privacidad
 
@@ -183,6 +186,29 @@ Salieron juntos, al revisar qué pasa cuando alguien sube una foto de más de 5 
 - **Qué pasaba:** la API respondía `validation.required` en lugar de un mensaje.
 - **Causa:** `APP_FALLBACK_LOCALE=es` sin traducciones al español en `lang/`: Laravel no encuentra el texto y devuelve la clave.
 - **Solución:** `APP_FALLBACK_LOCALE=en`, en `.env.production.example` (#43) y en `.env.example` (#58). Los mensajes que ve el usuario se escriben en español en cada validación.
+
+### El WebSocket rechazaba a la app de celular (14 nov)
+
+- **Qué pasaba:** al probar el servidor, el WebSocket respondía `pusher:error` a toda conexión que no viniera de `localhost`.
+- **Causa:** Reverb rechaza las conexiones con un `Origin` que no esté en `REVERB_ALLOWED_ORIGINS`, y también las que no mandan `Origin`. La plantilla solo traía el dominio de la app web, pero la app de celular (React Native) manda como origen el dominio del propio WebSocket, que es el de la API.
+- **Solución:** `REVERB_ALLOWED_ORIGINS` lleva el dominio de la app web y el de la API. Se probó en el servidor: con el origen de la app web, con el de la API y con `localhost:8081` conecta, y sin origen o con otro dominio se rechaza.
+- **Para que no vuelva:** `.env.production.example` explica por qué van los dos dominios, y la tabla de [Tiempo real](/docs/backend/api/chat/realtime#variables-del-backend) también.
+- **Dónde:** backend #63.
+
+### La app web salía en blanco en Vercel (14 nov)
+
+- **Qué pasaba:** la web publicada cargaba el HTML y el JavaScript, pero se quedaba en blanco. Las fuentes y los íconos daban `404`.
+- **Causa:** `expo export` deja las fuentes y los íconos en `assets/node_modules/.pnpm/...`. Al subir una carpeta ya compilada, el CLI de Vercel omite cualquier carpeta llamada `node_modules` y las que empiezan con punto. La app espera a que carguen las fuentes antes de pintar la pantalla.
+- **Solución:** en la copia que se sube, esas carpetas se renombran (`_nm` y `pnpm`), y un rewrite en `vercel.json` las sirve en su ruta original. Se comprobó que los 27 archivos responden `200`.
+- **Para que no vuelva:** cuando Vercel compile desde el repo del frontend, en lugar de subir la carpeta compilada a mano, ya no hace falta el renombre.
+- **Dónde:** entorno de pruebas, `app-kampus.emulatornds.online`.
+
+### `502` después de recrear `app` (14 nov)
+
+- **Qué pasaba:** después de cambiar `.env.production` y recrear los contenedores de la API, todas las peticiones respondían `502`.
+- **Causa:** Nginx resuelve la dirección interna de `app` al arrancar y se queda con ella. Al recrear `app`, Docker le da otra dirección.
+- **Solución:** reiniciar Nginx después de recrear `app`. Quedó como paso en [Desplegar](/docs/backend/deployment#desplegar).
+- **Para que no vuelva:** hoy es un paso manual. La solución de fondo sería que Nginx vuelva a resolver el nombre en cada petición, con `resolver 127.0.0.11` y la dirección de `app` en una variable; está pendiente en el backend.
 
 ## CI y dependencias
 

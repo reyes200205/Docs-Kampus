@@ -64,3 +64,4 @@ Estas variables llegan con el [PR #7](https://github.com/WilbertDevMx/backend-ka
 | `LIVEKIT_URL` | vacío | **[Nuevo]** Dirección `wss://` del proyecto de LiveKit Cloud para la [videollamada](/docs/backend/api/chat/video-call#configuración) (T-19) |
 | `LIVEKIT_API_KEY` | vacío | **[Nuevo]** API key del proyecto de LiveKit Cloud |
 | `LIVEKIT_API_SECRET` | vacío | **[Nuevo]** API secret del proyecto. Solo va en el servidor. Sin las tres variables, la videollamada responde `503` |
+| `API_DOCS_ENABLED` | `true` fuera de producción | **[Nuevo]** Publica la documentación interactiva en `/docs/api` ([Contrato OpenAPI](/docs/backend/api#contrato-openapi), T-33). En producción vale `false` salvo que se active |
