@@ -6,7 +6,7 @@ description: "Alta, desactivación y reactivación de moderadores y administrado
 **[Nuevo]** Un administrador da de alta a moderadores y a otros administradores desde el panel, y puede desactivar o reactivar sus cuentas (RF-22). Nadie se registra como staff por su cuenta: el [registro público](/docs/backend/api/auth/register#crear-la-cuenta) siempre crea estudiantes, y el primer administrador se crea en el servidor con `php artisan kampus:create-admin`.
 
 <Callout title="Estado">
-  En `develop` desde el 3 de noviembre con T-41 ([PR #33](https://github.com/WilbertDevMx/backend-kampus/pull/33)). La moderación de reportes y usuarios llega con T-37 y T-43; la aprobación de grupos ya está, con T-42.
+  En `develop` desde el 3 de noviembre con T-41 ([PR #33](https://github.com/WilbertDevMx/backend-kampus/pull/33)). La aprobación de grupos ya está, con T-42. **[Nuevo]** La [revisión de reportes](/docs/backend/api/admin/reports) (T-37) y los [usuarios](/docs/backend/api/admin/users) (T-43) están en revisión.
 </Callout>
 
 Todas las rutas de esta página requieren un token de Sanctum, un correo verificado y una cuenta **`admin`**. Un moderador o un estudiante recibe `403` (`Tu cuenta no tiene acceso a esta sección.`), y sin token la respuesta es `401`.
@@ -161,5 +161,7 @@ Cada acción de esta página queda en la tabla `moderation_actions` (ver el [dic
 | Alta de un moderador o administrador | `create_staff` |
 | Desactivación | `deactivate_staff` |
 | Reactivación | `reactivate_user` |
+| **[Nuevo]** Suspensión de un estudiante ([Usuarios](/docs/backend/api/admin/users)) | `suspend_user` |
+| **[Nuevo]** Resolver o descartar un reporte ([Reportes](/docs/backend/api/admin/reports)) | `resolve_report` · `dismiss_report` |
 
 La bitácora es **inmutable**: solo tiene `created_at`, y la API no permite editar ni borrar un registro.

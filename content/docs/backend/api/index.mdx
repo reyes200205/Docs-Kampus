@@ -12,7 +12,7 @@ Esta sección documenta los endpoints de la API, con ejemplos de petición y res
 | **Descubrimiento y matches** | [Descubrimiento y swipe](/docs/backend/api/social/discovery), **[Nuevo]** [vista Cerca](/docs/backend/api/social/nearby), [matches](/docs/backend/api/social/matches) y [bloqueo y reporte](/docs/backend/api/social/blocks-reports). |
 | **Chat** | **[Nuevo]** [Mensajes e imágenes](/docs/backend/api/chat/messages), [videollamada](/docs/backend/api/chat/video-call) y [tiempo real](/docs/backend/api/chat/realtime). |
 | **Grupos** | [Grupos, integrantes y actividades](/docs/backend/api/groups). |
-| **Administración** | [Staff](/docs/backend/api/admin/staff) y [revisión de grupos](/docs/backend/api/admin/group-review). |
+| **Administración** | [Staff](/docs/backend/api/admin/staff), [revisión de grupos](/docs/backend/api/admin/group-review), **[Nuevo]** [revisión de reportes](/docs/backend/api/admin/reports) y [usuarios](/docs/backend/api/admin/users). |
 
 ## URL base
 
@@ -123,16 +123,16 @@ Todas requieren el token de una cuenta de staff; el moderador solo recibe datos 
 | `GET` · `POST` | `/api/admin/staff` | Admin | Lista o crea cuentas de staff ([Administración: staff](/docs/backend/api/admin/staff)) | T-41 |
 | `PATCH` | `/api/admin/staff/{id}` | Admin | Desactiva o reactiva una cuenta de staff, con `reason`. La universidad no se cambia ([Administración: staff](/docs/backend/api/admin/staff#desactivar-o-reactivar-una-cuenta)) | T-41 |
 
-**Planeado** (T-37 y T-43, Sprint 4). Son rutas propuestas; cada una se confirma y se documenta en su PR.
+**[Nuevo] En revisión** (T-37 en el [PR #75](https://github.com/WilbertDevMx/backend-kampus/pull/75) y T-43 en el [PR #76](https://github.com/WilbertDevMx/backend-kampus/pull/76)):
 
 | Método | Ruta | Rol | Descripción | Tarea |
 | --- | --- | --- | --- | --- |
-| `GET` | `/api/admin/users` | Moderador, admin | Lista y busca usuarios | T-43 |
-| `GET` | `/api/admin/users/{id}` | Moderador, admin | Detalle de un usuario, con sus reportes | T-43 |
-| `POST` | `/api/admin/users/{id}/suspend` | Moderador, admin | Suspende una cuenta; pide `reason` y, si es moderador, `report_id` | T-43 |
-| `POST` | `/api/admin/users/{id}/reactivate` | Moderador, admin | Reactiva una cuenta suspendida, con `reason` | T-43 |
-| `GET` | `/api/admin/reports` | Moderador, admin | Reportes por estado | T-37 |
-| `PATCH` | `/api/admin/reports/{id}` | Moderador, admin | Resuelve o descarta un reporte | T-37 |
+| `GET` | `/api/admin/reports` | Moderador, admin | Cola de reportes, con filtros de estado, reportado y motivo ([Administración: reportes](/docs/backend/api/admin/reports#cola-de-reportes)) | T-37 |
+| `GET` · `PATCH` | `/api/admin/reports/{id}` | Moderador, admin | Ve un reporte, o lo resuelve o descarta con `reason`; al resolverlo puede suspender al reportado ([Administración: reportes](/docs/backend/api/admin/reports#resolver-o-descartar)) | T-37 |
+| `GET` | `/api/admin/users` | Moderador, admin | Lista y busca cuentas ([Administración: usuarios](/docs/backend/api/admin/users#listar-y-buscar)) | T-43 |
+| `GET` | `/api/admin/users/{id}` | Moderador, admin | Detalle con perfil, reportes e historial de moderación ([Administración: usuarios](/docs/backend/api/admin/users#detalle-de-una-cuenta)) | T-43 |
+| `POST` | `/api/admin/users/{id}/suspend` | Moderador, admin | Suspende una cuenta de estudiante; pide `reason` y, si es moderador, `report_id` ([Administración: usuarios](/docs/backend/api/admin/users#suspender-o-reactivar)) | T-43 |
+| `POST` | `/api/admin/users/{id}/reactivate` | Moderador, admin | Reactiva una cuenta suspendida, con `reason` ([Administración: usuarios](/docs/backend/api/admin/users#suspender-o-reactivar)) | T-43 |
 
 <Callout title="Mantener al día">
   Cada endpoint nuevo se documenta aquí como parte de la [Definition of Done](/docs/development/pull-requests#definition-of-done).
