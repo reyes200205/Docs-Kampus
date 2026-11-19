@@ -1,0 +1,98 @@
+---
+title: "Usuarios"
+description: "Consulta de cuentas en el panel y suspensión o reactivación de estudiantes (T-43, RF-15 y RF-24)."
+---
+
+**[Nuevo]** El staff consulta las cuentas de su alcance, ve su perfil, los reportes que recibieron y su historial de moderación, y suspende o reactiva cuentas de estudiantes (RF-24).
+
+<Callout title="Estado">
+  En revisión en el [PR #76](https://github.com/WilbertDevMx/backend-kampus/pull/76) del backend (T-43), que se fusiona después del de [reportes](/docs/backend/api/admin/reports) (T-37).
+</Callout>
+
+Todas las rutas de esta página requieren un token de Sanctum, un correo verificado y una cuenta **`moderator`** o **`admin`**. Un estudiante recibe `403`, y sin token la respuesta es `401`.
+
+## Reglas
+
+- Un **moderador** solo ve a los **estudiantes de su universidad**. Un **administrador** ve todas las cuentas, staff incluido, menos la suya. Una cuenta fuera del alcance responde `404`.
+- El moderador **solo suspende con un reporte** sobre esa cuenta (`report_id`). Para el administrador el reporte es opcional.
+- Toda suspensión o reactivación lleva un **motivo** (`reason`), que queda en la [bitácora](/docs/backend/api/admin/staff#bitácora).
+- Aquí solo se suspenden **estudiantes**. Las cuentas de staff se desactivan en [Staff](/docs/backend/api/admin/staff#desactivar-o-reactivar-una-cuenta); intentarlo aquí responde `422`.
+- Eliminar una cuenta no está en esta página: se hará con el borrado de datos de T-23.
+
+## Listar y buscar
+
+```http
+GET /api/admin/users?search=luis&status=suspended&page=1
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+| Parámetro | Descripción |
+| --- | --- |
+| `search` | Busca en el nombre y el correo, sin distinguir mayúsculas. Hasta 100 caracteres. |
+| `status` | `all` (por defecto), `active` o `suspended`. |
+| `role` | `student`, `moderator` o `admin`. Útil para el administrador. |
+| `university_id` | Solo las cuentas de esa universidad. Útil para el administrador. |
+| `sort` | `name` (por defecto, alfabético), `reports` (primero quien tiene más reportes pendientes) o `newest` (las más nuevas primero). |
+
+Van de 20 en 20, con la paginación estándar de Laravel:
+
+```json
+{
+  "id": 15,
+  "name": "Luis Pérez",
+  "email": "luis@uttcampus.edu.mx",
+  "role": "student",
+  "university": { "id": 1, "name": "Universidad Tecnológica de Torreón", "short_name": "UTT" },
+  "email_verified": true,
+  "suspended": false,
+  "suspended_at": null,
+  "reports_count": 3,
+  "pending_reports_count": 2,
+  "created_at": "2026-11-17T18:40:00+00:00"
+}
+```
+
+## Detalle de una cuenta
+
+```http
+GET /api/admin/users/{id}
+```
+
+Trae lo mismo que la lista, más:
+
+| Campo | Descripción |
+| --- | --- |
+| `profile` | Carrera, semestre, "Sobre mí", si el perfil está completo y sus fotos (URL firmada de 15 minutos). `null` si no tiene perfil. |
+| `reports` | Los 20 reportes recibidos más recientes: motivo, descripción, estado, quién reportó y cuándo. |
+| `moderation_history` | Las 20 acciones más recientes de la bitácora sobre esta cuenta: `action`, `reason`, `report_id`, quién la hizo y cuándo. |
+
+## Suspender o reactivar
+
+```http
+POST /api/admin/users/{id}/suspend
+Content-Type: application/json
+
+{
+  "reason": "Acoso confirmado en el chat.",
+  "report_id": 7
+}
+```
+
+| Campo | Reglas |
+| --- | --- |
+| `reason` | Obligatorio, hasta 1000 caracteres. |
+| `report_id` | **Obligatorio para el moderador** (`Indica el reporte que justifica la suspensión.`); opcional para el administrador. Tiene que ser un reporte **sobre esa cuenta**; si no, `422` con `El reporte no es sobre esta cuenta.` |
+
+Suspender cierra todas las sesiones de la cuenta y le impide iniciar sesión, igual que desde la [revisión de reportes](/docs/backend/api/admin/reports#resolver-o-descartar). Si el reporte seguía pendiente, queda **resuelto** con el mismo motivo. Una cuenta ya suspendida responde `422` con `La cuenta ya está suspendida.`
+
+```http
+POST /api/admin/users/{id}/reactivate
+Content-Type: application/json
+
+{ "reason": "Apeló y se revisó el caso." }
+```
+
+Reactiva la cuenta: puede volver a iniciar sesión. Si no estaba suspendida, responde `422` con `La cuenta no está suspendida.`
+
+Las dos responden `200` con el detalle de la cuenta. En la bitácora quedan como `suspend_user` (con su `report_id`) y `reactivate_user`.

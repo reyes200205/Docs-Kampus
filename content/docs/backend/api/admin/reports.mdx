@@ -1,0 +1,120 @@
+---
+title: "Revisión de reportes"
+description: "Cola de reportes de los alumnos, resolución o descarte y suspensión del reportado (T-37, RF-15)."
+---
+
+**[Nuevo]** Los reportes que hacen los estudiantes ([Bloqueo y reporte](/docs/backend/api/social/blocks-reports#reportar)) llegan a una cola que atiende el staff. Cada reporte se **resuelve** o se **descarta** con un motivo, y al resolverlo se puede **suspender** al reportado en el mismo paso.
+
+<Callout title="Estado">
+  En revisión en el [PR #75](https://github.com/WilbertDevMx/backend-kampus/pull/75) del backend (T-37). La consulta de usuarios y la suspensión desde el detalle de la cuenta están en [Usuarios](/docs/backend/api/admin/users) (T-43).
+</Callout>
+
+Todas las rutas de esta página requieren un token de Sanctum, un correo verificado y una cuenta **`moderator`** o **`admin`**. Un estudiante recibe `403`, y sin token la respuesta es `401`.
+
+## Reglas
+
+- Un reporte lo atiende la universidad del **reportado** (`reports.university_id`). Un **moderador** solo ve y atiende los de su universidad; un **administrador**, todos. Un reporte fuera de su alcance responde `404`.
+- Un reporte se revisa **una sola vez**: si ya no está pendiente, la API responde `422` con `El reporte ya fue revisado.`
+- Toda decisión lleva un **motivo** (`reason`), que queda en la [bitácora](#bitácora).
+- Solo un reporte **resuelto** puede suspender al reportado. Descartarlo con `suspend: true` responde `422`.
+
+## Cola de reportes
+
+```http
+GET /api/admin/reports?status=pending&page=1
+Accept: application/json
+Authorization: Bearer <token>
+```
+
+| Parámetro | Descripción |
+| --- | --- |
+| `status` | `pending` (por defecto), `reviewed`, `dismissed` o `all`. Otro valor responde `422`. |
+| `user_id` | Solo los reportes contra ese estudiante. |
+| `reason` | Solo los de ese motivo: `acoso`, `perfil_falso`, `contenido_inapropiado`, `spam` u `otro`. |
+
+| `status` | Orden |
+| --- | --- |
+| `pending` | Del más antiguo al más nuevo, para atenderlos en orden. |
+| `reviewed` o `dismissed` | Del revisado más recientemente al más antiguo (historial). |
+| `all` | Del creado más recientemente al más antiguo. |
+
+Van de 20 en 20, con la paginación estándar de Laravel. Cada reporte trae:
+
+```json
+{
+  "id": 7,
+  "reason": "acoso",
+  "description": null,
+  "status": "pending",
+  "university": { "id": 1, "name": "Universidad Tecnológica de Torreón", "short_name": "UTT" },
+  "reporter": { "id": 12, "name": "Ana López", "email": "ana@uttcampus.edu.mx" },
+  "reported": {
+    "id": 15,
+    "name": "Luis Pérez",
+    "email": "luis@uttcampus.edu.mx",
+    "suspended": false,
+    "suspended_at": null,
+    "reports_count": 3
+  },
+  "match_id": 4,
+  "reviewed_by": null,
+  "reviewed_at": null,
+  "created_at": "2026-11-19T16:00:00+00:00"
+}
+```
+
+| Campo | Descripción |
+| --- | --- |
+| `reporter` | Quién reportó. `null` si ya borró su cuenta: el reporte se conserva. |
+| `reported.reports_count` | Cuántos reportes ha recibido en total, para ver si es reincidente. |
+| `match_id` | Conversación que el alumno adjuntó como evidencia, o `null`. |
+| `reviewed_by` · `reviewed_at` | Quién lo revisó y cuándo; `null` mientras está pendiente. |
+
+## Ver un reporte
+
+```http
+GET /api/admin/reports/{id}
+```
+
+Responde `200` con el reporte, en el mismo formato.
+
+## Resolver o descartar
+
+```http
+PATCH /api/admin/reports/{id}
+Accept: application/json
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "status": "reviewed",
+  "reason": "Mandó insultos por el chat; se suspende.",
+  "suspend": true
+}
+```
+
+| Campo | Reglas |
+| --- | --- |
+| `status` | Obligatorio. `reviewed` (resuelto: el reporte procede) o `dismissed` (descartado). |
+| `reason` | Obligatorio, hasta 1000 caracteres. |
+| `suspend` | Opcional. `true` también suspende al reportado. Solo con `status: reviewed`. |
+
+Responde `200` con el reporte actualizado.
+
+Al **suspender**:
+
+- se llena `users.suspended_at` y se borran todos sus tokens, así que pierde sus sesiones en todos sus dispositivos;
+- el login le responde `403` con `Tu cuenta está suspendida.`;
+- deja de aparecer en Descubrir, Cerca y los matches, y no puede suscribirse a los canales de tiempo real.
+
+Si la cuenta ya estaba suspendida, el reporte se resuelve sin repetir la suspensión. Para reactivarla se usa [Usuarios](/docs/backend/api/admin/users#suspender-o-reactivar).
+
+## Bitácora
+
+Cada decisión queda en `moderation_actions` (ver la [bitácora](/docs/backend/api/admin/staff#bitácora)), con la universidad del reportado y el `report_id`:
+
+| Acción | `action` |
+| --- | --- |
+| Resolver un reporte | `resolve_report` |
+| Descartar un reporte | `dismiss_report` |
+| Suspender al reportado | `suspend_user` |
