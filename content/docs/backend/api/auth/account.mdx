@@ -1,0 +1,134 @@
+---
+title: "Cuenta"
+description: "Aceptar el aviso de privacidad y las normas de comunidad, y eliminar la cuenta (T-23, RF-04 y RF-16)."
+---
+
+**[Nuevo]** Esta página cubre dos obligaciones de privacidad de la app:
+
+- **RF-04:** guardar cuándo aceptó cada estudiante el aviso de privacidad y las normas de comunidad.
+- **RF-16:** eliminar la cuenta con todos sus datos en un máximo de 72 horas.
+
+<Callout title="Estado">
+  En revisión con T-23 ([PR #78](https://github.com/WilbertDevMx/backend-kampus/pull/78)). Los textos del aviso y de las normas son de Alejandro; las pantallas de la app todavía no están.
+</Callout>
+
+## Aceptar el aviso de privacidad y las normas
+
+### Al registrarse
+
+[`POST /api/register`](/docs/backend/api/auth/register#crear-la-cuenta) acepta dos campos más:
+
+```json
+{
+  "name": "Ana Torres",
+  "email": "ana.torres@uttcampus.edu.mx",
+  "password": "Kampus2026segura",
+  "password_confirmation": "Kampus2026segura",
+  "accept_privacy": true,
+  "accept_rules": true
+}
+```
+
+Si vienen, tienen que estar en `true` (o `"yes"`, `"on"`, `1`) y la API guarda la fecha. Si vienen en `false`, responde `422` con "Debes aceptar el aviso de privacidad." o "Debes aceptar las normas de comunidad.".
+
+Por ahora son **opcionales**, para que la app siga registrando mientras agrega las casillas. Cuando las tenga, se vuelven obligatorios en el backend.
+
+### Cuentas que ya existían
+
+```http
+POST /api/legal/accept
+Accept: application/json
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{ "privacy": true, "rules": true }
+```
+
+Se manda al menos uno de los dos. Responde `200` con el usuario, igual que `GET /api/user`. También sirve para volver a aceptarlos si los documentos cambian: la fecha se actualiza.
+
+### Cómo saber si falta aceptarlos
+
+[`GET /api/user`](/docs/backend/api#endpoints) trae dos campos nuevos:
+
+```json
+{
+  "data": {
+    "id": 12,
+    "name": "Ana Torres",
+    "privacy_accepted_at": "2026-11-23T18:04:11+00:00",
+    "rules_accepted_at": null
+  }
+}
+```
+
+Si alguno es `null`, la app muestra el documento y llama a `POST /api/legal/accept` cuando el estudiante lo acepte. El staff no necesita aceptarlos.
+
+## Eliminar la cuenta
+
+```http
+DELETE /api/user
+Accept: application/json
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{ "password": "Kampus2026segura" }
+```
+
+### Respuesta `200`
+
+```json
+{ "message": "Eliminamos tu cuenta y tus datos." }
+```
+
+El token deja de funcionar en ese momento. **No se puede deshacer**: la app debe pedir confirmación antes de llamar a esta ruta.
+
+### Qué se borra
+
+El borrado en la base es **inmediato**:
+
+| Se borra | Queda |
+| --- | --- |
+| Cuenta, perfil, intereses, fotos y ubicación | Los reportes que hizo, sin autor |
+| Swipes, matches y **todos los mensajes de esos chats**, también los de la otra persona | Los grupos que creó, sin creador |
+| Bloqueos, en los dos sentidos | La bitácora de moderación, que solo guarda el id |
+| Membresías de grupos | |
+| Reportes en su contra | |
+| Sesiones y token de recuperación de contraseña | |
+
+**Archivos:** las fotos del perfil y las imágenes de sus chats se borran del bucket **por la cola**, unos segundos después. Si el bucket falla, se reintenta durante unas 8 horas, dentro del plazo de 72 horas de RF-16.
+
+**Grupos:** si la cuenta era la única integrante, el grupo se borra con su imagen. Si era la única administradora, el rol pasa al integrante más antiguo, igual que al [salir del grupo](/docs/backend/api/groups).
+
+### Errores
+
+| Código | Cuándo |
+| --- | --- |
+| `401` | Sin token. |
+| `403` | La cuenta es de staff: se da de baja desde la [gestión de staff](/docs/backend/api/admin/staff). |
+| `422` | Falta la contraseña o no es correcta ("La contraseña no es correcta."). |
+| `429` | Más de 6 intentos por minuto. |
+
+## Eliminar una cuenta desde el panel
+
+```http
+DELETE /api/admin/users/{id}
+Accept: application/json
+Authorization: Bearer <token de staff>
+Content-Type: application/json
+
+{ "reason": "Acoso reiterado.", "report_id": 31 }
+```
+
+Borra la cuenta de un estudiante igual que la ruta anterior. Tiene las mismas reglas que suspender una cuenta desde el panel (T-43):
+
+- `reason` es obligatorio (máximo 1000 caracteres).
+- El **moderador** solo elimina estudiantes de su universidad y tiene que indicar un `report_id` sobre esa cuenta. El administrador puede omitirlo.
+- Una cuenta fuera del alcance responde `404`, y una cuenta de staff responde `422`.
+
+Responde `200` con `{ "message": "Eliminamos la cuenta y sus datos." }`. La eliminación queda en la bitácora como `delete_user`, con el id de la cuenta. El reporte se borra junto con la cuenta, así que su número queda al final del motivo, por ejemplo: `"Acoso reiterado. (reporte #31)"`.
+
+## Flujo sugerido en la app
+
+1. En el registro, dos casillas con enlace al aviso y a las normas; el botón "Crear cuenta" se activa cuando las dos están marcadas.
+2. Al entrar, si `privacy_accepted_at` o `rules_accepted_at` son `null`, una pantalla con el documento y el botón "Acepto".
+3. En Ajustes, "Eliminar cuenta" (T-38): explica qué se borra, pide la contraseña y una confirmación, llama a `DELETE /api/user` y regresa al inicio de sesión.

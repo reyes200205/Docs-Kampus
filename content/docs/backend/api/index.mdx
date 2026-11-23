@@ -7,7 +7,7 @@ Esta sección documenta los endpoints de la API, con ejemplos de petición y res
 
 | Carpeta | Qué cubre |
 | --- | --- |
-| **Autenticación** | [Inicio de sesión](/docs/backend/api/auth/login), **[Nuevo]** [sesiones](/docs/backend/api/auth/sessions), **[Nuevo]** [verificación en dos pasos](/docs/backend/api/auth/two-factor), [registro y verificación](/docs/backend/api/auth/register) y [recuperar la contraseña](/docs/backend/api/auth/password). |
+| **Autenticación** | [Inicio de sesión](/docs/backend/api/auth/login), **[Nuevo]** [sesiones](/docs/backend/api/auth/sessions), **[Nuevo]** [verificación en dos pasos](/docs/backend/api/auth/two-factor), [registro y verificación](/docs/backend/api/auth/register), [recuperar la contraseña](/docs/backend/api/auth/password) y **[Nuevo]** [cuenta: aviso de privacidad y eliminación](/docs/backend/api/auth/account). |
 | **Perfil** | [Perfil, intereses y fotos](/docs/backend/api/profile/profile) y [zonas y ubicación](/docs/backend/api/profile/location). |
 | **Descubrimiento y matches** | [Descubrimiento y swipe](/docs/backend/api/social/discovery), **[Nuevo]** [vista Cerca](/docs/backend/api/social/nearby), [matches](/docs/backend/api/social/matches) y [bloqueo y reporte](/docs/backend/api/social/blocks-reports). |
 | **Chat** | **[Nuevo]** [Mensajes e imágenes](/docs/backend/api/chat/messages), [videollamada](/docs/backend/api/chat/video-call) y [tiempo real](/docs/backend/api/chat/realtime). |
@@ -76,6 +76,9 @@ Responde `200` cuando la aplicación está arriba. Útil para monitoreo.
 | `PUT` | `/api/profile/interests` | Estudiante | Reemplaza los intereses del perfil, de 3 a 20 ([Perfil](/docs/backend/api/profile/profile#intereses)) |
 | `POST` | `/api/profile/photos` | Estudiante | Sube una foto JPG, PNG o WebP de hasta 5 MB, con un máximo de 5 por perfil. Se le quitan los metadatos EXIF y GPS ([Perfil](/docs/backend/api/profile/profile#fotos)) |
 | `DELETE` | `/api/profile/photos/{photo}` | Estudiante | Borra una foto del propio perfil ([Perfil](/docs/backend/api/profile/profile#fotos)) |
+| `POST` | `/api/legal/accept` | Sí | **[Nuevo]** Guarda cuándo se aceptaron el aviso de privacidad y las normas de comunidad ([Cuenta](/docs/backend/api/auth/account#cuentas-que-ya-existían)) |
+| `DELETE` | `/api/user` | Estudiante | **[Nuevo]** Elimina la cuenta y todos sus datos, con la contraseña ([Cuenta](/docs/backend/api/auth/account#eliminar-la-cuenta)) |
+| `DELETE` | `/api/admin/users/{id}` | Moderador, admin | **[Nuevo]** Elimina la cuenta de un estudiante; pide `reason` y, si es moderador, `report_id` ([Cuenta](/docs/backend/api/auth/account#eliminar-una-cuenta-desde-el-panel)) |
 | `GET` | `/api/zones` | Estudiante | Catálogo de zonas: campus y colonias ([Zonas y ubicación](/docs/backend/api/profile/location#catálogo-de-zonas)) |
 | `GET` | `/api/location` | Estudiante | Zona declarada y celda de Cerca de ti ([Zonas y ubicación](/docs/backend/api/profile/location#ver-la-ubicación-del-alumno)) |
 | `PUT` | `/api/location/zone` | Estudiante | Declara o quita la zona ([Zonas y ubicación](/docs/backend/api/profile/location#declarar-la-zona)) |
