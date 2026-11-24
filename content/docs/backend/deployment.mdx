@@ -17,6 +17,7 @@ El entorno de pruebas corre en **un solo servidor de AWS (EC2) con Docker Compos
 | Imágenes | Bucket privado de S3 en `us-east-2` |
 | Correos | Resend, desde `no-reply@kampus.emulatornds.online` |
 | Monitoreo | UptimeRobot sobre `/up`, cada 5 minutos |
+| **[Nuevo]** Producción | `https://api.kodev.online`, desde el 24 nov: el mismo EC2, con su propia base y rama `main`. Ver [Producción](#producción). |
 
 ## Servicios
 
@@ -68,6 +69,7 @@ Se copian de `.env.production.example` a `.env.production`, que **nunca** se sub
 | `BROADCAST_CONNECTION` · `REVERB_*` | `reverb` y credenciales propias del entorno. |
 | `REVERB_ALLOWED_ORIGINS` | **[Nuevo]** El dominio de la app web **y** el de la API, separados por coma. La app de celular manda como origen el dominio de la API; sin él, el chat en tiempo real no conecta en el celular. Ver [Tiempo real](/docs/backend/api/chat/realtime#variables-del-backend). |
 | `PROFILE_PHOTOS_DISK` · `GROUP_IMAGES_DISK` · `AWS_*` | `s3` y las llaves del usuario de IAM. |
+| `AWS_ROOT` | **[Nuevo]** Carpeta dentro del bucket, cuando dos entornos lo comparten (producción usa `produccion`). Vacía, los archivos van a la raíz. Se pone antes del primer archivo: si se cambia después, los anteriores quedan fuera de alcance. Llega con el [backend #81](https://github.com/WilbertDevMx/backend-kampus/pull/81). |
 | `MAIL_*` | SMTP de Resend. |
 | `LOG_LEVEL` · `LOG_SECURITY_DAYS` | `warning` · `90` días de `security.log`. |
 
@@ -88,6 +90,10 @@ docker compose -f compose.prod.yaml --env-file .env.production exec app php arti
 - La llave que imprime `key:generate --show` va en `APP_KEY` antes del `up`.
 - La primera vez se levantan solo `db` y `app` para migrar: la cola y el scheduler fallan si arrancan antes de que existan las tablas.
 - En producción **no** se corre `db:seed` sin `--class`: `DatabaseSeeder` crea un usuario de prueba.
+
+<Callout title="En el servidor de Kampus">
+  **[Nuevo]** Desde el 24 nov, en el EC2 de Kampus todos los comandos de esta página llevan además `-f compose.server.yaml` (después de `-f compose.prod.yaml`): `docker compose -f compose.prod.yaml -f compose.server.yaml --env-file .env.production ...`. Ese archivo solo existe en el servidor y hace que Nginx también atienda producción. Si se omite, Nginx se recrea sin él y producción deja de responder. Ver [Producción](#producción).
+</Callout>
 
 **[Nuevo]** El entorno de pruebas se actualiza solo: ver [Actualización automática](#actualización-automática). Para actualizar a mano: `git pull`, compilar `app` y luego `nginx` (por separado), `up -d` y `migrate --force`.
 
@@ -126,7 +132,7 @@ Lo mismo aplica después de un `up -d --build` que recree `app`: si `/up` respon
 2. Consulta `origin/develop`. Si el servidor ya está en ese commit, termina.
 3. Si ese commit ya falló antes, no lo vuelve a intentar: espera al siguiente commit.
 4. Avanza la copia del servidor con `git merge --ff-only`. Si no avanza en línea recta (alguien cambió algo a mano en el servidor), se detiene para revisarlo a mano.
-5. Compila `app` y luego `nginx`, levanta todo con `up -d`, corre `migrate --force` y reinicia Nginx (para evitar el `502`).
+5. Compila `app` y luego `nginx`, arma la configuración de Nginx con `kampus-nginx-conf` (**[Nuevo]**, desde el 24 nov; ver [Producción](#producción)), levanta todo con `up -d`, corre `migrate --force` y reinicia Nginx (para evitar el `502`).
 6. Revisa `https://api-kampus.emulatornds.online/up` hasta 12 veces, cada 5 segundos.
 7. Si responde `200`, borra las imágenes viejas de Docker y termina.
 
@@ -153,7 +159,69 @@ Para pausarla (por ejemplo, mientras se revisa algo a mano): `sudo systemctl sto
 
 - **No cambia `.env.production`.** Si un PR necesita una variable nueva, hay que agregarla en el servidor antes de fusionarlo, o el despliegue puede fallar y regresar a la versión anterior.
 - **No corre seeders.** Si un PR agrega datos de catálogo, se siembran a mano.
-- Solo sigue `develop`. `main` (las versiones publicadas) no se despliega aquí.
+- Solo sigue `develop`. **[Nuevo]** `main` lo despliega otro script, `kampus-deploy-prod`, en [Producción](#producción).
+
+## Producción
+
+**[Nuevo]** Desde el 24 nov, producción corre en el **mismo EC2** que pruebas, como un segundo stack de Docker Compose con su propia base de datos. Sigue la rama `main`, así que tiene lo que ya se publicó como versión (al 24 nov, `ec6458c`). Lo que está en `develop` llega a producción en la siguiente publicación.
+
+| Qué | Pruebas | Producción |
+| --- | --- | --- |
+| API | `api-kampus.emulatornds.online` | `api.kodev.online` |
+| Rama | `develop` | `main` |
+| Carpeta en el servidor | `~/backend-kampus` | `~/kampus-prod` |
+| Proyecto de Compose | `backend-kampus` | `kampus-prod` (`-p kampus-prod`) |
+| Imagen de la API | `kampus-api` | `kampus-api-prod` |
+| Base de datos | volumen `backend-kampus_pgdata` | volumen `kampus-prod_pgdata` |
+| `APP_KEY`, contraseña de la base y `REVERB_*` | propias | propias, distintas a las de pruebas |
+| S3, Resend, Vonage y LiveKit | mismas llaves | mismas llaves; en S3, `AWS_ROOT=produccion` |
+| Actualización automática | `kampus-deploy` | `kampus-deploy-prod` |
+| Monitor de UptimeRobot | "Kampus API (/up)" | "Kampus API producción (/up)" |
+
+El DNS de `api.kodev.online` está en Cloudflare (registro `A` a la IP elástica, sin proxy). La app web de producción todavía no está definida: `FRONTEND_URLS` y `PASSWORD_RESET_URL` apuntan, por ahora, a `app.kodev.online`, igual que pruebas. Una web propia de producción necesita la llave pública de Reverb de producción.
+
+### Un solo Nginx para los dos
+
+Solo un contenedor puede tener los puertos 80 y 443, así que el **Nginx de pruebas atiende los dos dominios**. El stack de producción no levanta su propio `nginx` ni `certbot`.
+
+<Mermaid chart={`
+flowchart LR
+    App((App)) -->|api-kampus...| nginx
+    App -->|api.kodev.online| nginx
+    nginx -->|red de pruebas| P[app y reverb de pruebas]
+    nginx -->|red kampus-edge| R[app y reverb de producción]
+    P --> PDB[(base de pruebas)]
+    R --> RDB[(base de producción)]
+`} />
+
+- Nginx entra a una red de Docker compartida, `kampus-edge`. Ahí están `app` y `reverb` de producción, con los alias `kampus-prod-app` y `kampus-prod-reverb`.
+- En `kampus-edge`, los nombres `app` y `reverb` son los de producción. Por eso, para pruebas, Nginx usa el nombre exacto de cada contenedor (`backend-kampus-app-1` y `backend-kampus-reverb-1`).
+- Para producción, Nginx busca la dirección del contenedor en cada petición. Así, cuando la actualización recrea producción, no responde `502`.
+- El certificado de `api.kodev.online` lo sacó el `certbot` de pruebas y vence el 22 feb 2027. El mismo `certbot` lo renueva junto con el de pruebas.
+
+Estos archivos solo existen en el servidor (no están en el repositorio):
+
+| Archivo | Qué hace |
+| --- | --- |
+| `~/backend-kampus/compose.server.yaml` | Mete el `nginx` de pruebas a `kampus-edge` y le monta `~/kampus-edge/conf.d` como su configuración, y el `public` de producción. |
+| `~/kampus-prod/compose.server.yaml` | Le pone a producción su propia imagen, mete `app` y `reverb` a `kampus-edge` y apaga `nginx` y `certbot` en ese stack. |
+| `~/kampus-edge/produccion.conf` | El bloque de Nginx de `api.kodev.online`. |
+| `/usr/local/bin/kampus-nginx-conf` | Arma `~/kampus-edge/conf.d`: copia `produccion.conf` y genera `pruebas.conf` desde `docker/nginx/default.conf` del repo, con los nombres exactos de los contenedores. Si el archivo del repo cambia de forma que ya no puede hacerlo, se detiene y la actualización regresa a la versión anterior. |
+| `kampus-deploy-prod` (`.service` y `.timer`) | Igual que la de pruebas, pero sobre `main` y `https://api.kodev.online/up`. Comparte el candado con `kampus-deploy`: nunca compilan las dos al mismo tiempo. |
+
+### Comandos de producción
+
+Desde `~/kampus-prod`, todo lleva `-p kampus-prod` y los dos archivos de Compose:
+
+```bash
+cd ~/kampus-prod
+docker compose -p kampus-prod -f compose.prod.yaml -f compose.server.yaml --env-file .env.production ps
+docker compose -p kampus-prod -f compose.prod.yaml -f compose.server.yaml --env-file .env.production logs -f app queue
+journalctl -u kampus-deploy-prod --since today
+```
+
+- Si cambias el `.env.production` de producción, recrea `app queue scheduler reverb` de ese stack. No hace falta reiniciar Nginx.
+- Si cambias `produccion.conf`, corre `sudo kampus-nginx-conf` y reinicia el `nginx` de pruebas.
 
 ## Datos de demostración
 
@@ -183,5 +251,5 @@ Desde ahí `certbot` lo renueva solo. Si el primer comando falla, revisa que el 
 
 ## Monitoreo básico
 
-- `https://<dominio-de-la-API>/up` responde `200` mientras la API está arriba. Se registra en un monitor externo gratuito para recibir un aviso si se cae. **[Nuevo]** En el entorno de pruebas es el monitor "Kampus API (/up)" de UptimeRobot: revisa cada 5 minutos, valida el certificado y avisa por correo a Wilbert.
+- `https://<dominio-de-la-API>/up` responde `200` mientras la API está arriba. Se registra en un monitor externo gratuito para recibir un aviso si se cae. **[Nuevo]** En el entorno de pruebas es el monitor "Kampus API (/up)" de UptimeRobot: revisa cada 5 minutos, valida el certificado y avisa por correo a Wilbert. **[Nuevo]** Producción tiene el suyo, "Kampus API producción (/up)", con la misma configuración.
 - Logs: `docker compose -f compose.prod.yaml logs -f app queue reverb`. Los de Laravel, incluido `security.log`, quedan en el volumen `logs`.

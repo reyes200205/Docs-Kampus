@@ -51,6 +51,7 @@ description: "Registro de los errores que han salido en el proyecto: qué pasaba
 | **[Nuevo]** 14 nov | Compilar todos los servicios juntos fallaba con "image already exists" | Despliegue | [Despliegue](/docs/backend/deployment#desplegar) |
 | **[Nuevo]** 17 y 20 nov | GitHub borraba la aprobación de un PR en cuanto se daba | Flujo de PRs | Backend #66 y #76 |
 | **[Nuevo]** 19 nov | Cada código por SMS se cobraba como dos mensajes | SMS | Backend #77 |
+| **[Nuevo]** 24 nov | Una ruta protegida respondía `500` si la petición no pedía JSON | Backend | Backend #80 |
 
 ## Seguridad y privacidad
 
@@ -183,6 +184,14 @@ Salieron juntos, al revisar qué pasa cuando alguien sube una foto de más de 5 
 - **Solución:** `VonageSmsSender` manda el texto sin acentos (`Str::ascii`: "código" pasa a "codigo") y con `type=text`. Así cada código cabe en un solo SMS de 160 caracteres, con margen para el aviso que Vonage agrega en la cuenta de prueba.
 - **Para que no vuelva:** `SmsTest` revisa que lo que recibe Vonage no tenga acentos y que cada código, ya sin acentos, tenga como máximo 125 caracteres. Si alguien alarga el texto, la prueba falla.
 - **Dónde:** backend #77 (`11d5fb6`). Ver [Recuperar la contraseña](/docs/backend/api/auth/password).
+
+### `500` en lugar de `401` sin el encabezado `Accept` (24 nov)
+
+- **[Nuevo] Qué pasaba:** al levantar producción, `GET /api/user` sin token respondía `500` en lugar de `401`. En el log: "Route [login] not defined.". Pasaba en pruebas y en producción con cualquier cliente que no mande `Accept: application/json` (un navegador, `curl` o un monitor). Lo mismo pasaba con una cuenta sin verificar, que debía recibir `403`.
+- **Causa:** `auth:sanctum` y `verified` deciden si redirigen o responden JSON según ese encabezado. Sin él intentaban redirigir a las rutas web `login` y `verification.notice`, que la API no tiene.
+- **Solución:** el middleware `ForceJsonResponse`, global y al principio, marca toda petición a `api/*` como JSON. La app ya mandaba el encabezado, así que para ella no cambia nada.
+- **Para que no vuelva:** `UnauthenticatedResponseTest` prueba sin token, con token inválido y con cuenta sin verificar, sin el encabezado. Sin el arreglo, tres de las cuatro pruebas fallan con `500`.
+- **Dónde:** backend #80.
 
 ## Despliegue
 
