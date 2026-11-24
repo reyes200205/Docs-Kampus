@@ -89,7 +89,17 @@ docker compose -f compose.prod.yaml --env-file .env.production exec app php arti
 - La primera vez se levantan solo `db` y `app` para migrar: la cola y el scheduler fallan si arrancan antes de que existan las tablas.
 - En producción **no** se corre `db:seed` sin `--class`: `DatabaseSeeder` crea un usuario de prueba.
 
-Para actualizar: `git pull`, el mismo `up -d --build` y después `migrate --force`.
+**[Nuevo]** El entorno de pruebas se actualiza solo: ver [Actualización automática](#actualización-automática). Para actualizar a mano: `git pull`, compilar `app` y luego `nginx` (por separado), `up -d` y `migrate --force`.
+
+```bash
+docker compose -f compose.prod.yaml --env-file .env.production build app
+docker compose -f compose.prod.yaml --env-file .env.production build nginx
+docker compose -f compose.prod.yaml --env-file .env.production up -d
+docker compose -f compose.prod.yaml --env-file .env.production exec -T app php artisan migrate --force
+docker compose -f compose.prod.yaml --env-file .env.production restart nginx
+```
+
+**[Nuevo]** `app`, `queue`, `scheduler` y `reverb` usan la misma imagen. Si se compilan juntos (`build` o `up -d --build` de todo), a veces fallan con `image "kampus-api:latest": already exists`; compilando `app` se deja lista la imagen de los cuatro. Ver [Errores resueltos](/docs/project/bug-log#image-already-exists-al-compilar-14-nov).
 
 **[Nuevo]** Si cambias `.env.production`, recrea los contenedores que usan la API, porque la configuración se cachea al arrancar. Después reinicia Nginx: guarda la dirección interna de `app` de cuando arrancó, y si `app` se recrea responde `502` hasta reiniciarlo.
 
@@ -99,6 +109,51 @@ docker compose -f compose.prod.yaml --env-file .env.production restart nginx
 ```
 
 Lo mismo aplica después de un `up -d --build` que recree `app`: si `/up` responde `502`, reinicia Nginx.
+
+## Actualización automática
+
+**[Nuevo]** Desde el 17 nov, el entorno de pruebas se actualiza solo: **cada 5 minutos revisa `develop`** y, si hay commits nuevos, compila, migra y reinicia. Nadie tiene que entrar al servidor después de fusionar un PR; en unos 10 minutos ya está arriba.
+
+| Pieza | Dónde | Qué hace |
+| --- | --- | --- |
+| `kampus-deploy.timer` | `/etc/systemd/system/` | Corre el servicio 5 minutos después de encender el servidor y luego cada 5 minutos. |
+| `kampus-deploy.service` | `/etc/systemd/system/` | Corre el script una vez, con un tope de 20 minutos. Necesita Docker arriba. |
+| `kampus-deploy` | `/usr/local/bin/` | El script que actualiza. |
+
+### Qué hace en cada vuelta
+
+1. Si ya hay una actualización en curso, no hace nada (un candado con `flock`).
+2. Consulta `origin/develop`. Si el servidor ya está en ese commit, termina.
+3. Si ese commit ya falló antes, no lo vuelve a intentar: espera al siguiente commit.
+4. Avanza la copia del servidor con `git merge --ff-only`. Si no avanza en línea recta (alguien cambió algo a mano en el servidor), se detiene para revisarlo a mano.
+5. Compila `app` y luego `nginx`, levanta todo con `up -d`, corre `migrate --force` y reinicia Nginx (para evitar el `502`).
+6. Revisa `https://api-kampus.emulatornds.online/up` hasta 12 veces, cada 5 segundos.
+7. Si responde `200`, borra las imágenes viejas de Docker y termina.
+
+**Si algo falla** (la compilación, una migración o `/up`), anota ese commit como fallido, **regresa al commit anterior** y lo vuelve a desplegar. Así el servidor sigue con la última versión que funcionaba, y el commit con el error no se reintenta cada 5 minutos. Cuando se fusione el arreglo, el siguiente commit se despliega normal.
+
+<Callout title="Ojo con las migraciones">
+  Si una migración falla a la mitad, regresar el código no deshace lo que ya cambió en la base. Las migraciones se prueban en el PR (la CI corre las migraciones en una base limpia y luego las pruebas) para que esto no pase.
+</Callout>
+
+### Revisar qué pasó
+
+```bash
+journalctl -u kampus-deploy --since today      # lo que hizo hoy
+journalctl -u kampus-deploy -n 50              # las últimas 50 líneas
+systemctl list-timers kampus-deploy.timer      # cuándo toca la siguiente vuelta
+sudo systemctl start kampus-deploy             # actualizar ahora, sin esperar
+```
+
+En el log se ve, por ejemplo, `Actualizando d5643fe -> 4172d8f` y `Listo: ...`. Si dice `Falló la actualización`, el commit fallido está en `/var/lib/kampus-deploy/fallido`.
+
+Para pausarla (por ejemplo, mientras se revisa algo a mano): `sudo systemctl stop kampus-deploy.timer`, y `sudo systemctl start kampus-deploy.timer` para volver a activarla.
+
+### Lo que no hace
+
+- **No cambia `.env.production`.** Si un PR necesita una variable nueva, hay que agregarla en el servidor antes de fusionarlo, o el despliegue puede fallar y regresar a la versión anterior.
+- **No corre seeders.** Si un PR agrega datos de catálogo, se siembran a mano.
+- Solo sigue `develop`. `main` (las versiones publicadas) no se despliega aquí.
 
 ## Datos de demostración
 
