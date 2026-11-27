@@ -1,6 +1,6 @@
 {
   "title": "Proyecto",
-  "description": "El proyecto, Unidades 1 y 2 y seguimiento por sprint",
+  "description": "El proyecto, Unidades 1 a 4 y seguimiento por sprint",
   "icon": "GraduationCap",
   "root": true,
   "pages": [
@@ -9,6 +9,8 @@
     "location-privacy",
     "unit-1",
     "unit-2",
+    "unit-3",
+    "unit-4",
     "sprints",
     "bug-log"
   ]

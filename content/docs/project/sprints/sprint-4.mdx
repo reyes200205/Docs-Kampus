@@ -1,63 +1,106 @@
 ---
 title: "Sprint 4 · Grupos, mapa y video"
-description: "11 – 24 nov 2026: plan del sprint, carga por persona con lo arrastrado del Sprint 3 y propuestas para el Planning."
+description: "11 – 24 nov 2026: lo cerrado, lo que pasó al Sprint 5, el alcance que se agregó y los riesgos al cierre."
 ---
 
-**Objetivo planeado:** módulo de grupos y clubes funcional; vista "Cerca" con mapa por zonas; videollamada 1 a 1 entre matches; API de bloqueo, reporte y moderación. **[Nuevo]** Panel de administración con consulta de usuarios y suspensión de cuentas reportadas.
+**Objetivo planeado:** módulo de grupos y clubes funcional; vista "Cerca" con mapa por zonas; videollamada 1 a 1 entre matches; API de bloqueo, reporte y moderación. Panel de administración con consulta de usuarios y suspensión de cuentas reportadas.
 
-<Callout type="warn" title="Por empezar">
-  El Planning es el martes 10 de noviembre y el sprint corre del 11 al 24. La revisión de seguimiento es el martes 17 (el 16 es festivo) y la Review, el lunes 23.
+<Callout type="info" title="[Nuevo] Cerrado">
+  El sprint corrió del 11 al 24 de noviembre. Datos al **viernes 27 de noviembre de 2026**, tomados de Plane y de los PR fusionados en `develop`. Las horas son las estimadas en la [tabla de tareas](/docs/project/unit-1/tasks), no horas registradas.
 </Callout>
 
-| Propias | Arrastradas del Sprint 3 | Total |
+## Resultado
+
+| Planeado (propias + arrastradas) | Cerrado | Pasa al Sprint 5 |
 | :---: | :---: | :---: |
-| 86 h | 55 h | **141 h** |
+| 141 h | **129 h (91 %)** | 12 h (T-44) |
+
+**[Nuevo]** **Se cumplió el objetivo.** Grupos, vista "Cerca", videollamada y la API de moderación están en `develop` y en la app, salvo el panel de reportes y usuarios de la app (T-44). Además:
+
+- Se cerró T-49 (perfil obligatorio por pasos, 10 h), que venía en revisión desde el Sprint 3 y no estaba en las 141 h.
+- El backend publicó la **v0.3.0** el 20 de noviembre ([backend #74](https://github.com/WilbertDevMx/backend-kampus/pull/74)).
+- **Producción** quedó arriba el 24 de noviembre en `api.kodev.online`, con su propia base y despliegue automático desde `main` ([Despliegue en producción](/docs/project/unit-4/production)).
+- El entorno de pruebas se actualiza solo desde el 17 de noviembre ([CI/CD](/docs/project/unit-4/ci-cd)).
 
 ## Tareas propias
 
-| Tarea | Responsable | Horas | Estado |
+| Tarea | Responsable (planeado → real) | Horas | Estado al 27 nov |
 | --- | --- | :---: | --- |
-| T-18 Pantallas de grupos | Aless | 12 | Backlog. La API (T-17) ya está. |
-| T-19 LiveKit en el servidor (Adapter) | Mario | 8 | Backlog |
-| T-20 Pantalla de videollamada | Luis | 12 | Backlog |
-| T-30 Vista "Cerca" | Aless | 12 | Backlog |
-| T-35 API de la vista "Cerca" | Wilbert | 6 | Backlog. La API de zonas (T-28) ya está. |
-| T-37 API de moderación | Mario | 6 | Backlog |
-| **[Nuevo]** T-43 Consulta de usuarios y suspensión | Mario | 6 | Backlog |
-| **[Nuevo]** T-44 Panel de administración en la app | Aless (con Luis) | 12 | Backlog |
-| **[Nuevo]** T-46 Gestión de sesiones | Wilbert | 4 | Backlog |
-| **[Nuevo]** T-47 Autenticación en dos pasos (TOTP) | Wilbert | 8 | Backlog |
-| **[Nuevo]** T-48 Documentación de la Unidad 3 | Wilbert | 4 | ✅ Cerrada en el Sprint 3 (Docs-Kampus #40); no cuenta. |
-| T-21 API de bloqueo y reporte | Wilbert | 6 | ✅ Cerrada antes, el 5 nov (backend #42); no cuenta. |
-
-Sin contar T-21 ni T-48, que se adelantaron al Sprint 3, son **86 h**. En Plane las dos ya están en el ciclo del Sprint 3.
+| T-18 Pantallas de grupos | Aless → Aless y Alejandro | 12 | Cerrada |
+| T-19 LiveKit en el servidor (Adapter) | Mario → Wilbert | 8 | Cerrada ([backend #60](https://github.com/WilbertDevMx/backend-kampus/pull/60)) |
+| T-20 Pantalla de videollamada | Luis → Alejandro | 12 | Cerrada |
+| T-30 Vista "Cerca" | Aless | 12 | Cerrada |
+| T-35 API de la vista "Cerca" | Wilbert | 6 | Cerrada ([backend #45](https://github.com/WilbertDevMx/backend-kampus/pull/45)) |
+| T-37 API de moderación | Mario → Wilbert | 6 | Cerrada ([backend #75](https://github.com/WilbertDevMx/backend-kampus/pull/75)) |
+| T-43 Consulta de usuarios y suspensión | Mario → Wilbert | 6 | Cerrada ([backend #76](https://github.com/WilbertDevMx/backend-kampus/pull/76)) |
+| T-44 Panel de administración en la app | Aless (con Luis) | 12 | **In Progress**: revisión de grupos, staff y cuenta listos; faltan reportes y usuarios. Pasa al Sprint 5. |
+| T-46 Gestión de sesiones | Wilbert | 4 | Cerrada ([backend #48](https://github.com/WilbertDevMx/backend-kampus/pull/48)) |
+| T-47 Autenticación en dos pasos (TOTP) | Wilbert | 8 | Cerrada ([backend #49](https://github.com/WilbertDevMx/backend-kampus/pull/49)) |
+| T-48 Documentación de la Unidad 3 | Wilbert | 4 | Cerrada en el Sprint 3 (Docs-Kampus #40); no cuenta. |
+| T-21 API de bloqueo y reporte | Wilbert | 6 | Cerrada antes, el 5 nov (backend #42); no cuenta. |
 
 ## Arrastradas del Sprint 3
 
-T-14, T-15, T-16, T-29, T-31, T-34, T-33 y el cierre de T-24: **55 h**. T-12 y T-36 se terminaron el 8 nov y ya no pasan. El detalle de cada una está en [Sprint 3](/docs/project/sprints/sprint-3#pasa-al-sprint-4).
+| Tarea | Responsable (planeado → real) | Horas | Estado al 27 nov |
+| --- | --- | :---: | --- |
+| T-14 API de mensajes | Mario | 8 | Cerrada |
+| T-15 Imágenes en el chat | Mario → Wilbert | 6 | Cerrada ([backend #57](https://github.com/WilbertDevMx/backend-kampus/pull/57)) |
+| T-16 Pantallas de chat | Luis → Aless | 12 | Cerrada |
+| T-29 Estilo oscuro del mapa | Aless | 6 | Cerrada |
+| T-31 Perfil expandible en Descubrir | Luis → Alejandro | 6 | Cerrada |
+| T-33 Contrato OpenAPI | Alejandro → Wilbert | 4 | Cerrada ([backend #61](https://github.com/WilbertDevMx/backend-kampus/pull/61)) |
+| T-34 Datos de demostración | Mario → Wilbert | 5 | Cerrada ([backend #46](https://github.com/WilbertDevMx/backend-kampus/pull/46)) |
+| T-24 Despliegue en el entorno de pruebas (cierre) | Wilbert | 8 | Cerrada |
 
-## Carga por persona
+## Alcance agregado durante el sprint
 
-| Persona | Propias | Arrastradas | Total |
-| --- | --- | --- | :---: |
-| Aless | T-18, T-30, T-44 (36 h) | T-16, T-29 (18 h) | **54 h** |
-| Mario | T-19, T-37, T-43 (20 h) | T-14, T-15, T-34 (19 h) | **39 h** |
-| Wilbert | T-35, T-46, T-47 (18 h) | T-24 (8 h) | **26 h** |
-| Luis | T-20 (12 h) | T-31 (6 h) | **18 h** + apoyo en T-44 |
-| Alejandro | — | T-33 (4 h) | **4 h** + preparar las pruebas de usabilidad (T-25) |
+**[Nuevo]** Estas tareas no estaban en el plan. Salieron de la revisión de la app, de la rúbrica de la Unidad 3 y de errores encontrados. Ninguna tiene horas estimadas en la [tabla de tareas](/docs/project/unit-1/tasks), así que no cuentan en el total.
 
-La carga está desbalanceada: la app (Aless y Luis) concentra la mayor parte y tiene la ruta crítica del chat.
+| Tarea | Responsable | Estado |
+| --- | --- | --- |
+| T-50 Pantallas de seguridad: dos pasos y sesiones activas | Sin responsable en Plane | Cerrada en Plane. La pantalla de dos pasos está; la de sesiones todavía no. |
+| T-51 Validación de correo en la app: solo formato | Alejandro | Cerrada |
+| T-52 Errores de la base de datos sin exponer host, consulta ni `SQLSTATE` | Alejandro | Cerrada |
+| T-53 Recuperación de contraseña por SMS (Vonage) y registro del celular | Wilbert | Cerrada ([backend #77](https://github.com/WilbertDevMx/backend-kampus/pull/77)) |
+| T-54 Selector de carreras en el perfil | Alejandro | Cerrada |
+| T-55 Mejoras del swipe de Descubrir | Alejandro | Cerrada |
+| T-56 Salir de un grupo oficial siendo el único integrante | Alejandro | Cerrada ([backend #79](https://github.com/WilbertDevMx/backend-kampus/pull/79)) |
 
-## Propuestas para el Planning (10 nov)
+También se adelantó del Sprint 5 la parte de API de **T-23** (eliminación de cuenta y aceptación del aviso de privacidad, [backend #78](https://github.com/WilbertDevMx/backend-kampus/pull/78)).
 
-Son propuestas: si cambian el alcance, se aprueban y registran como indica la [sección 9.4](/docs/project/unit-1/methodology#94-cambios-de-alcance).
+## Carga real por persona
 
-1. **Primero el chat.** T-14 → T-15 → T-16 es la ruta crítica: las pruebas de usabilidad (T-25) dependen de T-16 y de T-18.
-2. **Recortar lo de prioridad Media que no alcance**, empezando por la videollamada (T-19 y T-20, 20 h) y la vista "Cerca" (T-29, T-30 y T-35, 24 h).
-3. **Rebalancear la carga.** Wilbert tiene la menor carga pendiente; puede apoyar con T-14 y T-15 para desbloquear el chat de la app.
-4. **Cerrar T-34** (datos de demostración, 5 h) para que el descubrimiento se pueda demostrar.
-5. **Decidir T-33**: hacer el contrato OpenAPI o cerrarla, porque la referencia ya vive en [API REST](/docs/backend/api).
+| Persona | Horas cerradas (de las 141 h) | Tareas |
+| --- | :---: | --- |
+| Wilbert | 61 h | T-15, T-19, T-24, T-33, T-34, T-35, T-37, T-43, T-46 y T-47, más T-53 y la API de T-23 |
+| Aless | 42 h | T-16, T-18, T-29 y T-30 |
+| Alejandro | 18 h | T-20 y T-31, más su parte de T-18, T-49 y T-51 a T-56 |
+| Mario | 8 h | T-14 |
+| Luis | — | T-44 (con Aless, en curso) |
 
-## Riesgos a vigilar
+Las horas de T-18, que hicieron Aless y Alejandro, se cuentan una sola vez, con Aless. La carga se movió mucho respecto al plan: Wilbert tomó cinco tareas de Mario y una de Alejandro, y Alejandro tomó dos de Luis.
 
-Los puntajes vienen del [cierre del Sprint 3](/docs/project/sprints/sprint-3#riesgos-al-cierre-del-sprint-3): **R14** la app no alcanza al backend (20 🔴), **R6** curva de aprendizaje (16 🔴), **R4** videollamadas a tiempo (15 🔴), **R3** uso indebido sin moderación (15 🔴) y **R15** PR revisados por lotes (12 🟡).
+## Propuestas del Planning (10 nov) y qué pasó
+
+| Propuesta | Qué pasó |
+| --- | --- |
+| Primero el chat (T-14 → T-15 → T-16) | Se cumplió: el chat con imágenes quedó en la app. |
+| Recortar lo de prioridad Media que no alcanzara | No hizo falta: la videollamada y la vista "Cerca" se cerraron. |
+| Rebalancear la carga | Se rebalanceó, pero hacia el backend: Wilbert tomó T-15, T-19, T-34, T-37 y T-43. |
+| Cerrar T-34 (datos de demostración) | Se cerró el 11 nov. |
+| Decidir T-33 | Se hizo: contrato OpenAPI con una prueba que lo compara con el código. |
+
+## Riesgos al cierre del Sprint 4
+
+**[Nuevo]** Puntaje = probabilidad × impacto, con la misma escala del [análisis de riesgos](/docs/project/unit-1/risks).
+
+| Riesgo | Al cierre del Sprint 3 | Ahora | Por qué cambia | Mitigación |
+| --- | :---: | :---: | --- | --- |
+| **R4** No completar a tiempo las videollamadas | 5 × 3 = 15 | 1 × 3 = **3** | T-19 y T-20 cerradas; la llamada 1 a 1 funciona en la app. | Ninguna nueva. |
+| **R14** La app no alcanza al backend | 4 × 5 = 20 | 3 × 4 = **12** | La app cerró 60 h en el sprint, pero quedan cinco funciones de la API sin pantalla (sesiones, SMS, bloqueo y reporte, eliminar cuenta y reportes del panel). | Priorizar T-22 y T-38, que son del MVP indispensable, y dejar lo demás documentado como pendiente. |
+| **R3** Uso indebido sin moderación | 3 × 5 = 15 | 2 × 5 = **10** | La revisión de reportes y la suspensión están en la API (T-37 y T-43), pero la app todavía no deja reportar (T-22). | T-22 en el Sprint 5. |
+| **R6** Curva de aprendizaje del stack | 4 × 4 = 16 | 3 × 3 = **9** | La app sostuvo el ritmo con las pantallas de chat, mapa y videollamada. | Seguir con los hooks y servicios existentes. |
+| **R13** Cambio de alcance a mitad del proyecto | 4 × 3 = 12 | 4 × 3 = **12** | Entraron siete tareas sin estimar (T-50 a T-56), entre ellas la recuperación por SMS. | Registrar cada tarea nueva con sus horas y su compensación ([sección 9.4](/docs/project/unit-1/methodology#94-cambios-de-alcance)). |
+| **R15** PR revisados por lotes | 4 × 3 = 12 | 4 × 3 = **12** | Al 27 nov hay seis PR esperando revisión, abiertos entre el 19 y el 24 nov (backend #80 y #81; documentación #54 a #57). | Revisarlos antes de la Review final del 30 nov. |
+| **[Nuevo] R16** Entregar sin las pruebas de usabilidad | — | 4 × 4 = **16** | T-25 sigue en Backlog y el Sprint 5 dura una semana. | Una sesión corta con 5 estudiantes y el cuestionario SUS, aunque sea en una sola tarde. |
+| **[Nuevo] R17** Perder datos de producción | — | 2 × 4 = **8** | La base de producción no tiene respaldo automático. | Respaldo manual antes de cada publicación ([plan de regreso](/docs/project/unit-4/release#base-de-datos)); programarlo con `cron` cuando entren usuarios reales. |

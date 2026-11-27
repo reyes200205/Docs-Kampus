@@ -66,6 +66,13 @@ Las tareas se derivan de los requisitos funcionales y no funcionales. La estimac
 | **[Nuevo] T-47** | Autenticación en dos pasos (MFA) con app de autenticación (TOTP) | RF-02, RNF-02 | Wilbert | 8 | T-05, T-45 | Activar y desactivar MFA con código TOTP; el login pide el código cuando está activo; códigos de respaldo; el secreto se guarda cifrado; sirve como segundo método al recuperar la contraseña; pruebas. |
 | **[Nuevo] T-48** | Documentación para la Unidad 3: resolución de conflictos, seguimiento por sprint con riesgos y patrones enlazados al código | Rúbrica de la Unidad 3 | Wilbert | 4 | — | Sección de resolución de conflictos en la página de Pull Requests; página de seguimiento por sprint con objetivo, lo cerrado, lo que pasó al siguiente sprint y riesgos actualizados; la página de patrones enlaza las clases reales. |
 | **[Nuevo] T-49** | Perfil obligatorio por pasos: género, edad mínima de 17 años y perfil completo para usar Descubrir | RF-03, RF-05 | Alejandro | 10 | T-07, T-08 | Al entrar con el perfil incompleto, la app pide por pasos nombre y fecha de nacimiento, género, carrera y semestre, al menos 3 intereses, al menos 1 foto y "Sobre mí"; hasta completarlo no aparece en Descubrir ni puede hacer swipe (`403 profile_incomplete`); pruebas. |
+| **[Nuevo] T-50** | Pantallas de seguridad: verificación en dos pasos y sesiones activas | RF-02 | Sin responsable | — | T-46, T-47 | La app activa y desactiva la verificación en dos pasos y muestra y cierra las sesiones activas. |
+| **[Nuevo] T-51** | Validación de correo en la app: solo formato; el dominio institucional lo valida el backend | RF-01 | Alejandro | — | T-06 | La app ya no rechaza dominios válidos que no conoce. |
+| **[Nuevo] T-52** | Manejo de errores de base de datos en la API sin exponer host, consulta ni SQLSTATE | RNF-02 | Alejandro | — | — | Un error de la base responde un mensaje genérico; pruebas. |
+| **[Nuevo] T-53** | Recuperación de contraseña por SMS con Vonage y registro del celular | RF-02 | Wilbert | — | T-45 | Registrar y verificar el celular; código por SMS de un solo uso que da el token para restablecer; pruebas. |
+| **[Nuevo] T-54** | Selector de carreras predefinidas en el perfil | RF-03 | Alejandro | — | T-08 | La carrera se elige de una lista. |
+| **[Nuevo] T-55** | Mejoras de UX/UI del swipe de Descubrir y "Like" en lugar de corazón | RF-05 | Alejandro | — | T-11 | — |
+| **[Nuevo] T-56** | Salir de un grupo oficial siendo el único integrante | RF-11 | Alejandro | — | T-17 | El único integrante de un grupo oficial puede salir sin borrarlo; pruebas. |
 
 *Esfuerzo total estimado: aproximadamente 320 horas de desarrollo, unas 6 a 7 horas por integrante por semana durante las 10 semanas del proyecto. Distribución de tareas propias: Wilbert 69 h, Mario 69 h, Aless 68 h, Luis 56 h y Alejandro 24 h; las tareas T-23, T-27 y T-32 se reparten entre varios integrantes. Las notificaciones dentro de la app (RF-17) se mantienen como función deseable sin tarea asignada: solo se implementan si el Sprint 5 termina con tiempo disponible.*
 
@@ -74,3 +81,5 @@ Las tareas se derivan de los requisitos funcionales y no funcionales. La estimac
 *[Nuevo] Con T-45 a T-48 (rúbrica de la Unidad 3) se suman 21 horas, todas de Wilbert: el total queda en unas **379 horas** y Wilbert en 108 h.*
 
 *[Nuevo] T-49 (perfil obligatorio, 8 de noviembre) suma unas 10 horas: el total queda en unas **389 horas**.*
+
+*[Nuevo] T-50 a T-56 se agregaron en Plane durante el Sprint 4 (del 11 al 24 de noviembre) sin estimación de horas, así que no cambian el total. Al 27 de noviembre todas están cerradas en Plane. Ver [Sprint 4](/docs/project/sprints/sprint-4#alcance-agregado-durante-el-sprint).*

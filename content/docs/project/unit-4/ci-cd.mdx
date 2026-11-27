@@ -1,0 +1,84 @@
+---
+title: "CI/CD"
+description: "Los pipelines de GitHub Actions de los tres repositorios y el despliegue automático del servidor."
+---
+
+**[Nuevo]** Los tres repositorios tienen integración continua en **GitHub Actions**, y el backend además se despliega solo: el servidor de pruebas sigue `develop` y el de producción sigue `main`.
+
+<Mermaid chart={`
+flowchart LR
+    Dev([Rama de la tarea]) -->|PR| CI["CI: formato, auditoría,<br/>migraciones y pruebas"]
+    CI -->|verde y aprobado| D[develop]
+    D -->|cada 5 min| SP["kampus-deploy<br/>servidor de pruebas"]
+    D -->|PR de publicación| M[main]
+    M --> R["Versión: tag, release<br/>y changelog"]
+    M -->|cada 5 min| SPr["kampus-deploy-prod<br/>producción"]
+    SP --> U1{"/up = 200?"}
+    SPr --> U2{"/up = 200?"}
+    U1 -- no --> RB1[regresa al commit anterior]
+    U2 -- no --> RB2[regresa al commit anterior]
+`} />
+
+## Pipelines por repositorio
+
+### Backend (`backend-kampus`)
+
+| Workflow | Cuándo corre | Pasos |
+| --- | --- | --- |
+| **CI** (`ci.yml`), check "Formato y pruebas" | Cada PR y cada push a `develop` y `main` | 1. Instala dependencias (con caché de `vendor/`). 2. `composer audit`. 3. `pint --test`. 4. `php artisan migrate --force` contra un servicio `postgres:16`. 5. `php artisan test`. |
+| **Commits** (`commits.yml`) | Cada PR | commitlint revisa todos los commits del PR. |
+| **Versión** (`release.yml`) | PR a `main` y push a `main` | En el PR comenta qué versión saldrá y su changelog; al fusionar crea el tag y el GitHub Release. |
+| **Dependabot** | Semanal | Abre PR de actualización de dependencias, que pasan por el mismo CI. |
+
+El check "Formato y pruebas" es **obligatorio** en la regla de `main` y `develop`: con una prueba en rojo, GitHub no deja fusionar.
+
+### App (`Frontend-Kampus`)
+
+| Workflow | Cuándo corre | Pasos |
+| --- | --- | --- |
+| **CI** (`ci.yml`), check "Tipos" | Cada PR y push | `pnpm install --frozen-lockfile` y `pnpm typecheck` (TypeScript) |
+| **Commits** | Cada PR | commitlint |
+| **Versión** | PR y push a `main` | Tag, release y changelog |
+
+La app web se publica en Vercel (`app.kodev.online`), conectado al repositorio.
+
+### Documentación (`Docs-Kampus`)
+
+| Workflow | Cuándo corre | Pasos |
+| --- | --- | --- |
+| **Commits** | Cada PR | commitlint (y husky en la computadora de cada quien) |
+| **Versión** | PR y push a `main` | Tag y release, `pnpm build` y publicación en Cloudflare Workers con `wrangler deploy` |
+
+## Despliegue continuo del backend
+
+Un *timer* de systemd revisa GitHub cada 5 minutos. Si la rama avanzó, el servidor compila la imagen, migra, levanta los contenedores y revisa `/up`. Si algo falla, **regresa solo al commit anterior** y no reintenta el commit roto. El detalle está en [Actualización automática](/docs/backend/deployment#actualización-automática).
+
+| | Pruebas | Producción |
+| --- | --- | --- |
+| Rama | `develop` | `main` |
+| Script | `kampus-deploy` | `kampus-deploy-prod` |
+| Revisión de salud | `https://api-kampus.emulatornds.online/up` | `https://api.kodev.online/up` |
+| Bitácora | `journalctl -u kampus-deploy` | `journalctl -u kampus-deploy-prod` |
+
+Los dos comparten un candado: nunca compilan al mismo tiempo, porque el servidor tiene 2 GB de RAM.
+
+## Evidencias
+
+Corridas en GitHub Actions al 27 de noviembre de 2026 (últimas 200 de cada repositorio):
+
+| Repositorio | Workflow | Corridas | Exitosas | Fallidas |
+| --- | --- | :---: | :---: | :---: |
+| Backend | CI | 107 | 91 | 9 |
+| Backend | Commits | 70 | 70 | 0 |
+| Backend | Versión | 8 | 8 | 0 |
+| Backend | Dependabot | 13 | 13 | 0 |
+| App | CI | 68 | 62 | 0 |
+| App | Commits | 39 | 39 | 0 |
+| App | Versión | 4 | 4 | 0 |
+| Documentación | Commits | 77 | 77 | 0 |
+| Documentación | Versión (y despliegue) | 42 | 42 | 0 |
+
+Las corridas que no son exitosas ni fallidas son las que GitHub canceló porque llegó otro commit a la misma rama. **Las 9 fallas del CI del backend son el pipeline haciendo su trabajo:** cada una detuvo un PR que todavía no estaba listo (formato, una prueba o un aviso de seguridad en una dependencia) hasta que se corrigió. Por ejemplo, el 10 de noviembre `composer audit` detuvo todos los PR por un aviso de Symfony, que se arregló en el [backend #47](https://github.com/WilbertDevMx/backend-kampus/pull/47) ([Errores resueltos](/docs/project/bug-log)).
+
+- Historial de corridas: [backend](https://github.com/WilbertDevMx/backend-kampus/actions) · [app](https://github.com/reyes200205/Frontend-Kampus/actions) · [documentación](https://github.com/reyes200205/Docs-Kampus/actions)
+- PR fusionados: 70 en el backend, 31 en la app y 52 en la documentación.

@@ -1,0 +1,76 @@
+---
+title: "Rutas seguras"
+description: "Cómo protege la API cada ruta: token, correo verificado, rol, permisos por registro y límites de peticiones."
+---
+
+**[Nuevo]** Toda ruta de la API pasa por varias capas antes de llegar al controlador. Si una capa rechaza la petición, la respuesta es JSON con el código que corresponde (`401`, `403`, `404`, `422` o `429`) y nunca un error del servidor. Las rutas están en [`routes/api.php`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/routes/api.php).
+
+## Las capas
+
+<Mermaid chart={`
+flowchart LR
+    P([Petición]) --> L["Límite general<br/>120 por minuto"]
+    L --> A{"auth:sanctum<br/>¿token válido?"}
+    A -- no --> E401[401]
+    A -- sí --> V{"verified<br/>¿correo verificado?"}
+    V -- no --> E403a[403]
+    V -- sí --> R{"role<br/>¿rol permitido?"}
+    R -- no --> E403b[403]
+    R -- sí --> C{"profile.complete<br/>(solo Descubrir)"}
+    C -- no --> E403c[403]
+    C -- sí --> Po{"Policy<br/>¿puede con ESTE registro?"}
+    Po -- no --> E404[403 o 404]
+    Po -- sí --> OK([Controlador])
+`} />
+
+| Capa | Dónde | Qué revisa |
+| --- | --- | --- |
+| Límite general | `throttleApi()` en `bootstrap/app.php`, `RateLimiter::for('api')` | 120 peticiones por minuto por usuario (o por IP si no hay sesión). Responde `429`. |
+| Límites por ruta | `throttle:N,1` en `routes/api.php` | Más estrictos en lo sensible: 6 por minuto en registro, recuperación, celular y dos pasos; 10 en imágenes, grupos y reportes. El inicio de sesión se bloquea tras 5 intentos fallidos por correo e IP. |
+| Token | `auth:sanctum` | Token de Sanctum vigente. Un token vencido, revocado o falso responde `401`. Al suspender una cuenta o restablecer la contraseña se borran sus tokens. |
+| Correo verificado | `verified` | Sin verificar el correo institucional no se entra a nada, ni al canal del WebSocket. |
+| Rol | `role:...` ([`EnsureUserHasRole`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/app/Http/Middleware/EnsureUserHasRole.php)) | `student` en las funciones sociales; `moderator,admin` y `admin` en el panel. El staff no ve las rutas sociales y los estudiantes no ven el panel. |
+| Perfil completo | `profile.complete` ([`EnsureProfileIsComplete`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/app/Http/Middleware/EnsureProfileIsComplete.php)) | Descubrir, swipe y la vista Cerca piden el perfil completo (T-49). |
+| Permiso sobre el registro | Policies ([`UserPolicy`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/app/Policies/UserPolicy.php), [`GroupPolicy`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/app/Policies/GroupPolicy.php), [`ReportPolicy`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/app/Policies/ReportPolicy.php)) y *scopes* | Que el registro sea tuyo o esté a tu alcance: un moderador solo ve estudiantes y reportes de su universidad; solo los dos del match ven su chat y su videollamada; solo quien administra un grupo lo edita. Lo que está fuera de alcance responde `404`, para no revelar que existe. |
+| Canales en tiempo real | [`routes/channels.php`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/routes/channels.php) | El canal de un chat solo lo abren los dos del match, y se cierra si hay bloqueo o si alguno está suspendido. |
+
+## Qué rutas son públicas
+
+Solo las que se usan antes de tener sesión, y todas con límite de peticiones:
+
+| Ruta | Para qué |
+| --- | --- |
+| `POST /api/register` | Registro con correo institucional |
+| `GET /api/email/verify/{id}/{hash}` | Verificar el correo. La URL va firmada (`signed`): si se altera, responde `403`. |
+| `POST /api/login` y `POST /api/login/two-factor` | Iniciar sesión y, si aplica, el segundo paso |
+| `POST /api/forgot-password` y `POST /api/reset-password` | Recuperar la contraseña por correo |
+| `POST /api/forgot-password/sms` y `.../sms/verify` | Recuperar la contraseña por SMS |
+| `GET /up` | Estado del servicio para el monitoreo. No expone datos. |
+
+`/docs/api` (la referencia OpenAPI interactiva) no es pública: la protege la *gate* `viewApiDocs` y se puede apagar por completo con `API_DOCS_ENABLED` ([Contrato OpenAPI](/docs/backend/api#contrato-openapi)).
+
+## Grupos de rutas protegidas
+
+| Grupo | Middleware | Ejemplos |
+| --- | --- | --- |
+| Cuenta (estudiantes y staff) | `auth:sanctum`, `verified` | `/api/user`, `/api/sessions`, `/api/two-factor`, `/api/phone`, `/api/logout` |
+| Funciones sociales | además `role:student` | perfil, descubrimiento, matches, mensajes, videollamada, grupos, bloqueos y reportes |
+| Descubrir | además `profile.complete` | `/api/discover`, `/api/discover/nearby`, `/api/swipes` |
+| Panel: revisión | `auth:sanctum`, `verified`, `role:moderator,admin` | `/api/admin/groups`, `/api/admin/reports`, `/api/admin/users` |
+| Panel: staff | `auth:sanctum`, `verified`, `role:admin` | `/api/admin/staff` |
+
+Las acciones que no se pueden deshacer piden algo más: desactivar la verificación en dos pasos, cambiar el celular o eliminar la cuenta piden la contraseña, y una suspensión pide un motivo (y al moderador, el reporte que la justifica).
+
+## Cómo se prueba
+
+Cada capa tiene pruebas automáticas que corren en cada PR. Las más directas:
+
+| Prueba | Qué comprueba |
+| --- | --- |
+| `RoleMiddlewareTest` | Estudiante, moderador, administrador e invitado: cada uno llega solo a lo suyo. |
+| `UserPolicyTest` | Un moderador no toca estudiantes de otra universidad ni a otro staff; un administrador no se modera a sí mismo. |
+| `BroadcastChannelAuthTest` | Nadie fuera del match abre su canal; tampoco con bloqueo o suspensión. |
+| `UnauthenticatedResponseTest` ([backend #80](https://github.com/WilbertDevMx/backend-kampus/pull/80)) | Sin token o con token falso responde `401` en JSON, aunque falte el encabezado `Accept`. |
+| `LoginApiTest` | Token vencido, cuenta sin verificar, cuenta suspendida y bloqueo tras 5 intentos. |
+
+El resto está en [Pruebas de seguridad](/docs/project/unit-4/security-tests).

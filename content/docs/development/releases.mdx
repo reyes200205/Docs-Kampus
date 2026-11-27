@@ -40,6 +40,10 @@ Se toman los commits desde el último tag. La primera versión es **v0.1.0**.
 
 Cada línea muestra la descripción del commit, su autor y un enlace al commit. Escribe la descripción pensando en quien la va a leer en el changelog.
 
+<Callout title="[Nuevo] Lista de verificación y regreso a la versión anterior">
+  Desde el 24 de noviembre, `main` del backend se despliega solo en producción. Antes de fusionar el PR de publicación, sigue la [lista de verificación](/docs/project/unit-4/release#lista-de-verificación); si la versión nueva falla, el [plan de regreso](/docs/project/unit-4/release#plan-de-regreso-rollback) explica cómo volver a la anterior.
+</Callout>
+
 ## Cómo hacer el merge a main
 
 Usa **"Create a merge commit"** en el PR de `develop` a `main`, no "Squash". Con squash se pierden los commits individuales y el changelog quedaría con una sola línea.

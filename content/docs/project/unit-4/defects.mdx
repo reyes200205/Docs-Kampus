@@ -1,0 +1,81 @@
+---
+title: "Registro de defectos"
+description: "Cada defecto encontrado con su severidad, cómo se reproducía, su estado y su resolución."
+---
+
+**[Nuevo]** Este es el registro formal de defectos para la Unidad 4. El detalle de cada uno (causa, solución y la prueba que evita que vuelva) está en [Errores resueltos](/docs/project/bug-log), que el equipo llena desde octubre en el mismo PR que trae el arreglo.
+
+## Cómo se gestiona un defecto
+
+1. **Se detecta** en una prueba automática, en la revisión de un PR, en una prueba manual o en el servidor.
+2. **Se registra:** si es de una tarea abierta, se comenta en su PR; si no, se crea una tarea en Plane o se le avisa al responsable en Slack.
+3. **Se corrige** en una rama `fix/...` con una prueba que falla sin el arreglo, cuando se puede.
+4. **Se cierra** cuando el PR se fusiona en `develop`, y se anota en [Errores resueltos](/docs/project/bug-log) con el enlace al PR.
+
+| Severidad | Criterio |
+| --- | --- |
+| **Crítica** | Expone datos personales, permite saltarse un control de seguridad o tira el servicio. |
+| **Alta** | Una función principal no sirve o un grupo de usuarios no puede usar la app. |
+| **Media** | Una función falla, pero hay forma de seguir, o el problema solo se ve en el servidor o en la CI. |
+| **Baja** | Detalle visual, de texto o del entorno local. |
+
+## Resumen
+
+| Estado | Crítica | Alta | Media | Baja | Total |
+| --- | :---: | :---: | :---: | :---: | :---: |
+| Cerrado | 5 | 10 | 17 | 6 | **38** |
+| En revisión | — | — | 1 | — | **1** |
+| Abierto | — | — | — | 1 | **1** |
+
+Los cinco críticos se encontraron en la revisión o en una prueba **antes de llegar a usuarios reales**, y los cinco tienen hoy una prueba automática que los detecta.
+
+## Registro
+
+| ID | Fecha | Defecto | Cómo se reproducía | Severidad | Estado | Resolución |
+| --- | --- | --- | --- | --- | --- | --- |
+| DEF-01 | 9 oct | El changelog no mostraba las versiones nuevas | Publicar una versión y abrir `/changelog` | Baja | Cerrado | Docs `fe0cfdc` |
+| DEF-02 | 12 oct | El build de Cloudflare usaba pnpm 10 y fallaba | Fusionar a `main` de la documentación | Media | Cerrado | Docs `047fa9f` |
+| DEF-03 | 12 oct | El diagrama entidad-relación salía recortado | Abrir Diagramas en el sitio | Baja | Cerrado | Docs `c6058ae` |
+| DEF-04 | 13 – 20 oct | Sin cabeceras de seguridad, CORS abierto, contraseñas débiles y `/api/user` con el modelo completo | Pedir cualquier ruta desde otro origen; registrarse con `12345678` | Crítica | Cerrado | Backend #10 y #11 |
+| DEF-05 | 18 oct | `composer.lock` con paquetes que exigen PHP 8.4 | Correr la CI con PHP 8.3 | Media | Cerrado | Backend `5ef1d25` |
+| DEF-06 | 28 oct | Las fotos de perfil se guardaban con la ubicación GPS del EXIF | Subir una foto tomada con el celular y descargarla | Crítica | Cerrado | Backend #29 |
+| DEF-07 | 28 oct | El correo no se normalizaba y el registro no fijaba el rol | Registrar `Ana@...` y luego `ana@...` | Alta | Cerrado | Backend #28 |
+| DEF-08 | 28 oct | El motivo de una acción de moderación era opcional | Suspender sin motivo | Media | Cerrado | Backend #27 |
+| DEF-09 | 29 oct | `composer audit` fallaba por `symfony/mime` | Correr la CI | Media | Cerrado | Backend #25 |
+| DEF-10 | 29 oct | Se perdió un `import` al traer `develop` a una rama | Resolver el conflicto en `User` | Media | Cerrado | Backend `33fb232` |
+| DEF-11 | 28 – 29 oct | commitlint rechazaba commits viejos | Abrir un PR con historial anterior a la convención | Media | Cerrado | Backend `e1d07fe` y `c58e0b4` |
+| DEF-12 | 3 nov | El canal del chat no revisaba si la otra persona estaba suspendida | Suspender a una persona y conectarse al canal de su chat | Crítica | Cerrado | Backend #41 |
+| DEF-13 | 4 nov | El enlace de verificación dependía del host con que la app llamaba a la API | Registrarse desde el celular con la IP de la red | Alta | Cerrado | Backend #40 |
+| DEF-14 | 4 nov | commitlint fallaba en todos los PR por una dependencia de Tailwind | Abrir cualquier PR | Media | Cerrado | Backend #38 |
+| DEF-15 | 8 nov | La cola fallaba si arrancaba antes de las migraciones | `docker compose up` en una base vacía | Media | Cerrado | Backend #43 |
+| DEF-16 | 8 nov | La API respondía `validation.required` en lugar del mensaje | Mandar un formulario vacío en el servidor | Alta | Cerrado | Backend #43 y #58 |
+| DEF-17 | 8 nov | La pantalla de zona no cabía en el celular | Abrir la selección de zona en un celular pequeño | Baja | Cerrado | Frontend `35eefaf` |
+| DEF-18 | 8 nov | El nombre no se guardaba con mayúscula en cada palabra | Registrarse con el nombre en minúsculas | Baja | Cerrado | Frontend #13 |
+| DEF-19 | 9 nov | Los perfiles que ya existían quedaban "incompletos" con T-49 | Migrar una base con perfiles completos y abrir Descubrir | Alta | Cerrado | Backend #44 |
+| DEF-20 | 10 nov | CI en rojo por los avisos de seguridad de Symfony | Correr la CI | Media | Cerrado | Backend #47 |
+| DEF-21 | 10 nov | Una prueba de migraciones se rompía al agregar migraciones | Agregar una migración y correr `ModerationSchemaTest` | Media | Cerrado | Backend #44 y #48 |
+| DEF-22 | 10 nov | Un código de verificación en dos pasos se podía usar dos veces | Iniciar sesión dos veces con el mismo código | Crítica | Cerrado | Backend #49 |
+| DEF-23 | 10 nov | Los estudiantes de demostración no salían en Descubrir | Sembrar `DemoSeeder` y abrir Descubrir | Media | Cerrado | Backend `c5f3d1b` |
+| DEF-24 | 10 nov | Las pruebas tardaban 10 veces más en local | Correr `php artisan test` con Xdebug activo | Baja | Cerrado | [Instalación](/docs/backend/installation#límites-de-php-en-local) |
+| DEF-25 | 11 nov | La sesión se perdía al recargar la app | Iniciar sesión en la web y recargar | Alta | Cerrado | Frontend #17 |
+| DEF-26 | 11 nov | La vista Cerca no pedía el perfil completo | Pedir `/api/discover/nearby` con el perfil incompleto | Media | Cerrado | Backend #56 |
+| DEF-27 | 11 nov | Una imagen enorme tumbaba la petición (`500`) | Subir un PNG de 231 KB que declara 9000 × 9000 px | Crítica | Cerrado | Backend #58 |
+| DEF-28 | 11 nov | Las imágenes no se reducían y las verticales podían quedar de lado | Subir una foto vertical del celular | Media | Cerrado | Backend #58 |
+| DEF-29 | 11 nov | Los errores al subir imágenes salían en inglés o en HTML | Subir un archivo de más de 5 MB | Media | Cerrado | Backend #58 |
+| DEF-30 | 11 nov | En local no se podían subir fotos de más de 2 MB | Subir una foto de 3 MB con `php artisan serve` | Baja | Cerrado | [Instalación](/docs/backend/installation#límites-de-php-en-local) |
+| DEF-31 | 11 nov | Los alumnos de la UTT no podían registrarse con su correo real | Registrarse con `@uttcampus.edu.mx` | Alta | Cerrado | Backend #59 |
+| DEF-32 | 11 nov | LiveKit Cloud no aplica el límite de 2 personas por videollamada | Entrar con un tercer token a una sala de 2 | Alta | Cerrado | Backend #60 |
+| DEF-33 | 14 nov | El WebSocket rechazaba a la app de celular en el servidor | Conectarse desde la app que no corre en `localhost` | Alta | Cerrado | Backend #63 |
+| DEF-34 | 14 nov | La app web publicada en Vercel salía en blanco | Abrir la web publicada | Alta | Cerrado | [Despliegue](/docs/backend/deployment) |
+| DEF-35 | 14 nov | La API respondía `502` después de recrear el contenedor `app` | Cambiar `.env.production` y recrear `app` | Alta | Cerrado | [Despliegue](/docs/backend/deployment#desplegar) |
+| DEF-36 | 14 nov | Compilar todos los servicios juntos fallaba con "image already exists" | `docker compose up -d --build` en el servidor | Media | Cerrado | [Despliegue](/docs/backend/deployment#desplegar) |
+| DEF-37 | 17 y 20 nov | GitHub borraba la aprobación de un PR en cuanto se daba | Aprobar un PR atrasado respecto a `develop` | Media | Cerrado | Backend #66 y #76 |
+| DEF-38 | 19 nov | Cada código por SMS se cobraba como dos mensajes | Pedir un código de recuperación por SMS | Media | Cerrado | Backend #77 |
+| DEF-39 | 24 nov | Una ruta protegida respondía `500` si la petición no pedía JSON | `curl https://api.kodev.online/api/user` sin token ni `Accept` | Media | En revisión | [Backend #80](https://github.com/WilbertDevMx/backend-kampus/pull/80) |
+| DEF-40 | 27 nov | Los campos de correo de la app muestran de ejemplo `matricula@utt.edu.mx`, el dominio viejo de la UTT | Abrir Registro, Inicio de sesión u Olvidé mi contraseña | Baja | Abierto | Reportado al equipo de app |
+
+## Seguimiento
+
+- Cada defecto cerrado tiene su PR o commit enlazado, y en GitHub se ve la conversación de la revisión donde se detectó.
+- Varios se detectaron **antes de fusionar**, en la revisión del PR o en una prueba real: DEF-12, DEF-19, DEF-22, DEF-32 y DEF-38. Ninguno llegó a usuarios reales.
+- DEF-39 se detectó al levantar producción: no afecta a la app, que siempre manda `Accept: application/json`, pero sí a navegadores y monitores.
