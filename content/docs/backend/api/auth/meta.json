@@ -5,6 +5,7 @@
     "sessions",
     "two-factor",
     "register",
-    "password"
+    "password",
+    "account"
   ]
 }
