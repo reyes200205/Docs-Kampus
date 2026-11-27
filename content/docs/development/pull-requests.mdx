@@ -86,6 +86,7 @@ Con base `main` y compare `develop`, este mensaje significa que **`main` ya tien
 ## Revisión
 
 - Al menos **otro integrante** revisa y aprueba el PR.
+- **[Nuevo]** Si GitHub dice que la rama está atrás de `develop` (por ejemplo, porque se fusionó otro PR antes), primero dale **"Update branch"** (con merge, sin rebase) y después aprueba. Si apruebas antes, la regla de la rama descarta la aprobación en ese momento. Ver [Errores resueltos](/docs/project/bug-log#las-aprobaciones-se-borraban-solas-17-y-20-nov).
 - CI debe pasar. En el backend: formato, migraciones y pruebas (ver [Integración continua](/docs/backend/installation#integración-continua)). En la documentación: la convención de commits.
 - Cómo se calcula la versión: ver [Versiones y changelog](/docs/development/releases).
 
