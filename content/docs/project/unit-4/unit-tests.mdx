@@ -1,0 +1,84 @@
+---
+title: "Pruebas unitarias"
+description: "Las pruebas unitarias del backend, cómo correrlas, la cobertura y la evidencia de la última corrida."
+---
+
+**[Nuevo]** El backend tiene **331 pruebas automáticas con 2,939 aserciones**, y todas pasan. Están en dos suites de PHPUnit:
+
+| Suite | Carpeta | Pruebas | Aserciones | Qué prueba |
+| --- | --- | :---: | :---: | --- |
+| Unit | `tests/Unit` | 33 | 132 | Una clase aislada, sin base de datos ni HTTP |
+| Feature | `tests/Feature` | 298 | 2,807 | Una ruta completa con base de datos: ver [Pruebas de integración](/docs/project/unit-4/integration-tests) y [Pruebas funcionales](/docs/project/unit-4/functional-tests) |
+
+## Qué cubren las pruebas unitarias
+
+| Archivo | Clase probada | Casos |
+| --- | --- | --- |
+| [`GeohashTest`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/tests/Unit/GeohashTest.php) | `Geohash`: la celda de ~1 km de la vista "Cerca" | Codifica y decodifica el ejemplo de referencia; el centro de una celda regresa a la misma celda; una celda tiene 8 vecinas distintas; rechaza caracteres fuera del alfabeto; la distancia usa la fórmula de Haversine |
+| [`ImageSanitizerTest`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/tests/Unit/ImageSanitizerTest.php) | `ImageSanitizer` y `MasksEmail` | Borra el EXIF de un JPEG; conserva PNG y WebP; rechaza lo que no es imagen, los formatos no permitidos y las dimensiones enormes antes de abrir la imagen; reduce el lado largo sin deformar; endereza según la orientación del EXIF; enmascara correos para el log |
+| [`LiveKitProviderTest`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/tests/Unit/LiveKitProviderTest.php) | `LiveKitProvider` (Adapter de videollamada) | El token es un JWT firmado y limitado a una sala; crea salas con límite de participantes; cerrar una sala que ya no existe no es error; avisa si LiveKit falla o no está configurado |
+| [`SmsTest`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/tests/Unit/SmsTest.php) | `PhoneNumber` y `VonageSmsSender` (Adapter de SMS) | Normaliza números de México a E.164; Vonage recibe texto sin acentos; cada código cabe en un solo SMS; un rechazo de Vonage lanza excepción; sin llaves no se llama a Vonage |
+| [`DeviceLabelTest`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/tests/Unit/DeviceLabelTest.php) | `DeviceLabel`: el nombre del dispositivo en Sesiones | 10 navegadores y sistemas distintos, con un *data provider* |
+
+Las llamadas a LiveKit y Vonage se simulan con `Http::fake()`: las pruebas no salen a internet ni gastan saldo.
+
+## Cobertura
+
+Cobertura de `app/` con **toda la suite** (unitarias y de integración), medida con Xdebug el 27 de noviembre de 2026 sobre `develop` (`dfcc46f`):
+
+| Medida | Cubierto | Total | % |
+| --- | :---: | :---: | :---: |
+| **Líneas** | 2,667 | 2,740 | **97.3 %** |
+| Métodos | 359 | 396 | 90.7 % |
+| Clases (todas sus líneas) | 94 | 121 | 77.7 % |
+
+| Carpeta de `app/` | Líneas | Métodos |
+| --- | :---: | :---: |
+| `Http` (controladores, middleware, requests y resources) | 98.8 % | 93.1 % |
+| `Discovery` (descubrimiento, Builder y Strategy) | 99.2 % | 96.0 % |
+| `Policies` | 100 % | 100 % |
+| `Moderation` | 100 % | 100 % |
+| `Notifications` | 100 % | 100 % |
+| `Support` (geohash, imágenes, códigos, seguridad) | 96.3 % | 88.4 % |
+| `Video` | 96.5 % | 90.9 % |
+| `Models` | 95.0 % | 89.7 % |
+| `Accounts` | 98.0 % | 80.0 % |
+| `Sms` | 70.0 % | 33.3 % |
+| `Listeners` | 66.7 % | 75.0 % |
+| `Jobs` | 64.3 % | 75.0 % |
+
+Las clases que la suite unitaria prueba por sí sola quedan así: `Geohash`, `DeviceLabel`, `PhoneNumber` y `MasksEmail` al 100 % de líneas, `ImageSanitizer` al 89 %, `LiveKitProvider` al 88 % y `VonageSmsSender` al 77 %.
+
+**Lo menos cubierto:** `LogSmsSender` (el *driver* de SMS que solo escribe en el log, 0 %), `DeleteStoredFiles` (el caso en que S3 falla al borrar, 64 %) y `SecurityEventSubscriber` (el evento de bloqueo, 67 %). Son caminos de error o de desarrollo; ninguno es una regla de negocio.
+
+## Cómo correrlas
+
+```bash
+php artisan test                         # todas
+php artisan test --testsuite=Unit        # solo las unitarias
+php artisan test --filter=GeohashTest    # una clase
+XDEBUG_MODE=coverage php artisan test --coverage-text   # con cobertura (necesita Xdebug o PCOV)
+```
+
+Con Xdebug activo las pruebas tardan unas 10 veces más; para el día a día conviene apagarlo ([Instalación](/docs/backend/installation#límites-de-php-en-local)).
+
+## Evidencia
+
+Corrida completa del 27 de noviembre de 2026, con cobertura, sobre `develop` (`dfcc46f`):
+
+```text
+$ XDEBUG_MODE=coverage php artisan test --coverage-text --log-junit=junit.xml
+{"tool":"phpunit","result":"passed","tests":331,"passed":331,"assertions":2939,"duration_ms":493043}
+
+Code Coverage Report:
+  2026-11-27 16:21:52
+
+ Summary:
+  Classes: 77.69% (94/121)
+  Methods: 90.66% (359/396)
+  Lines:   97.34% (2667/2740)
+```
+
+Reporte JUnit de la misma corrida: suite Unit, 33 pruebas y 132 aserciones en 14 s; suite Feature, 298 pruebas y 2,807 aserciones en 461 s; **0 fallas, 0 errores y 0 pruebas saltadas**.
+
+La CI corre las mismas 331 pruebas (sin cobertura, para que sea rápida) en cada PR: ver el check "Formato y pruebas" en la pestaña [Actions](https://github.com/WilbertDevMx/backend-kampus/actions/workflows/ci.yml).

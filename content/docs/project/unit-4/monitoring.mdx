@@ -1,0 +1,74 @@
+---
+title: "Monitoreo y logging"
+description: "Qué se registra en pruebas y producción, dónde se guarda, cuánto dura y cómo se vigila que el servicio siga arriba."
+---
+
+**[Nuevo]** El monitoreo de Kampus tiene tres partes: un **monitor externo** que avisa si la API se cae, **logs de la aplicación** (uno general y uno de seguridad) y la **bitácora del despliegue automático**.
+
+## Monitor externo: UptimeRobot
+
+| Monitor | URL | Cada | Revisa |
+| --- | --- | --- | --- |
+| Kampus API (/up) | `https://api-kampus.emulatornds.online/up` | 5 min | Respuesta `2xx`, tiempo máximo de 30 s y certificado válido |
+| Kampus API producción (/up) | `https://api.kodev.online/up` | 5 min | Lo mismo |
+
+- `/up` es la ruta de salud de Laravel: responde `200` solo si la aplicación arranca completa.
+- Si un monitor falla, UptimeRobot avisa por correo a Wilbert. También avisa antes de que venza el certificado.
+- **Del 14 al 27 de noviembre: 100 % de disponibilidad y ninguna caída** en los dos monitores. El de pruebas lleva 12 días y 19 horas seguidos arriba, y el de producción, 3 días (desde que se levantó, el 24 nov).
+
+## Logs de la aplicación
+
+Se guardan en el volumen de Docker `logs` (`storage/logs` dentro del contenedor), así que sobreviven a cada despliegue.
+
+| Log | Qué guarda | Nivel | Se conserva |
+| --- | --- | --- | --- |
+| `laravel-AAAA-MM-DD.log` | Errores y advertencias de la API: excepciones, fallas de la base, de la cola o de un servicio externo | `warning` en adelante (`LOG_LEVEL`) | 14 días (`LOG_DAILY_DAYS`) |
+| `security-AAAA-MM-DD.log` | Eventos de seguridad (tabla de abajo) | `info` en adelante | 90 días (`LOG_SECURITY_DAYS`) |
+
+### Eventos de seguridad
+
+| Evento | Nivel |
+| --- | --- |
+| Cuenta registrada y correo verificado | info |
+| Intento fallido de inicio de sesión | notice |
+| Bloqueo por intentos fallidos | warning |
+| Código de verificación en dos pasos incorrecto; inicio de sesión con un código de respaldo | notice y warning |
+| Se activó o desactivó la verificación en dos pasos | notice |
+| Solicitud para restablecer la contraseña (correo o SMS), código incorrecto y contraseña restablecida | info y notice |
+| Sesión cerrada desde otro dispositivo; se cerraron las demás sesiones | info |
+| Celular verificado o eliminado | notice |
+| Vonage no aceptó un SMS | warning |
+| Cuenta eliminada; no se pudieron borrar sus archivos | notice y error |
+
+Según el caso, cada evento lleva el id del usuario, la IP y el correo o el celular **enmascarados** (por ejemplo, `al****@uttcampus.edu.mx` o `******4567`), para que el log no se vuelva una lista de datos personales. Las acciones de moderación (suspender, reactivar, aprobar o rechazar un grupo) además quedan en la tabla `moderation_actions` con quién, cuándo y por qué.
+
+### Cómo leerlos en el servidor
+
+```bash
+cd ~/kampus-prod   # o ~/backend-kampus para pruebas
+P="docker compose -p kampus-prod -f compose.prod.yaml -f compose.server.yaml --env-file .env.production"
+$P exec app sh -c 'tail -n 50 storage/logs/laravel-$(date +%F).log'
+$P exec app sh -c 'tail -n 50 storage/logs/security-$(date +%F).log'
+$P logs -f --since 1h app queue reverb   # salida de los contenedores
+```
+
+En pruebas, el comando es el mismo sin `-p kampus-prod` ([Comandos de producción](/docs/backend/deployment#comandos-de-producción)).
+
+## Bitácora del despliegue
+
+Cada vuelta de la actualización automática queda en el *journal* de systemd: qué commit se desplegó, si `/up` respondió y si hubo que regresar a la versión anterior.
+
+```bash
+journalctl -u kampus-deploy --since today        # pruebas
+journalctl -u kampus-deploy-prod --since today   # producción
+```
+
+## Accesos
+
+- Nginx registra cada petición (método, ruta, código y tiempo) en la salida de su contenedor: `docker compose ... logs nginx`.
+- Las peticiones por encima del límite responden `429` y no llegan a la API.
+
+## Qué falta
+
+- **Métricas** (tiempos de respuesta por ruta, uso de memoria): hoy solo se ven el tiempo de respuesta de `/up` en UptimeRobot y `docker stats` en el servidor. Laravel Pulse o un panel de CloudWatch serían el siguiente paso.
+- **Alertas por errores:** un error `500` queda en `laravel.log`, pero no avisa a nadie. Un servicio como Sentry (o Nightwatch, de Laravel) lo mandaría por correo al momento.

@@ -6,6 +6,8 @@ Documentación de **Kampus**: aplicación para la integración social de estudia
 
 > [!NOTE]
 > Este README contiene **completos** el documento de la **Unidad 1** (anteproyecto) y la documentación de la **Unidad 2**, para leerlos directamente en GitHub sin entrar al sitio. Es el mismo contenido que la sección **Proyecto** del sitio. Los diagramas se dibujan aquí mismo y las imágenes están en `public/docs/project/`.
+>
+> **[Nuevo]** Las **Unidades 3 y 4** (entrega del proyecto; pruebas y liberación) están en el sitio y en `content/docs/project/unit-3` y `unit-4`. Abajo, en [Unidades 3 y 4](#unidades-3-y-4), está la lista de páginas con su enlace.
 
 ## Índice
 
@@ -36,6 +38,7 @@ Documentación de **Kampus**: aplicación para la integración social de estudia
   - [Diagramas del sistema](#diagramas-del-sistema)
   - [Diccionario de datos](#diccionario-de-datos)
   - [Prototipo y maquetado](#prototipo-y-maquetado)
+- [Unidades 3 y 4](#unidades-3-y-4)
 - [Sitio de documentación](#sitio-de-documentación)
 
 ## Proyecto
@@ -69,6 +72,7 @@ Documentación de **Kampus**: aplicación para la integración social de estudia
 - **[Privacidad de la ubicación](#privacidad-de-la-ubicación)**: Reglas obligatorias para el manejo de datos de ubicación (RNF-11).
 - **[Unidad 1 · Anteproyecto](#anteproyecto)**: Problemática, objetivos, alcance, riesgos, requisitos, metodología, cronograma, arquitectura y diseño.
 - **[Unidad 2 · Versionamiento y diseño](#rúbrica-y-avance)**: Control de versiones, flujo de trabajo, diagramas, diccionario de datos y prototipo.
+- **[Nuevo] [Unidades 3 y 4](#unidades-3-y-4)**: Entrega del proyecto (rutas seguras y seguridad) y pruebas y liberación (plan y casos de prueba, defectos, CI/CD, publicación, producción, monitoreo y manual de usuario).
 
 ### Repositorios
 
@@ -2083,6 +2087,33 @@ En escritorio la barra inferior se convierte en barra lateral.
 
 ---
 
+## Unidades 3 y 4
+
+**[Nuevo]** Estas unidades se leen en el sitio publicado. Cada página tiene su archivo en el repositorio:
+
+| Unidad | Página | Archivo |
+| --- | --- | --- |
+| 3 · Entrega del proyecto | [Rúbrica y avance](https://doc.kodev.online/docs/project/unit-3) | [unit-3/index.mdx](content/docs/project/unit-3/index.mdx) |
+| 3 | [Rutas seguras](https://doc.kodev.online/docs/project/unit-3/secure-routes) | [unit-3/secure-routes.mdx](content/docs/project/unit-3/secure-routes.mdx) |
+| 3 | [Seguridad (OWASP)](https://doc.kodev.online/docs/project/unit-3/security) | [unit-3/security.mdx](content/docs/project/unit-3/security.mdx) |
+| 4 · Pruebas y liberación | [Rúbrica y avance](https://doc.kodev.online/docs/project/unit-4) | [unit-4/index.mdx](content/docs/project/unit-4/index.mdx) |
+| 4 | [Plan de pruebas](https://doc.kodev.online/docs/project/unit-4/test-plan) | [unit-4/test-plan.mdx](content/docs/project/unit-4/test-plan.mdx) |
+| 4 | [Pruebas unitarias](https://doc.kodev.online/docs/project/unit-4/unit-tests) | [unit-4/unit-tests.mdx](content/docs/project/unit-4/unit-tests.mdx) |
+| 4 | [Pruebas de integración](https://doc.kodev.online/docs/project/unit-4/integration-tests) | [unit-4/integration-tests.mdx](content/docs/project/unit-4/integration-tests.mdx) |
+| 4 | [Pruebas funcionales](https://doc.kodev.online/docs/project/unit-4/functional-tests) | [unit-4/functional-tests.mdx](content/docs/project/unit-4/functional-tests.mdx) |
+| 4 | [Pruebas de seguridad](https://doc.kodev.online/docs/project/unit-4/security-tests) | [unit-4/security-tests.mdx](content/docs/project/unit-4/security-tests.mdx) |
+| 4 | [Casos de prueba](https://doc.kodev.online/docs/project/unit-4/test-cases) | [unit-4/test-cases.mdx](content/docs/project/unit-4/test-cases.mdx) |
+| 4 | [Registro de defectos](https://doc.kodev.online/docs/project/unit-4/defects) | [unit-4/defects.mdx](content/docs/project/unit-4/defects.mdx) |
+| 4 | [CI/CD](https://doc.kodev.online/docs/project/unit-4/ci-cd) | [unit-4/ci-cd.mdx](content/docs/project/unit-4/ci-cd.mdx) |
+| 4 | [Proceso de publicación](https://doc.kodev.online/docs/project/unit-4/release) | [unit-4/release.mdx](content/docs/project/unit-4/release.mdx) |
+| 4 | [Despliegue en producción](https://doc.kodev.online/docs/project/unit-4/production) | [unit-4/production.mdx](content/docs/project/unit-4/production.mdx) |
+| 4 | [Monitoreo y logging](https://doc.kodev.online/docs/project/unit-4/monitoring) | [unit-4/monitoring.mdx](content/docs/project/unit-4/monitoring.mdx) |
+| 4 | [Manual de usuario](https://doc.kodev.online/docs/project/unit-4/user-manual) | [unit-4/user-manual.mdx](content/docs/project/unit-4/user-manual.mdx) |
+
+El seguimiento de cada sprint, con sus riesgos, está en [Seguimiento por sprint](https://doc.kodev.online/docs/project/sprints).
+
+---
+
 ## Sitio de documentación
 
 El sitio está hecho con [Fumadocs](https://fumadocs.dev) (Next.js) y se publica como sitio estático. Es público, igual que los repositorios.
@@ -2093,7 +2124,7 @@ El menú lateral tiene un selector con cuatro secciones. `/docs` abre en **Proye
 
 | Sección | Qué contiene | Carpeta |
 | --- | --- | --- |
-| **Proyecto** | El proyecto, privacidad de la ubicación (RNF-11), la documentación formal (Unidad 1 y Unidad 2) y el seguimiento por sprint | `content/docs/project/` |
+| **Proyecto** | El proyecto, privacidad de la ubicación (RNF-11), la documentación formal (Unidades 1 a 4), el seguimiento por sprint y los errores resueltos | `content/docs/project/` |
 | **Backend** | API REST con Laravel: instalación y comandos, configuración, despliegue y endpoints por módulo | `content/docs/backend/` |
 | **App (Expo)** | Web y móvil con Expo y Expo Router: instalación, dispositivo, sistema de diseño y problemas comunes | `content/docs/mobile/` |
 | **Desarrollo** | Flujo de Git, commits, pull requests, versiones y cómo documentar | `content/docs/development/` |

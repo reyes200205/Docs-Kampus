@@ -1,0 +1,53 @@
+---
+title: "Sprint 5 · Cierre"
+description: "25 nov – 1 dic 2026: lo que falta para la entrega final, quién lo tiene y los riesgos."
+---
+
+**[Nuevo]** **Objetivo:** interfaz de bloqueo, reporte y moderación; pantalla de Ajustes; prueba de carga; pruebas de usabilidad aplicadas; errores corregidos; documentación y entrega final.
+
+<Callout type="warn" title="En curso">
+  El sprint corre del miércoles 25 de noviembre al martes 1 de diciembre. La **Review final es el lunes 30 de noviembre** y la **entrega final, el martes 1 de diciembre**. Datos al viernes 27 de noviembre.
+</Callout>
+
+| Propias | Arrastradas del Sprint 4 | Total | Días hábiles |
+| :---: | :---: | :---: | :---: |
+| 57 h | 12 h (T-44) | **69 h** | 4 (25, 26, 27 y 30 nov) |
+
+## Tareas
+
+| Tarea | Responsable | Horas | Estado al 27 nov |
+| --- | --- | :---: | --- |
+| T-22 UI de bloqueo y reporte | Aless | 8 | Backlog. La API está desde el 5 nov (T-21). |
+| T-23 Aviso de privacidad, normas de comunidad y eliminación de cuenta | Wilbert (API) y Alejandro (textos y pantallas) | 6 | In Progress. La API está en `develop` ([backend #78](https://github.com/WilbertDevMx/backend-kampus/pull/78)); faltan los textos finales y las pantallas. |
+| T-25 Pruebas de usabilidad con estudiantes (guion, sesiones, SUS, informe) | Alejandro | 10 | Backlog |
+| T-26 Documentación técnica (README, OpenAPI, manuales de despliegue y de usuario) | Alejandro | 10 | Backlog. Ya hay: el contrato OpenAPI (T-33), la guía de [despliegue](/docs/backend/deployment) y, **[Nuevo]** desde el 27 nov, el [manual de usuario](/docs/project/unit-4/user-manual) y la [Unidad 4](/docs/project/unit-4). |
+| T-27 Corrección de errores y ajustes finales | Todo el equipo | 16 | Backlog. Ver los defectos abiertos en [Registro de defectos](/docs/project/unit-4/defects). |
+| T-38 Pantalla de Ajustes: bloqueados, eliminar cuenta y cerrar sesión | Luis | 4 | Backlog |
+| T-39 Prueba de carga básica sobre descubrimiento y chat | Wilbert | 3 | Backlog |
+| T-44 Panel de administración en la app (arrastrada) | Aless (con Luis) | 12 | In Progress: faltan reportes y usuarios. |
+
+## Carga por persona
+
+| Persona | Tareas | Horas |
+| --- | --- | :---: |
+| Alejandro | T-25 y T-26, y T-23 con Wilbert | 20 h + T-23 (6 h) |
+| Aless | T-22 y T-44 (con Luis) | 20 h |
+| Luis | T-38 y apoyo en T-44 | 4 h + apoyo |
+| Wilbert | T-39 | 3 h |
+| Todos | T-27 | 16 h |
+
+Con cuatro días hábiles, la carga de Alejandro y Aless no alcanza sin ayuda. Wilbert y Mario tienen la menor carga pendiente.
+
+## Propuestas
+
+Son propuestas: si cambian el alcance, se aprueban y registran como indica la [sección 9.4](/docs/project/unit-1/methodology#94-cambios-de-alcance).
+
+1. **Primero lo del MVP indispensable:** T-22 (bloqueo y reporte) y T-38 (Ajustes y eliminar cuenta). Sin ellas, el criterio de alineación con el MVP queda en Parcial ([Unidad 3](/docs/project/unit-3)).
+2. **Usabilidad corta (T-25):** una sola sesión con 5 estudiantes y el cuestionario SUS alcanza para el informe.
+3. **Revisar los PR abiertos** antes del 30 nov: backend #80 y #81, documentación #54 a #57 y el de las Unidades 3 y 4.
+4. **Publicar la v0.4.0 del backend** (`develop` a `main`) después de fusionar el #80 y el #81, para que producción tenga lo de los sprints 4 y 5 con la [lista de verificación](/docs/project/unit-4/release#lista-de-verificación).
+5. **Mover a fase 2** las pantallas de sesiones activas y de recuperación por SMS si no alcanzan: la API ya está y quedan documentadas.
+
+## Riesgos
+
+Los puntajes vienen del [cierre del Sprint 4](/docs/project/sprints/sprint-4#riesgos-al-cierre-del-sprint-4). Los que más pesan en esta semana: **R16** entregar sin las pruebas de usabilidad (16), **R14** la app no alcanza al backend (12), **R13** cambio de alcance (12), **R15** PR revisados por lotes (12) y **R3** uso indebido sin moderación (10).

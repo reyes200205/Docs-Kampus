@@ -1,0 +1,130 @@
+---
+title: "Rúbrica y avance"
+description: "Qué evalúa la Unidad 3 (entrega del proyecto), dónde se cubre cada criterio y qué falta."
+---
+
+**[Nuevo]** **Actividad:** Entrega del proyecto · **Asignatura:** Desarrollo Web Integral · **Profesor:** Jesús Del Toro Robledo · **Corte de esta página:** 27 de noviembre de 2026
+
+Escala de desempeño: 5 Excelente (10) · 4 Bien (9.5) · 3 Suficiente (9) · 2 Deficiente (8) · 1 Insuficiente (menor a 8). La calificación final es el promedio de los criterios generales y los específicos.
+
+<Callout title="Cómo leer el estado">
+  **Cubierto:** el criterio se cumple y hay evidencia enlazada. **Parcial:** se cumple en el backend o en la documentación, pero falta una parte (casi siempre una pantalla de la app). **Pendiente:** todavía no hay evidencia. El estado de la app se tomó de la rama `develop` de [`Frontend-Kampus`](https://github.com/reyes200205/Frontend-Kampus) al 27 nov.
+</Callout>
+
+## Avance por criterio
+
+| # | Criterio específico | Dónde se cubre | Estado |
+| :---: | --- | --- | --- |
+| 1 | Alineación con alcance, limitaciones y MVP (Unidad 1) | [Alcance y MVP](/docs/project/unit-1/scope#51-cronograma-estimado-y-producto-mínimo-viable) · [Seguimiento por sprint](/docs/project/sprints) | Parcial |
+| 2 | Fidelidad UI/UX respecto al maquetado y al prototipo | [Prototipo y maquetado](/docs/project/unit-2/prototype) · [Sistema de diseño](/docs/mobile/design-system) | Lo presenta el equipo de app |
+| 3 | Implementación frontend | [App](/docs/mobile) · [`Frontend-Kampus`](https://github.com/reyes200205/Frontend-Kampus) | Parcial |
+| 4 | Implementación backend | [API REST](/docs/backend/api) · [Pruebas unitarias](/docs/project/unit-4/unit-tests) | Cubierto |
+| 5 | Integración frontend-backend | [Qué usa la app de la API](#3-y-5-integración-de-la-app-con-la-api) | Parcial |
+| 6 | Base de datos | [Diccionario de datos](/docs/project/unit-2/data-dictionary) · [Diagramas](/docs/project/unit-2/diagrams) | Cubierto |
+| 7 | Control de versiones y flujo de trabajo | [Flujo de trabajo](/docs/project/unit-2/workflow) · [Repositorios y evidencias](/docs/project/unit-2/evidence) | Cubierto |
+| 8 | Aplicación de políticas de pull request | [Pull requests](/docs/development/pull-requests) · [Protección de ramas](/docs/project/unit-2/repository-setup#protección-de-ramas) | Cubierto |
+| 9 | Uso de patrones de diseño | [Patrones de diseño](/docs/project/unit-1/design-patterns#dónde-está-cada-patrón-en-el-código) | Cubierto |
+| 10 | Autenticación de usuario | [Inicio de sesión](/docs/backend/api/auth/login) · [Verificación en dos pasos](/docs/backend/api/auth/two-factor) | Cubierto |
+| 11 | Manejo de multisesiones | [Sesiones](/docs/backend/api/auth/sessions) | Parcial |
+| 12 | Recuperación de contraseñas | [Recuperar la contraseña](/docs/backend/api/auth/password) | Parcial |
+| 13 | Manejo de rutas seguras en el backend | [Rutas seguras](/docs/project/unit-3/secure-routes) | Cubierto |
+| 14 | Principios de seguridad y buenas prácticas | [Seguridad (OWASP)](/docs/project/unit-3/security) | Cubierto |
+| 15 | Repositorio y documentación técnica final | [README del backend](https://github.com/WilbertDevMx/backend-kampus#readme) · [Instalación](/docs/backend/installation) · [Despliegue](/docs/backend/deployment) | Cubierto |
+| 16 | Metodología y análisis de riesgos por sprint | [Metodología](/docs/project/unit-1/methodology) · [Seguimiento por sprint](/docs/project/sprints) | Cubierto |
+
+## Qué hay detrás de cada criterio
+
+### 1. Alcance y MVP
+
+Las funciones **indispensables** del [MVP](/docs/project/unit-1/scope#51-cronograma-estimado-y-producto-mínimo-viable) están en la API desde el Sprint 3, y las **importantes** (imágenes en el chat, grupos, vista "Cerca", videollamada y módulo de Administración), desde el Sprint 4. Lo que quedó fuera respeta las limitaciones de la Unidad 1: la ubicación en el chat pasó a fase 2 con un [cambio de alcance aprobado](/docs/project/unit-1/methodology#94-cambios-de-alcance), no hay ubicación en vivo ni contenido para adultos, y la ubicación nunca se guarda exacta ([Privacidad de la ubicación](/docs/project/location-privacy)).
+
+Falta en la app, del MVP indispensable: la interfaz de **bloqueo y reporte** (T-22) y la pantalla de **Ajustes** con la eliminación de cuenta (T-38). Las dos están en el Sprint 5.
+
+### 3 y 5. Integración de la app con la API
+
+La app (Expo, web y móvil) ya consume estas partes de la API:
+
+| Módulo | Pantallas de la app | API |
+| --- | --- | --- |
+| Registro e inicio de sesión | Registro, verificación de correo, inicio de sesión | [Registro](/docs/backend/api/auth/register) · [Inicio de sesión](/docs/backend/api/auth/login) |
+| Recuperación por correo | Olvidé mi contraseña, restablecer contraseña | [Recuperar la contraseña](/docs/backend/api/auth/password) |
+| Verificación en dos pasos | Perfil → Seguridad | [Dos pasos](/docs/backend/api/auth/two-factor) |
+| Perfil | Perfil por pasos, editar perfil, zona | [Perfil](/docs/backend/api/profile/profile) · [Ubicación](/docs/backend/api/profile/location) |
+| Descubrir | Para ti (swipe y filtros) y Cerca de ti (mapa) | [Descubrimiento](/docs/backend/api/social/discovery) · [Cerca](/docs/backend/api/social/nearby) |
+| Matches y chat | Chats, conversación con imágenes, aviso de match | [Matches](/docs/backend/api/social/matches) · [Mensajes](/docs/backend/api/chat/messages) · [Tiempo real](/docs/backend/api/chat/realtime) |
+| Videollamada | Llamada 1 a 1 y llamada entrante | [Videollamada](/docs/backend/api/chat/video-call) |
+| Grupos | Explorar, detalle, crear y actividades | [Grupos](/docs/backend/api/groups) |
+| Administración | Revisión de grupos, staff y cuenta | [Revisión de grupos](/docs/backend/api/admin/group-review) · [Staff](/docs/backend/api/admin/staff) |
+
+**Todavía no las usa la app** (la API ya está en `develop`):
+
+| Función | Tarea de la app | Estado |
+| --- | --- | --- |
+| Sesiones activas (ver y cerrar) | Pantalla de Seguridad | La pantalla solo trae la verificación en dos pasos |
+| Recuperación por SMS y registro del celular | — | Sin tarea en Plane |
+| Bloquear y reportar | T-22 | Backlog, Sprint 5 |
+| Eliminar cuenta y aceptar el aviso de privacidad | T-38 y T-23 | Backlog e In Progress, Sprint 5 |
+| Revisión de reportes y consulta de usuarios en el panel | T-44 | In Progress |
+
+### 10. Autenticación
+
+Correo institucional y contraseña, token de Sanctum con vencimiento y **verificación en dos pasos con TOTP** (Google Authenticator, Microsoft Authenticator o Authy), con códigos de respaldo. El inicio de sesión se bloquea tras 5 intentos fallidos y cada intento queda en `security.log`. Cubre el nivel Excelente: usuario, contraseña, token y MFA. Ver [Inicio de sesión](/docs/backend/api/auth/login) y [Verificación en dos pasos](/docs/backend/api/auth/two-factor).
+
+### 11. Multisesiones
+
+Cada inicio de sesión es un token propio, así que se puede tener la sesión abierta en varios dispositivos a la vez. La API lista las sesiones activas con su dispositivo y su última actividad, y permite cerrar una o todas las demás ([Sesiones](/docs/backend/api/auth/sessions)). En la API cubre el nivel Excelente; queda en Parcial porque la app todavía no tiene la pantalla.
+
+### 12. Recuperación de contraseñas
+
+| Método | API | App |
+| --- | --- | --- |
+| Correo electrónico (enlace de un solo uso) | Sí, T-45 | Sí |
+| SMS con código (Vonage) | Sí, T-53 ([backend #77](https://github.com/WilbertDevMx/backend-kampus/pull/77)) | No |
+| Verificación en dos pasos como segundo factor al restablecer | Sí, T-47 | Sí, si la cuenta la tiene activa |
+| Pregunta secreta | No | — |
+| Llamada telefónica | No | — |
+
+Con correo y SMS se cubre el nivel **Bien** (al menos dos métodos). La pregunta secreta no se implementó a propósito: OWASP y NIST SP 800-63B la desaconsejan porque las respuestas se adivinan o se encuentran en redes sociales. Se le propuso al profesor, por medio del Product Owner, evaluar la seguridad del flujo en su lugar (ver [Notas sobre la rúbrica](#notas-sobre-la-rúbrica)).
+
+### 15. Repositorio y documentación técnica
+
+- El [`README.md` del backend](https://github.com/WilbertDevMx/backend-kampus#readme) explica cómo levantar la API (con PHP o con Docker), correr las pruebas, desplegar y ver el monitoreo.
+- [Instalación](/docs/backend/installation), [Configuración](/docs/backend/configuration) y [Despliegue](/docs/backend/deployment) lo detallan, y [Versiones y changelog](/docs/development/releases) explica cómo se publica cada versión.
+- Ningún repositorio guarda secretos: `.env` y `.env.production` están en `.gitignore`, solo se suben los `.env.example`, y GitHub tiene activados el *secret scanning* y la *push protection* ([Llaves y credenciales](/docs/project/unit-2/repository-setup#llaves-y-credenciales)).
+
+### 16. Metodología y riesgos por sprint
+
+Cada sprint tiene su página con objetivo, plan contra lo real, lo que pasó al siguiente y los riesgos con su puntaje actualizado (probabilidad × impacto) y su mitigación: [Sprint 3](/docs/project/sprints/sprint-3#riesgos-al-cierre-del-sprint-3), [Sprint 4](/docs/project/sprints/sprint-4#riesgos-al-cierre-del-sprint-4) y [Sprint 5](/docs/project/sprints/sprint-5#riesgos). Las ceremonias, los roles y el Definition of Done están en [Metodología](/docs/project/unit-1/methodology) y en [Pull requests](/docs/development/pull-requests#definition-of-done).
+
+## Notas sobre la rúbrica
+
+El Excel de la rúbrica tiene detalles que conviene aclarar con el profesor:
+
+- La fórmula del promedio de criterios específicos (`G37`) toma `G21:G34`, así que deja fuera los criterios 15 (repositorio y documentación) y 16 (metodología y riesgos).
+- La escala no coincide: las instrucciones dicen Bien 9.5 y Suficiente 9, y los encabezados, Bien 9 y Suficiente 8.5.
+- La hoja se llama "Rúbrica Unidad 2" y la fila 37 dice "Documentación Técnica (README actualizado)", aunque es el promedio.
+
+El 2 de noviembre se le propuso al profesor, por medio del Product Owner: aceptar TOTP como MFA, evaluar la seguridad del flujo de recuperación en lugar de pedir pregunta secreta y llamada, y dar más peso a los criterios técnicos. De ahí salieron las tareas T-45 a T-48 ([cambio de alcance del 2 nov](/docs/project/unit-1/methodology#94-cambios-de-alcance)).
+
+## Criterios específicos: Unidad 3
+
+| Criterio | Excelente (5 / 10) | Bien (4 / 9) | Suficiente (3 / 8.5) | Deficiente (2 / 8) | Insuficiente (1 / < 8) |
+| --- | --- | --- | --- | --- | --- |
+| **Alineación con alcances, limitaciones y MVP (Unidad 1)** | Cumplimiento de las funcionalidades prioritarias del MVP y respeto a los límites declarados en la U1. | Funcionalidades principales listas con mínimos detalles pendientes en el MVP. | MVP incompleto o con desviaciones notorias del alcance original. | Desalineación grave respecto al MVP y alcance definido. | No presenta avances del MVP ni respeta el alcance. |
+| **Fidelidad UI/UX respecto a maquetado y prototipo (Unidades 1 y 2)** | Interfaz y flujos de navegación implementados fielmente según maquetas/prototipos con usabilidad y diseño responsivo. | Interfaz adecuada con pequeñas inconsistencias visuales o de navegación. | Diferencias notables entre la maqueta/prototipo y la implementación web. | Interfaz desordenada, no responsiva y alejada de los prototipos previos. | Sin implementación de UI/UX ni correspondencia visual. |
+| **Implementación frontend** | Frontend completo, responsive, con buen UX/UI, usando buenas prácticas (componentes reutilizables, estado, routing). | Frontend funcional con detalles menores. | Frontend básico o con problemas de responsividad. | Frontend incompleto o con errores graves. | Ausente o no funcional. |
+| **Implementación backend** | Backend robusto, con API bien estructurada, autenticación, validaciones y manejo de errores. | Backend funcional con algunos detalles pendientes. | Backend básico con limitaciones. | Backend deficiente o con fallos importantes. | Ausente. |
+| **Integración frontend-backend** | Integración completa y fluida (API calls, manejo de respuestas, autenticación). | Integración correcta con pequeños problemas. | Integración parcial o con errores. | Integración deficiente. | Sin integración. |
+| **Base de datos** | Implementación correcta de BD (esquema, consultas optimizadas, migraciones, relaciones). | BD funcional con detalles menores. | BD básica con inconsistencias. | BD con errores graves. | Ausente o mal implementada. |
+| **Control de versiones y flujo de trabajo** | Uso correcto de Git (branches, commits semánticos, PRs, merge) con flujo bien definido. | Buen uso de Git con detalles menores. | Uso básico de Git. | Uso incorrecto o sin flujo. | Sin repositorio o sin actividad. |
+| **Aplicación de políticas de pull request** | Políticas de PR claramente definidas e implementadas (plantillas de PR, checklist de revisión, aprobación obligatoria, protección de ramas principales, resolución de conflictos documentada). | Políticas de PR aplicadas de forma correcta, con algunos detalles menores faltantes. | Se usan pull requests, pero las políticas son básicas o inconsistentes. | Se crean PRs de forma irregular o sin políticas claras. | No se utilizan pull requests o no hay evidencia de políticas. |
+| **Uso de patrones de diseño** | Implementación correcta y justificada de al menos 2-3 patrones de diseño relevantes (Repository, Singleton, Factory, Observer, MVC/MVVM, etc.) según las necesidades del proyecto. | Patrones de diseño implementados con justificación breve. | Se mencionan o usan patrones de forma básica sin justificación clara. | Uso inadecuado o contradictorio de patrones. | Ausente. |
+| **Autenticación de usuario** | Implementación completa de autenticación: nombre de usuario o correo electrónico + contraseña + token (JWT/sesión) + Multi-Factor Authentication (MFA). Sesiones seguras y control de acceso. | Autenticación con usuario/correo + contraseña + token. MFA parcial o sin MFA. | Autenticación básica (usuario/correo + contraseña) sin token o MFA. | Autenticación incompleta o insegura. | Ausente. |
+| **Manejo de multisesiones** | Soporte completo de multisesiones (múltiples dispositivos/sesiones concurrentes), con posibilidad de cerrar sesiones remotas, listado de sesiones activas y control de dispositivos. | Soporte de multisesiones básico (permite varias sesiones) con algunos controles. | Soporte limitado de multisesiones. | Solo permite una sesión a la vez o manejo deficiente. | Ausente. |
+| **Recuperación de contraseñas** | Implementación completa de recuperación de contraseñas mediante correo electrónico + pregunta secreta + llamada telefónica + SMS. Flujos seguros y verificados. | Recuperación mediante al menos 2 métodos (ej. correo + SMS o correo + pregunta secreta). | Recuperación solo por correo electrónico. | Recuperación incompleta o insegura. | Ausente. |
+| **Manejo de rutas seguras en el backend** | Rutas del backend protegidas correctamente (middleware de autenticación/autorización), validación de roles/permisos, protección contra acceso no autorizado y rutas sensibles bien definidas. | Mayoría de rutas protegidas con middleware, con detalles menores faltantes. | Protección básica de rutas (solo algunas protegidas). | Rutas poco protegidas o con fallos de seguridad. | Sin protección de rutas. |
+| **Principios de seguridad y buenas prácticas** | Aplicación sólida de principios de seguridad (OWASP): validaciones, sanitización de inputs, hashing seguro de contraseñas, variables de entorno, etc. | Buenas prácticas de seguridad aplicadas con detalles menores. | Seguridad básica implementada. | Fallos importantes de seguridad. | Sin medidas de seguridad. |
+| **Repositorio y documentación técnica final** | El repositorio está actualizado; el README permite reproducir pruebas y despliegue, y la configuración no expone secretos. | Repositorio y documentación suficientes, con omisiones menores. | Documentación básica que requiere aclaraciones. | Repositorio desactualizado o instrucciones insuficientes. | No entrega repositorio funcional ni documentación mínima. |
+| **Revisión del uso de la metodología y análisis de riesgos por sprint** | Se evidencia la aplicación correcta de la metodología (Scrum/Kanban) en cada sprint: roles, ceremonias, DoD, y se presenta análisis de riesgos actualizado por sprint (probabilidad, impacto y mitigación). | Se evidencia el uso de la metodología y se presenta análisis de riesgos por sprint con detalles menores faltantes. | Se menciona el uso de la metodología y hay un análisis de riesgos genérico o incompleto por sprint. | Uso superficial de la metodología o análisis de riesgos muy limitado. | Ausente. |
+
+Los criterios generales son los mismos de la [Unidad 2](/docs/project/unit-2#criterios-generales).

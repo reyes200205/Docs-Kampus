@@ -1,0 +1,102 @@
+---
+title: "Plan de pruebas"
+description: "Objetivos, alcance, tipos de prueba, entornos, criterios de aceptación, herramientas y responsables."
+---
+
+**[Nuevo]** Este plan define qué se prueba en Kampus, cómo, dónde y quién lo hace. Rige desde el Sprint 1 para el backend y se formaliza para el cierre (Sprint 5, del 25 de noviembre al 1 de diciembre de 2026).
+
+## Objetivos
+
+1. Comprobar que cada requisito funcional del [anteproyecto](/docs/project/unit-1/requirements) hace lo que dice, con una prueba que falle si deja de hacerlo.
+2. Impedir que un cambio rompa lo que ya funciona: ningún PR entra a `develop` sin que pasen todas las pruebas.
+3. Verificar los controles de seguridad (autenticación, autorización, rutas protegidas, validación y manejo de tokens) con pruebas propias, no solo con revisión de código.
+4. Confirmar que el sistema desplegado responde por HTTPS en pruebas y en producción, y detectar a tiempo si deja de hacerlo.
+5. Dejar evidencia: reporte de cada corrida, cobertura y registro de cada defecto con su solución.
+
+## Alcance
+
+| Dentro | Fuera |
+| --- | --- |
+| API REST del backend: los 81 endpoints de `routes/api.php` y los canales de tiempo real | Pruebas de penetración externas |
+| Base de datos: migraciones contra PostgreSQL 16, relaciones, restricciones y semillas | Pruebas en dispositivos iOS de la tienda (no se publica en tiendas) |
+| Integraciones externas (LiveKit, Vonage, S3, correo) a través de sus *adapters*, con dobles de prueba | Pruebas de carga a gran escala; solo se hace una básica (T-39) |
+| La app (Expo): revisión de tipos en CI y casos funcionales manuales sobre la web | Pruebas automatizadas de interfaz de la app (no hay en este periodo) |
+| Despliegue: salud del servicio, HTTPS y variables en pruebas y producción | Recuperación ante desastres del servidor |
+
+## Tipos de prueba
+
+| Tipo | Qué cubre | Cómo | Dónde se documenta |
+| --- | --- | --- | --- |
+| **Unitarias** | Clases aisladas sin base de datos ni HTTP: geohash, sanitizado de imágenes, SMS, LiveKit, etiqueta del dispositivo | PHPUnit, `tests/Unit` | [Pruebas unitarias](/docs/project/unit-4/unit-tests) |
+| **Integración** | Ruta, middleware, controlador, modelo y base de datos juntos; migraciones contra PostgreSQL; la app contra la API desplegada | PHPUnit `tests/Feature` con base real; CI con `postgres:16`; casos manuales | [Pruebas de integración](/docs/project/unit-4/integration-tests) |
+| **Funcionales / E2E** | Flujos completos de un caso de uso: registro, verificación, inicio de sesión, dos pasos, recuperación, match, chat, grupos, moderación | Pruebas de flujo en `tests/Feature` y casos manuales en la app | [Pruebas funcionales](/docs/project/unit-4/functional-tests) |
+| **Seguridad** | Autenticación, autorización, rutas protegidas, inyección, XSS, CSRF, tokens, límites y cabeceras | PHPUnit, `composer audit`, revisión OWASP | [Pruebas de seguridad](/docs/project/unit-4/security-tests) |
+| **Contrato** | Que la referencia OpenAPI coincida con el código | `OpenApiContractTest` | [Contrato OpenAPI](/docs/backend/api#contrato-openapi) |
+| **Regresión** | Todo lo anterior, en cada PR y en cada push a `develop` y `main` | GitHub Actions | [CI/CD](/docs/project/unit-4/ci-cd) |
+| **Humo en el servidor** | `/up` responde `200` después de cada despliegue | Script de actualización y UptimeRobot | [Monitoreo](/docs/project/unit-4/monitoring) |
+| **Usabilidad** | Que estudiantes reales completen las tareas principales | Sesiones guiadas y cuestionario SUS (T-25) | Informe de T-25 |
+| **Carga básica** | Descubrimiento y chat con varios usuarios a la vez | T-39 | Informe de T-39 |
+
+## Entornos
+
+| Entorno | Base de datos | Para qué |
+| --- | --- | --- |
+| Local | SQLite en memoria (pruebas) o PostgreSQL / Docker (desarrollo) | Correr las pruebas antes de abrir el PR |
+| CI (GitHub Actions, `ubuntu-latest`) | SQLite en memoria para las pruebas y `postgres:16` para las migraciones | Regresión obligatoria en cada PR |
+| Pruebas (`api-kampus.emulatornds.online`) | PostgreSQL 16 propio, con datos de demostración | Integración con la app y casos manuales |
+| Producción (`api.kodev.online`) | PostgreSQL 16 propio, sin datos de demostración | Solo humo (`/up`) y monitoreo |
+
+Las pruebas automáticas nunca tocan servicios reales: el correo va a un buzón en memoria, los SMS al *driver* `log`, los archivos a un disco falso y las llamadas HTTP a LiveKit y Vonage se simulan con `Http::fake()`. Así no cuestan dinero y dan el mismo resultado en cualquier máquina.
+
+## Criterios de aceptación
+
+**Para fusionar un PR** (los revisa GitHub y la regla de la rama):
+
+- Pasan **todas** las pruebas (`php artisan test`), el formato (`pint --test`), las migraciones contra PostgreSQL y `composer audit`.
+- Todos los commits siguen la convención.
+- Lo aprobó otro integrante.
+- Si cambió la API, el contrato OpenAPI está regenerado.
+- Si arregla un error, trae una prueba que falla sin el arreglo y su entrada en [Errores resueltos](/docs/project/bug-log).
+
+**Para publicar una versión** (PR de `develop` a `main`):
+
+- Todo lo anterior, sobre `develop`.
+- Ningún defecto de severidad **crítica** o **alta** abierto ([Defectos](/docs/project/unit-4/defects)).
+- La [lista de verificación de la publicación](/docs/project/unit-4/release#lista-de-verificación) completa.
+
+**Para dar por buena una corrida de casos manuales:** cada caso tiene su resultado obtenido y su estado; un caso fallido se registra como defecto.
+
+## Herramientas
+
+| Herramienta | Uso |
+| --- | --- |
+| PHPUnit 12 y las ayudas de prueba de Laravel | `RefreshDatabase` (41 archivos), `Sanctum::actingAs` (24), `Storage::fake` (9), `Notification::fake` (6), `Event::fake` (5), `UploadedFile::fake` (5), `Http::fake` (3) y `travel()` para el tiempo (6) |
+| Xdebug | Reporte de cobertura |
+| Laravel Pint | Formato del código |
+| `composer audit` | Dependencias con avisos de seguridad |
+| commitlint | Convención de commits |
+| TypeScript (`pnpm typecheck`) | Tipos de la app en CI |
+| GitHub Actions | CI en los tres repositorios |
+| UptimeRobot | Monitoreo de `/up` cada 5 minutos |
+| `curl` | Casos de humo contra el servidor |
+| Plane y [Errores resueltos](/docs/project/bug-log) | Gestión de defectos |
+
+## Responsables
+
+| Persona | Rol en las pruebas |
+| --- | --- |
+| Wilbert Omar Acosta Barrera | Pruebas del backend, CI/CD, pruebas de seguridad, despliegue, monitoreo y prueba de carga (T-39) |
+| Mario Humberto García Rodríguez | Pruebas de sus módulos del backend (registro, perfil, tiempo real y chat) |
+| Jorge Alejandro Rentería Reyes | Product Owner: acepta cada tarea, pruebas de usabilidad (T-25) y casos manuales de la app |
+| Luis Carlos Fernández Quiñones y Marcelo Alessandro Sifuentes de la Cruz | Revisión de tipos de la app y casos manuales de sus pantallas |
+| Todo el equipo | Corrección de defectos y ajustes finales (T-27) |
+
+## Calendario
+
+| Fecha | Actividad |
+| --- | --- |
+| Cada PR, desde el 30 sep | Pruebas automáticas y CI |
+| 25 – 27 nov | Este plan, casos de prueba y evidencias |
+| 28 nov – 29 nov | Casos manuales en la app y prueba de carga básica (T-39) |
+| Lunes 30 nov | Review final |
+| Martes 1 dic | Entrega final y publicación de la versión |

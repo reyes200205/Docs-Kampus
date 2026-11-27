@@ -1,0 +1,75 @@
+---
+title: "Casos de prueba"
+description: "Casos de prueba con ID, descripción, precondiciones, pasos, resultado esperado, resultado obtenido y estado."
+---
+
+**[Nuevo]** Hay tres grupos de casos: **automáticos** de la API (corren en cada PR), **de humo** contra los servidores reales y **manuales** de la app. Cada caso automático dice qué prueba de PHPUnit lo ejecuta.
+
+| Grupo | Casos | Pasan | Fallan | Pendientes |
+| --- | :---: | :---: | :---: | :---: |
+| Automáticos de la API (CP-01 a CP-24) | 24 | 24 | 0 | 0 |
+| Humo en los servidores (CP-S01 a CP-S08) | 8 | 7 | 1 | 0 |
+| Manuales de la app (CP-M01 a CP-M10) | 10 | — | — | 10 |
+
+## Casos automáticos de la API
+
+Ejecutados el 27 de noviembre de 2026 sobre `develop` (`dfcc46f`), en la corrida completa de 331 pruebas.
+
+| ID | Descripción | Precondiciones | Pasos | Resultado esperado | Resultado obtenido | Estado |
+| --- | --- | --- | --- | --- | --- | --- |
+| CP-01 | Registro con correo institucional | Universidad activa con su dominio | `POST /api/register` con nombre, correo `@uttcampus.edu.mx` y contraseña válida | `201`; cuenta de estudiante en esa universidad; correo de verificación en la cola | Igual al esperado (`RegisterApiTest::test_registration_assigns_active_university_and_sends_verification_email`) | Pasa |
+| CP-02 | Registro con dominio no permitido | — | `POST /api/register` con `@gmail.com` | `422` en `email`; no se crea la cuenta | Igual al esperado (`test_registration_rejects_a_domain_not_in_an_active_university`) | Pasa |
+| CP-03 | Contraseña débil | — | Registro con `12345678` | `422` en `password` | Igual al esperado (`test_registration_rejects_a_weak_password`) | Pasa |
+| CP-04 | Verificar el correo | Cuenta sin verificar | Abrir el enlace firmado del correo | Cuenta verificada | Igual al esperado (`test_signed_verification_link_marks_the_user_as_verified`) | Pasa |
+| CP-05 | Enlace de verificación alterado | Cuenta sin verificar | Cambiar la firma del enlace | `403`; la cuenta sigue sin verificar | Igual al esperado (`test_verification_rejects_a_tampered_signature`) | Pasa |
+| CP-06 | Inicio de sesión correcto | Cuenta verificada | `POST /api/login` con correo y contraseña | `201` con un token que vence | Igual al esperado (`LoginApiTest::test_verified_user_receives_an_expiring_token`) | Pasa |
+| CP-07 | Cuenta sin verificar | Cuenta sin verificar | `POST /api/login` | `403`; sin token | Igual al esperado (`test_unverified_user_cannot_log_in`) | Pasa |
+| CP-08 | Bloqueo por intentos | Cuenta verificada | 5 inicios de sesión con contraseña incorrecta y un sexto intento | El sexto intento responde `429` | Igual al esperado (`test_account_is_locked_after_five_failed_attempts`) | Pasa |
+| CP-09 | Token vencido | Token con fecha de vencimiento pasada | `GET /api/user` con ese token | `401` | Igual al esperado (`test_expired_token_is_rejected`) | Pasa |
+| CP-10 | Inicio de sesión con dos pasos | Dos pasos activa | Login → código TOTP en `/api/login/two-factor` | Primero un reto sin token; con el código, `201` y token | Igual al esperado (`TwoFactorApiTest::test_login_asks_for_the_code_and_then_issues_the_token`) | Pasa |
+| CP-11 | Código TOTP reutilizado | Dos pasos activa; un código ya usado | Iniciar sesión otra vez con el mismo código | `422` | Igual al esperado (`test_a_code_cannot_be_used_twice`) | Pasa |
+| CP-12 | Recuperar la contraseña por correo | Cuenta verificada | Pedir el enlace → `POST /api/reset-password` con el token y una contraseña nueva | Contraseña cambiada; todas las sesiones cerradas | Igual al esperado (`PasswordResetApiTest::test_a_valid_token_resets_the_password_and_closes_every_session`) | Pasa |
+| CP-13 | Correo que no existe en la recuperación | — | Pedir el enlace con un correo sin cuenta | La misma respuesta que con un correo real y ningún correo enviado | Igual al esperado (`test_an_unknown_email_gets_the_same_answer_and_no_email`) | Pasa |
+| CP-14 | Recuperar por SMS | Celular verificado | Pedir el código → verificarlo → restablecer con el token | Contraseña cambiada | Igual al esperado (`SmsPasswordRecoveryTest::test_a_code_by_sms_is_exchanged_for_a_token_that_resets_the_password`) | Pasa |
+| CP-15 | Cerrar una sesión remota | Sesión abierta en dos dispositivos | `DELETE /api/sessions/{id}` de la otra | La otra deja de funcionar; la actual sigue | Igual al esperado (`SessionApiTest::test_a_session_from_another_device_can_be_closed`) | Pasa |
+| CP-16 | Estudiante en el panel | Estudiante con sesión | `GET /api/admin/groups` | `403` | Igual al esperado (`RoleMiddlewareTest::test_student_reaches_social_routes_but_not_the_admin_panel`) | Pasa |
+| CP-17 | Moderador de otra universidad | Moderador de la UTT; reporte de un alumno de la UAdeC | `GET /api/admin/reports/{id}` | `404` | Igual al esperado (`ReportReviewTest::test_a_moderator_cannot_see_or_review_reports_of_another_university`) | Pasa |
+| CP-18 | Descubrir con perfil incompleto | Estudiante sin foto | `GET /api/discover` | `403 profile_incomplete` con los pasos que faltan | Igual al esperado (`ProfileCompletionTest::test_a_student_with_an_incomplete_profile_cannot_discover_or_swipe`) | Pasa |
+| CP-19 | Match mutuo | Dos estudiantes con perfil completo | Los dos se dan "Me interesa" | Un match; `MatchCreated` a los dos | Igual al esperado (`MatchApiTest::test_a_mutual_like_creates_a_match_and_dispatches_match_created`) | Pasa |
+| CP-20 | Chat solo entre el match | Un match entre A y B; C fuera | C intenta leer y mandar mensajes | `404` en todo | Igual al esperado (`MessageApiTest::test_only_members_of_visible_matches_can_read_send_or_mark_messages_read`) | Pasa |
+| CP-21 | Foto con GPS | Foto JPEG con ubicación en el EXIF | Subirla al perfil | Se guarda sin EXIF | Igual al esperado (`ImageSanitizerTest::test_it_removes_exif_metadata_from_jpeg_images`) | Pasa |
+| CP-22 | Grupo nuevo en revisión | Estudiante con sesión | Crear un grupo → buscarlo en Explorar | Queda en revisión y no aparece hasta que lo aprueben | Igual al esperado (`GroupApiTest::test_a_student_creates_a_group_that_waits_for_review`) | Pasa |
+| CP-23 | Suspender con un reporte | Moderador; reporte pendiente sobre un alumno de su universidad | Resolver el reporte con `suspend: true` | Cuenta suspendida, sus sesiones cerradas y la acción en la bitácora | Igual al esperado (`ReportReviewTest::test_resolving_a_report_can_suspend_the_reported_account_and_close_its_sessions`) | Pasa |
+| CP-24 | Eliminar la cuenta | Estudiante con fotos y matches | `DELETE /api/user` con la contraseña | Se borran sus datos y archivos | Igual al esperado (`AccountDeletionTest::test_a_student_deletes_their_account_with_all_their_data`) | Pasa |
+
+## Casos de humo en los servidores
+
+Ejecutados a mano con `curl` el 27 de noviembre de 2026 contra los dos servidores reales. Solo leen: no crean cuentas ni datos.
+
+| ID | Descripción | Pasos | Resultado esperado | Resultado obtenido | Estado |
+| --- | --- | --- | --- | --- | --- |
+| CP-S01 | La API está arriba | `GET /up` en pruebas y producción | `200` | `200` en los dos | Pasa |
+| CP-S02 | Solo HTTPS | `GET http://.../up` | `301` a `https://` | `301` a `https://` en los dos | Pasa |
+| CP-S03 | Cabeceras de seguridad | `GET /api/user` con `Accept: application/json` | `401` con HSTS, CSP, `X-Frame-Options` y las demás | `401` con las 7 cabeceras en los dos | Pasa |
+| CP-S04 | Token falso | `GET /api/user` con `Authorization: Bearer kampus_falso123` | `401 Unauthenticated.` | `401` en los dos | Pasa |
+| CP-S05 | CORS con la app | Petición previa (`OPTIONS`) desde `https://app.kodev.online` | `Access-Control-Allow-Origin: https://app.kodev.online` | Igual en los dos | Pasa |
+| CP-S06 | CORS con otro sitio | `OPTIONS` desde `https://evil.example` | Sin `Access-Control-Allow-Origin` | Sin la cabecera en los dos | Pasa |
+| CP-S07 | Referencia de la API protegida | `GET /docs/api` sin sesión | `403` | `403` en los dos | Pasa |
+| CP-S08 | Ruta protegida sin `Accept` | `GET /api/user` sin token ni `Accept` | `401` | `500` en los dos | **Falla**: es DEF-39, lo arregla el [backend #80](https://github.com/WilbertDevMx/backend-kampus/pull/80) |
+
+## Casos manuales de la app
+
+Para correr en `https://app.kodev.online` (entorno de pruebas) antes de la Review final. Quien los corra anota el resultado obtenido y el estado (Pasa o Falla), y registra cada falla como defecto.
+
+| ID | Descripción | Precondiciones | Pasos | Resultado esperado | Resultado obtenido | Estado |
+| --- | --- | --- | --- | --- | --- | --- |
+| CP-M01 | Registro desde la app | Un correo institucional que no tenga cuenta | Registrarse → abrir el correo → tocar el enlace | La app dice que el correo quedó verificado | | Pendiente |
+| CP-M02 | Inicio de sesión | La cuenta de demostración | Iniciar sesión → recargar la página | Entra a Descubrir y sigue dentro al recargar | | Pendiente |
+| CP-M03 | Olvidé mi contraseña | Una cuenta con correo que se pueda leer | Pedir el enlace → abrirlo → cambiar la contraseña → entrar con la nueva | Entra con la nueva; la vieja ya no sirve | | Pendiente |
+| CP-M04 | Perfil por pasos | Una cuenta nueva | Completar todos los pasos con una foto | Al terminar, abre Descubrir | | Pendiente |
+| CP-M05 | Match desde Descubrir | La cuenta de demostración | Dar "Me interesa" a alguien que ya le dio "Me interesa" | Aparece "Es un match" y la persona sale en Chats | | Pendiente |
+| CP-M06 | Chat en tiempo real | Dos navegadores con las dos cuentas de un match | Mandar un mensaje y una imagen desde uno | Llegan al otro sin recargar | | Pendiente |
+| CP-M07 | Videollamada | Igual que CP-M06, con cámara y micrófono | Llamar desde uno → contestar en el otro → colgar | Se ven y se oyen; al colgar se cierra en los dos | | Pendiente |
+| CP-M08 | Grupo nuevo | Un estudiante y un moderador de la misma universidad | Crear un grupo → aprobarlo en el panel → buscarlo en Grupos | Primero "En revisión"; después de aprobarlo aparece en Explorar | | Pendiente |
+| CP-M09 | Verificación en dos pasos | Una cuenta y una app de autenticación | Perfil → Seguridad → activar → cerrar sesión → entrar con el código | Pide el código y entra con él | | Pendiente |
+| CP-M10 | Vista Cerca | La cuenta de demostración | Activar Cerca de ti → elegir una zona | Aparecen estudiantes en el mapa con distancia aproximada | | Pendiente |

@@ -1,0 +1,56 @@
+---
+title: "Pruebas de integración"
+description: "Cómo se prueba que la API, la base de datos, el tiempo real, los servicios externos y la app funcionan juntos."
+---
+
+**[Nuevo]** Kampus se prueba integrado en tres niveles: **API con base de datos** (automático, en cada PR), **migraciones contra PostgreSQL** (automático, en cada PR) y **la app contra la API desplegada** (pruebas reales en el servidor y casos manuales).
+
+## 1. API y base de datos (automático)
+
+Las 298 pruebas de `tests/Feature` mandan una petición HTTP real a la aplicación y pasan por todo el camino: rutas, middleware, validación, controlador, modelos, eventos y **base de datos**. Cada prueba empieza con una base limpia (`RefreshDatabase`), crea sus datos con las *factories* y al final revisa la respuesta **y lo que quedó guardado** (`assertDatabaseHas`, `assertDatabaseMissing`).
+
+| Módulo | Archivos de prueba | Pruebas | Aserciones |
+| --- | --- | :---: | :---: |
+| Registro, verificación e inicio de sesión | `RegisterApiTest`, `LoginApiTest` | 26 | 96 |
+| Recuperación, dos pasos, sesiones y celular | `PasswordResetApiTest`, `TwoFactorApiTest`, `SessionApiTest`, `PhoneApiTest`, `SmsPasswordRecoveryTest` | 38 | 281 |
+| Cuenta | `AccountDeletionTest`, `LegalAcceptanceTest` | 10 | 73 |
+| Perfil y ubicación | `ProfileApiTest`, `ProfileCompletionTest`, `LocationApiTest`, `NearbyApiTest`, `ImageUploadValidationTest` | 48 | 222 |
+| Descubrimiento y match | `DiscoveryApiTest`, `DiscoveryFiltersApiTest`, `SwipeApiTest`, `MatchApiTest` | 30 | 178 |
+| Chat, tiempo real y videollamada | `MessageApiTest`, `MessageImageApiTest`, `BroadcastChannelAuthTest`, `VideoCallApiTest` | 28 | 173 |
+| Grupos | `GroupApiTest`, `GroupMembershipTest`, `GroupActivityTest` | 21 | 117 |
+| Bloqueo y reporte | `BlockApiTest`, `ReportApiTest` | 10 | 61 |
+| Panel de administración | `GroupReviewTest`, `ReportReviewTest`, `UserModerationTest`, `StaffManagementTest` | 38 | 291 |
+| Roles y permisos | `RoleMiddlewareTest`, `UserPolicyTest` | 11 | 27 |
+| Seguridad | `SecurityHardeningTest`, `DatabaseErrorResponseTest` | 14 | 184 |
+| Base de datos, semillas y comandos | `ModerationSchemaTest`, `UttEmailDomainMigrationTest`, `DemoSeederTest`, `CatalogSeederTest`, `CreateAdminCommandTest` | 20 | 1,093 |
+| Contrato de la API | `OpenApiContractTest` | 3 | 10 |
+
+Los servicios externos se reemplazan por dobles de prueba en el mismo punto donde la app real los llama: el correo con `Notification::fake()`, los archivos con `Storage::fake()`, los eventos de tiempo real con `Event::fake()`, y LiveKit y Vonage con `Http::fake()`, que además permite revisar qué se le habría mandado a cada servicio.
+
+### Ejemplo: un match crea el chat y lo avisa por WebSocket
+
+`MatchApiTest` hace que dos estudiantes se den "Me interesa" con `POST /api/swipes`. Revisa que se cree un solo match para los dos, guardado igual sin importar quién lo cerró, que se dispare `MatchCreated` una sola vez y que el evento vaya a los canales privados de los dos. `SwipeApiTest` revisa en la tabla `swipes` que cada evaluación quede guardada y que no se pueda evaluar dos veces. Luego `MessageApiTest` manda un mensaje al match y revisa que se guarde, que salga por `MessageSent` al canal del chat y que nadie fuera del match pueda leerlo ni marcarlo como leído.
+
+## 2. Migraciones contra PostgreSQL (automático)
+
+Las pruebas corren sobre SQLite en memoria para ser rápidas, pero el servidor usa PostgreSQL 16. Para que una migración no falle solo en el servidor, la CI levanta un servicio `postgres:16` y corre **todas las migraciones desde cero** en cada PR, antes de las pruebas ([CI/CD](/docs/project/unit-4/ci-cd)). Además, `ModerationSchemaTest` prueba que las migraciones de moderación se puedan deshacer y volver a aplicar, y `UttEmailDomainMigrationTest`, que la migración del dominio de la UTT corrija una base que ya tenía el dominio viejo.
+
+## 3. La app contra la API desplegada
+
+La app no tiene pruebas automatizadas de interfaz. Su integración con la API se comprobó en el servidor de pruebas, con servicios reales:
+
+| Fecha | Qué se probó | Resultado |
+| --- | --- | --- |
+| 11 nov | Videollamada con LiveKit Cloud: tokens, sala de 2, token falsificado y cierre al colgar, con clientes WebRTC reales | Pasa; se encontró que LiveKit no aplica el límite de 2 (DEF-32) y se resolvió en la API |
+| 14 nov | La app web y la de celular contra `api-kampus.emulatornds.online`: inicio de sesión, CORS y WebSocket de Reverb | Pasa después de corregir DEF-33 y DEF-34 |
+| 19 nov | Recuperación por SMS con Vonage, con un celular real | Pasa; se encontró el cobro doble (DEF-38) |
+| 24 nov | Producción: `/up`, CORS para la app, Reverb con su propia llave, subir, leer y borrar en S3 | Pasa; se encontró DEF-39 |
+
+Los flujos de la app contra la API (registro, Descubrir, match, chat, grupos y panel) están escritos como **casos manuales** con sus pasos y su resultado esperado: [Casos manuales de la app](/docs/project/unit-4/test-cases#casos-manuales-de-la-app).
+
+## Cómo correrlas
+
+```bash
+php artisan test --testsuite=Feature           # todas las de integración
+php artisan test tests/Feature/Messaging       # un módulo
+```

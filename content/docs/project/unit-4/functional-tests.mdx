@@ -1,0 +1,58 @@
+---
+title: "Pruebas funcionales"
+description: "Pruebas de flujo completo para cada caso de uso principal: autenticación, recuperación de contraseña, rutas seguras, descubrimiento, chat, grupos y moderación."
+---
+
+**[Nuevo]** Una prueba funcional recorre un caso de uso de principio a fin, como lo haría una persona desde la app: varias peticiones seguidas a la API, con la base de datos real, revisando cada respuesta y el estado final. Todas son automáticas y corren en cada PR. Los casos de la app que se prueban a mano están en [Casos de prueba](/docs/project/unit-4/test-cases#casos-manuales-de-la-app).
+
+<Callout title="Resultado de la última corrida">
+  27 de noviembre de 2026, sobre `develop` (`dfcc46f`): **las 331 pruebas pasan**, incluidas todas las de esta página.
+</Callout>
+
+## Flujos cubiertos
+
+| ID | Caso de uso | Lo que recorre la prueba | Pruebas | Resultado |
+| --- | --- | --- | --- | --- |
+| F-01 | **Registrarse y verificar el correo** | Registro con correo institucional → correo de verificación en la cola → enlace firmado → cuenta verificada → inicio de sesión con token | `RegisterApiTest` (11), `LoginApiTest` (15) | Pasa |
+| F-02 | **Iniciar sesión con dos pasos** | Activar con contraseña → confirmar con un código TOTP → códigos de respaldo → inicio de sesión que pide el código → token; un código no sirve dos veces | `TwoFactorApiTest` (10) | Pasa |
+| F-03 | **Recuperar la contraseña por correo** | Pedir el enlace → correo con el enlace a la app → nueva contraseña con el token → se cierran todas las sesiones; el enlace sirve una vez | `PasswordResetApiTest` (8) | Pasa |
+| F-04 | **Recuperar la contraseña por SMS** | Registrar y verificar el celular → pedir el código → cambiarlo por un token → restablecer; sigue pidiendo el segundo factor si está activo | `PhoneApiTest` (7), `SmsPasswordRecoveryTest` (5) | Pasa |
+| F-05 | **Rutas seguras** | Invitado, estudiante, moderador y administrador contra rutas sociales y del panel; token vencido, falso o de cuenta suspendida | `RoleMiddlewareTest` (4), `UserPolicyTest` (7), `LoginApiTest` | Pasa |
+| F-06 | **Ver y cerrar sesiones** | Iniciar sesión en dos dispositivos → listar → cerrar la otra → cerrar todas menos la actual | `SessionApiTest` (8) | Pasa |
+| F-07 | **Completar el perfil** | Perfil nuevo incompleto → pasos que faltan en orden → cada paso → perfil completo; Descubrir pide el perfil completo | `ProfileCompletionTest` (10), `ProfileApiTest` (17) | Pasa |
+| F-08 | **Descubrir y hacer match** | Descubrir sin bloqueados, suspendidos ni ya evaluados → filtros → "Me interesa" de los dos → match y aviso por WebSocket | `DiscoveryApiTest` (11), `DiscoveryFiltersApiTest` (5), `SwipeApiTest` (6), `MatchApiTest` (8) | Pasa |
+| F-09 | **Ver quién está cerca** | Compartir la zona → lista por distancia aproximada, sin coordenadas reales | `LocationApiTest` (9), `NearbyApiTest` (7) | Pasa |
+| F-10 | **Chatear** | Mandar texto e imágenes al match → historial paginado → marcar como leído; nadie fuera del match entra | `MessageApiTest` (7), `MessageImageApiTest` (5), `BroadcastChannelAuthTest` (8) | Pasa |
+| F-11 | **Videollamada** | Iniciar → la otra persona recibe el aviso → contestar → colgar cierra la sala; sin LiveKit, el chat sigue funcionando | `VideoCallApiTest` (8) | Pasa |
+| F-12 | **Crear un grupo y unirse** | Crear → queda en revisión → el moderador aprueba → otro estudiante se une → actividades → abandonar | `GroupApiTest` (9), `GroupReviewTest` (8), `GroupMembershipTest` (7), `GroupActivityTest` (5) | Pasa |
+| F-13 | **Bloquear y reportar** | Reportar con la conversación como evidencia y bloquear en el mismo paso → la persona desaparece de Descubrir, matches y chat | `ReportApiTest` (6), `BlockApiTest` (4) | Pasa |
+| F-14 | **Moderar** | El moderador ve los reportes de su universidad → resuelve y suspende → se cierran las sesiones del suspendido → reactivar → vuelve a entrar | `ReportReviewTest` (9), `UserModerationTest` (10) | Pasa |
+| F-15 | **Eliminar la cuenta** | Confirmar con la contraseña → se borran los datos y las fotos → los grupos conservan un administrador | `AccountDeletionTest` (7), `LegalAcceptanceTest` (3) | Pasa |
+| F-16 | **Administrar el staff** | El administrador crea moderadores, les asigna universidad y los desactiva | `StaffManagementTest` (11), `CreateAdminCommandTest` (6) | Pasa |
+
+## Ejemplo: F-02, inicio de sesión con dos pasos
+
+`TwoFactorApiTest::test_login_asks_for_the_code_and_then_issues_the_token`:
+
+1. Activa la verificación en dos pasos de un estudiante verificado.
+2. `POST /api/login` con su correo, contraseña y el nombre del dispositivo. **Espera:** `200` con `two_factor_required: true`, un reto (`challenge_token`) que vence y **ningún token**.
+3. `POST /api/login/two-factor` con el reto y un código incorrecto. **Espera:** `422` con "El código no es correcto.".
+4. Repite con el código TOTP del momento. **Espera:** `201` con el token, su tipo, su vencimiento y el usuario; la sesión queda con el nombre del dispositivo.
+5. Usa ese token en `GET /api/user`. **Espera:** `200`.
+6. Intenta usar el mismo reto otra vez. **Espera:** `422`: el reto es de un solo uso.
+
+`test_a_code_cannot_be_used_twice` comprueba además que el mismo código TOTP no sirva en un segundo inicio de sesión.
+
+## Rendimiento dentro de las pruebas
+
+Dos pruebas funcionales además miden que el flujo no se vuelva lento con muchos datos:
+
+- `MessageApiTest::test_history_and_message_updates_stay_under_two_seconds_with_two_thousand_messages`: el historial de un chat con 2,000 mensajes responde en menos de 2 segundos.
+- `DiscoveryApiTest::test_the_number_of_queries_does_not_grow_with_the_batch`: Descubrir hace el mismo número de consultas a la base para 1 que para 10 perfiles (sin el problema N+1).
+
+## Cómo correrlas
+
+```bash
+php artisan test --filter=TwoFactorApiTest     # un flujo
+php artisan test tests/Feature/Auth            # todos los de autenticación
+```

@@ -91,8 +91,11 @@ php artisan db:seed --class=DemoSeeder # Solo vuelve a crear los datos de demost
 
 Cada push y cada pull request hacia `main` o `develop` ejecuta `.github/workflows/ci.yml` en `ubuntu-latest` con PHP 8.3:
 
-1. **Formato:** `./vendor/bin/pint --test`.
-2. **Migraciones:** `php artisan migrate --force` contra un servicio `postgres:16` real (base `kampus_test`).
-3. **Pruebas:** `php artisan test`.
+1. **[Nuevo] Dependencias:** `composer audit`. Si una dependencia tiene un aviso de seguridad, la corrida falla.
+2. **Formato:** `./vendor/bin/pint --test`.
+3. **Migraciones:** `php artisan migrate --force` contra un servicio `postgres:16` real (base `kampus_test`).
+4. **Pruebas:** `php artisan test`.
 
 Corre lo mismo en tu computadora antes de abrir el PR: si un paso falla, el PR no está listo para revisión. `vendor/` se guarda en caché según el hash de `composer.lock`, y si empujas otro commit a la misma rama, la ejecución anterior se cancela. La convención de commits la revisa otro workflow (`commits.yml`); ver [Pull requests](/docs/development/pull-requests).
+
+**[Nuevo]** Para medir la cobertura en tu computadora: `XDEBUG_MODE=coverage php artisan test --coverage-text` (necesita Xdebug o PCOV). La última medición y el detalle de las pruebas están en [Pruebas unitarias](/docs/project/unit-4/unit-tests) y en el resto de la [Unidad 4](/docs/project/unit-4).

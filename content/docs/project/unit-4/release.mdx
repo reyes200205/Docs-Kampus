@@ -1,0 +1,94 @@
+---
+title: "Proceso de publicación"
+description: "Versionado semántico, changelog, lista de verificación, estrategia de despliegue y plan de regreso a la versión anterior."
+---
+
+**[Nuevo]** Una publicación (release) lleva lo que está en `develop` a `main`. Desde el 24 de noviembre, `main` es lo que corre en producción (`api.kodev.online`), así que publicar es también desplegar.
+
+## Versionado
+
+Las versiones siguen [SemVer](https://semver.org/lang/es/) (`MAYOR.MENOR.PARCHE`) y **no se escriben a mano**: las calcula `scripts/release.mjs` con los commits desde el último tag. Un `feat` sube el número de en medio y un `fix`, el último. El detalle está en [Versiones y changelog](/docs/development/releases).
+
+| Repositorio | Versiones publicadas | Última |
+| --- | --- | --- |
+| Backend | v0.1.0 (20 oct), v0.2.0 (10 nov), v0.3.0 (20 nov) | [v0.3.0](https://github.com/WilbertDevMx/backend-kampus/releases/tag/v0.3.0) |
+| App | v0.1.0 (13 oct), v0.2.0 (14 oct) | [v0.2.0](https://github.com/reyes200205/Frontend-Kampus/releases/tag/v0.2.0) |
+| Documentación | Una por cada publicación del sitio, hasta v0.4.7 (18 nov) | [v0.4.7](https://github.com/reyes200205/Docs-Kampus/releases/tag/v0.4.7) |
+
+Cada versión crea un **tag** `vX.Y.Z` y un **GitHub Release** con sus notas, y aparece en el [changelog](/changelog) del sitio, que junta los tres repositorios.
+
+## Changelog
+
+Se genera solo con los commits: `feat` va a "Nuevas funciones", `fix` a "Correcciones", `perf` a "Mejoras" y `docs` a "Documentación". Cada línea lleva el autor y el enlace al commit. Antes de fusionar, un bot comenta en el PR de publicación qué versión saldrá y su changelog, para revisarlo.
+
+## Lista de verificación
+
+Antes de fusionar el PR de `develop` a `main`:
+
+- [ ] La CI de `develop` está en verde (pruebas, formato, migraciones contra PostgreSQL y `composer audit`).
+- [ ] No hay defectos de severidad crítica o alta abiertos ([Defectos](/docs/project/unit-4/defects)).
+- [ ] El entorno de pruebas ya tiene este mismo `develop` y responde: `/up` en `200` y una revisión rápida en la app (inicio de sesión, Descubrir y un chat).
+- [ ] Si alguna migración borra o cambia columnas, se revisó que tenga `down()` o se decidió depender del respaldo.
+- [ ] Si hay variables nuevas en `.env.production.example`, ya están en el `.env.production` de producción ([Lo que no hace](/docs/backend/deployment#lo-que-no-hace)).
+- [ ] El contrato OpenAPI (`docs/openapi.json`) está al día.
+- [ ] El comentario del bot muestra la versión y el changelog esperados.
+- [ ] Hay un respaldo reciente de la base de producción (ver abajo).
+- [ ] Lo aprobó otro integrante.
+
+Después de fusionar:
+
+- [ ] Se creó el tag y el release en GitHub.
+- [ ] En unos 10 minutos, `journalctl -u kampus-deploy-prod` dice `Listo` con el commit nuevo.
+- [ ] `https://api.kodev.online/up` responde `200` y el monitor de producción sigue arriba.
+- [ ] La versión aparece en el [changelog](/changelog) en el siguiente despliegue de la documentación.
+
+## Estrategia de despliegue
+
+1. **Primero pruebas, luego producción.** Todo llega antes a `develop`, que se despliega solo en el servidor de pruebas. Producción solo recibe lo que ya corrió en pruebas.
+2. **Despliegue automático con revisión de salud.** `kampus-deploy-prod` revisa `main` cada 5 minutos, compila la imagen, migra y revisa `/up` hasta 12 veces ([CI/CD](/docs/project/unit-4/ci-cd)).
+3. **Corte corto.** Solo se recrean los contenedores de la API, la cola, el *scheduler* y Reverb. Nginx busca la dirección de los contenedores en cada petición, así que no se reinicia ni responde `502` durante el cambio. El corte es de unos segundos.
+4. **Datos aparte.** Producción tiene su propia base, sus llaves y su carpeta en S3 (`AWS_ROOT=produccion`); una publicación nunca toca los datos de pruebas.
+
+## Plan de regreso (rollback)
+
+### Automático
+
+Si la compilación, una migración o `/up` fallan, el script **regresa solo al commit anterior**, lo vuelve a desplegar y anota el commit fallido para no reintentarlo. No hay que hacer nada para que producción siga con la versión que funcionaba.
+
+### Manual: la versión nueva arranca, pero tiene un error
+
+```bash
+# 1. Pausar la actualización automática, para que no vuelva a desplegar main.
+sudo systemctl stop kampus-deploy-prod.timer
+
+# 2. Regresar el código a la versión anterior y desplegarla.
+cd ~/kampus-prod
+git reset --hard v0.3.0
+P="docker compose -p kampus-prod -f compose.prod.yaml -f compose.server.yaml --env-file .env.production"
+$P build app && $P up -d
+curl -s -o /dev/null -w '%{http_code}\n' https://api.kodev.online/up
+```
+
+3. Arreglar en GitHub: un PR con el arreglo o con `git revert` del merge, a `develop` y luego a `main`.
+4. Cuando `main` ya tenga el arreglo, reactivar la actualización: `sudo systemctl start kampus-deploy-prod.timer`. Si se reactiva antes, vuelve a desplegar la versión con el error.
+
+### Base de datos
+
+Las migraciones solo avanzan. En estos comandos, `$P` es el mismo `docker compose -p kampus-prod ...` del bloque anterior. Si una versión cambió la base y hay que regresar:
+
+- Si la migración tiene `down()`, se deshace con `$P exec -T app php artisan migrate:rollback --step=1` (una vez por migración).
+- Si no, se restaura el respaldo previo a la publicación.
+
+Respaldo antes de publicar (desde `~/kampus-prod`, sin escribir la contraseña: la toma del contenedor):
+
+```bash
+mkdir -p ~/respaldos
+$P exec -T db sh -c 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' > ~/respaldos/kampus-prod-$(date +%F).sql
+```
+
+Restaurarlo (borra lo que tenga la base):
+
+```bash
+$P exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"'
+$P exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < ~/respaldos/kampus-prod-AAAA-MM-DD.sql
+```

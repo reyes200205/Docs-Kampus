@@ -1,0 +1,80 @@
+---
+title: "Rúbrica y avance"
+description: "Qué evalúa la Unidad 4 (pruebas, CI/CD, liberación, despliegue, monitoreo y manual), dónde se cubre cada criterio y qué falta."
+---
+
+**[Nuevo]** **Actividad:** Avances del proyecto · **Asignatura:** Desarrollo Web Integral · **Profesor:** Jesús Del Toro Robledo · **Corte de esta página:** 27 de noviembre de 2026
+
+Escala de desempeño: 5 Excelente (10) · 4 Bien (9.5) · 3 Suficiente (9) · 2 Deficiente (8) · 1 Insuficiente (menor a 8). La calificación final es el promedio de los criterios generales y los específicos.
+
+## Avance por criterio
+
+| # | Criterio específico | Dónde se cubre | Estado |
+| :---: | --- | --- | --- |
+| 1 | Plan de pruebas | [Plan de pruebas](/docs/project/unit-4/test-plan) | Cubierto |
+| 2 | Pruebas unitarias | [Pruebas unitarias](/docs/project/unit-4/unit-tests) | Cubierto |
+| 3 | Pruebas de integración | [Pruebas de integración](/docs/project/unit-4/integration-tests) | Parcial |
+| 4 | Pruebas funcionales / E2E | [Pruebas funcionales](/docs/project/unit-4/functional-tests) | Parcial |
+| 5 | Pruebas de seguridad | [Pruebas de seguridad](/docs/project/unit-4/security-tests) | Cubierto |
+| 6 | Documentación de casos de prueba | [Casos de prueba](/docs/project/unit-4/test-cases) | Cubierto |
+| 7 | Registro y gestión de defectos | [Registro de defectos](/docs/project/unit-4/defects) · [Errores resueltos](/docs/project/bug-log) | Cubierto |
+| 8 | CI/CD o automatización de pruebas | [CI/CD](/docs/project/unit-4/ci-cd) | Cubierto |
+| 9 | Proceso de liberación (release) | [Proceso de publicación](/docs/project/unit-4/release) · [Versiones y changelog](/docs/development/releases) | Cubierto |
+| 10 | Despliegue en producción / entorno final | [Despliegue en producción](/docs/project/unit-4/production) · [Despliegue](/docs/backend/deployment) | Cubierto |
+| 11 | Monitoreo y logging | [Monitoreo y logging](/docs/project/unit-4/monitoring) | Cubierto |
+| 12 | Documentación de usuario / manual | [Manual de usuario](/docs/project/unit-4/user-manual) | Cubierto |
+
+**Parcial** quiere decir que el backend lo cubre con pruebas automáticas, pero la parte de la app depende de casos manuales que todavía hay que correr: la app no tiene pruebas automatizadas de interfaz.
+
+## Lo que falta
+
+| Falta | Criterio | Quién | Propuesta |
+| --- | --- | --- | --- |
+| Correr los casos manuales de la app (CP-M01 a CP-M10) y anotar el resultado | 3, 4 y 6 | Equipo de app y Alejandro | Una tarde antes de la Review del 30 nov; ver [Casos de prueba](/docs/project/unit-4/test-cases#casos-manuales-de-la-app) |
+| Pruebas automatizadas de la app (por ejemplo Playwright sobre la web) | 3 y 4 | Equipo de app | Fase 2, o al menos el flujo de inicio de sesión |
+| Fusionar las pruebas de inyección SQL y XSS ([backend #86](https://github.com/WilbertDevMx/backend-kampus/pull/86), 36 pruebas) | 5 | Revisión de Alejandro | Ya están escritas y pasan ([Inyección SQL](/docs/project/unit-4/security-tests#inyección-sql) y [XSS](/docs/project/unit-4/security-tests#xss)) |
+| Fusionar el backend #80 y publicar la v0.4.0 | 9 y 10 | Revisión de Alejandro y Wilbert | Con la [lista de verificación](/docs/project/unit-4/release#lista-de-verificación) |
+| Prueba de carga básica (T-39) | 1 | Wilbert | Sprint 5 |
+
+## Guion para la revisión
+
+| # | Criterio | Qué mostrar |
+| :---: | --- | --- |
+| 1 | Plan de pruebas | El [plan](/docs/project/unit-4/test-plan): tipos, entornos y criterios para fusionar y para publicar. |
+| 2 | Unitarias | El [reporte de la corrida y la cobertura](/docs/project/unit-4/unit-tests#evidencia). |
+| 3 y 4 | Integración y funcionales | Una prueba de flujo completo, por ejemplo registro → verificación → inicio de sesión con dos pasos ([Pruebas funcionales](/docs/project/unit-4/functional-tests)). |
+| 5 | Seguridad | `RoleMiddlewareTest` y `BroadcastChannelAuthTest`, y las cabeceras en vivo con `curl` ([Despliegue en producción](/docs/project/unit-4/production#evidencias-de-funcionamiento)). |
+| 6 y 7 | Casos y defectos | Un caso con su resultado y un defecto con su PR: por ejemplo DEF-22, el código de dos pasos usado dos veces. |
+| 8 | CI/CD | La pestaña [Actions](https://github.com/WilbertDevMx/backend-kampus/actions) y un PR con el check "Formato y pruebas". |
+| 9 | Publicación | El PR #74 (v0.3.0) con el comentario del bot y el [changelog](/changelog). |
+| 10 y 11 | Producción y monitoreo | `https://api.kodev.online/up` y el panel de UptimeRobot. |
+| 12 | Manual | El [manual](/docs/project/unit-4/user-manual) y la cuenta de demostración en la app. |
+
+## Notas sobre la rúbrica
+
+El Excel de la Unidad 4 tiene detalles que conviene aclarar con el profesor:
+
+- La hoja se llama "Rúbrica Unidad 2" y el encabezado de los criterios específicos dice "Unidad 2 (control de versiones, diagramas y diccionario de datos)", aunque los criterios son de pruebas y liberación.
+- La fecha (20 de octubre de 2026) y los nombres de los estudiantes son los de otra rúbrica, no los de este equipo.
+- La escala no coincide, igual que en las unidades anteriores: las instrucciones dicen Bien 9.5 y Suficiente 9, y los encabezados, Bien 9 y Suficiente 8.5.
+
+Esta vez la fórmula de los criterios específicos (`G37`) sí toma los 12 criterios.
+
+## Criterios específicos: Unidad 4
+
+| Criterio | Excelente (5 / 10) | Bien (4 / 9) | Suficiente (3 / 8.5) | Deficiente (2 / 8) | Insuficiente (1 / < 8) |
+| --- | --- | --- | --- | --- | --- |
+| **Plan de pruebas** | Plan de pruebas completo y documentado: objetivos, alcance, tipos de pruebas, criterios de aceptación, herramientas y responsables. | Plan de pruebas adecuado con detalles menores faltantes. | Plan de pruebas básico o incompleto. | Plan genérico o poco estructurado. | Ausente. |
+| **Pruebas unitarias** | Pruebas unitarias implementadas y ejecutadas con buen coverage de las funciones/clases principales. Evidencias claras (reportes o capturas). | Pruebas unitarias presentes con cobertura aceptable. | Pruebas unitarias básicas o con baja cobertura. | Pruebas unitarias incompletas o mal implementadas. | Ausente. |
+| **Pruebas de integración** | Pruebas de integración entre frontend-backend-BD bien documentadas y ejecutadas, verificando flujos completos. | Pruebas de integración correctas con detalles menores. | Pruebas de integración básicas. | Pruebas de integración deficientes. | Ausente. |
+| **Pruebas funcionales / E2E** | Pruebas end-to-end o funcionales que cubren los casos de uso principales del sistema (incluyendo autenticación, recuperación de contraseña, rutas seguras, etc.). | Pruebas funcionales adecuadas de los flujos principales. | Pruebas funcionales básicas o incompletas. | Pruebas funcionales deficientes. | Ausente. |
+| **Pruebas de seguridad** | Pruebas de seguridad documentadas (validación de autenticación, autorización, protección de rutas, inyecciones, XSS, CSRF, manejo de tokens, etc.). | Pruebas de seguridad presentes con cobertura aceptable. | Pruebas de seguridad básicas. | Pruebas de seguridad deficientes o superficiales. | Ausente. |
+| **Documentación de casos de prueba** | Casos de prueba bien estructurados (ID, descripción, precondiciones, pasos, resultado esperado, resultado obtenido y estado). | Casos de prueba claros con detalles menores faltantes. | Casos de prueba básicos. | Casos de prueba incompletos o desordenados. | Ausente. |
+| **Registro y gestión de defectos (bugs)** | Registro claro de defectos encontrados (descripción, severidad, pasos para reproducir, estado y resolución). Evidencia de seguimiento. | Registro de defectos adecuado. | Registro básico de defectos. | Registro incompleto o desorganizado. | Ausente. |
+| **CI/CD o automatización de pruebas** | Implementación de CI/CD (GitHub Actions, GitLab CI, etc.) o automatización de pruebas. Pipeline funcional con evidencias. | Automatización parcial o pipeline básico funcional. | Intento de automatización o configuración incompleta. | Configuración deficiente. | Ausente. |
+| **Proceso de liberación (release)** | Proceso de liberación documentado: versionado (tags/semver), changelog, checklist de release, estrategia de despliegue y plan de rollback. | Proceso de liberación claro con detalles menores faltantes. | Proceso de liberación básico. | Proceso incompleto o poco documentado. | Ausente. |
+| **Despliegue en producción / entorno final** | Aplicación desplegada en entorno de producción o staging real, con HTTPS, variables de entorno correctas y evidencias de funcionamiento. | Despliegue funcional en entorno real. | Despliegue con problemas menores. | Despliegue fallido o incompleto. | Sin despliegue. |
+| **Monitoreo y logging** | Implementación de logging y/o monitoreo básico (errores, accesos, métricas) en el entorno de producción/staging. | Logging presente y útil. | Logging básico. | Logging deficiente. | Ausente. |
+| **Documentación de usuario / manual** | Manual de usuario o documentación final clara (cómo usar la aplicación, credenciales de prueba, flujos principales). | Documentación de usuario adecuada. | Documentación básica. | Documentación escasa. | Ausente. |
+
+Los criterios generales son los mismos de la [Unidad 2](/docs/project/unit-2#criterios-generales).

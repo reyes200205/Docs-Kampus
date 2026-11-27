@@ -1,0 +1,62 @@
+---
+title: "Despliegue en producción"
+description: "Dónde corre Kampus, con HTTPS y variables por entorno, y la evidencia de que funciona."
+---
+
+**[Nuevo]** Kampus tiene dos entornos reales en AWS, los dos con HTTPS y con su propia base de datos. La guía completa (servicios, variables, comandos y certificados) está en [Despliegue](/docs/backend/deployment).
+
+| | Pruebas (staging) | Producción |
+| --- | --- | --- |
+| API | `https://api-kampus.emulatornds.online` | `https://api.kodev.online` |
+| Rama | `develop` | `main` (v0.3.0) |
+| Desde | 14 nov 2026 | 24 nov 2026 |
+| Servidor | EC2 `t3.small` en `us-east-2`, el mismo para los dos | |
+| Servicios | Nginx, API (PHP-FPM), cola, *scheduler*, Reverb (WebSocket) y PostgreSQL 16, en Docker Compose | Los mismos, salvo Nginx, que comparte con pruebas |
+| Certificado | Let's Encrypt, vence el 12 feb 2027 | Let's Encrypt, vence el 22 feb 2027 |
+| Datos de demostración | Sí | No (`DEMO_DATA_ENABLED=false`) |
+| App web | `https://app.kodev.online` (Vercel) | Por definir |
+
+## HTTPS
+
+- Las dos APIs responden solo por HTTPS: una petición por `http://` recibe `301` hacia `https://`.
+- Las respuestas llevan `Strict-Transport-Security: max-age=31536000; includeSubDomains`, así que el navegador ya no intenta HTTP durante un año.
+- `certbot` renueva los dos certificados antes de que venzan.
+
+## Variables de entorno
+
+Cada entorno tiene su `.env.production` en el servidor, fuera del repositorio. La plantilla es [`.env.production.example`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/.env.production.example) y cada variable está explicada en [Variables de producción](/docs/backend/deployment#variables-de-producción).
+
+| Variable | Valor en los dos entornos |
+| --- | --- |
+| `APP_ENV` / `APP_DEBUG` | `production` / `false`: sin trazas de error en las respuestas |
+| `LOG_LEVEL` | `warning` |
+| `APP_KEY`, contraseña de la base, llaves de Reverb | Distintas en cada entorno, generadas en el servidor |
+| `APP_URL` / `API_DOMAIN` | El dominio de cada entorno |
+| `FRONTEND_URLS` | Solo los orígenes permitidos (CORS) |
+| `AWS_ROOT` | `produccion` en producción, para separar sus archivos en el bucket ([backend #81](https://github.com/WilbertDevMx/backend-kampus/pull/81)) |
+
+## Evidencias de funcionamiento
+
+Revisión del 27 de noviembre de 2026:
+
+```text
+$ curl -s -o /dev/null -w '%{http_code}' https://api.kodev.online/up
+200
+$ curl -s -o /dev/null -w '%{http_code} %{redirect_url}' http://api.kodev.online/up
+301 https://api.kodev.online/up
+$ curl -sI -H 'Accept: application/json' https://api.kodev.online/api/user
+HTTP/1.1 401 Unauthorized
+Cache-Control: no-store, private
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+```
+
+El entorno de pruebas da las mismas respuestas en `api-kampus.emulatornds.online`.
+
+- **Disponibilidad:** UptimeRobot no registra ninguna caída desde que empezó a vigilar cada entorno (100 % del 14 al 27 de noviembre). Ver [Monitoreo y logging](/docs/project/unit-4/monitoring).
+- **Al levantar producción** se comprobó: `/up` en los dos dominios con su certificado; que el Reverb de producción rechaza la llave de pruebas; CORS para la app; y subir, leer y borrar un archivo en S3.
+- **Hallazgo:** sin el encabezado `Accept: application/json`, una ruta protegida responde `500` en lugar de `401`. Lo arregla el [backend #80](https://github.com/WilbertDevMx/backend-kampus/pull/80), todavía en revisión ([Defectos](/docs/project/unit-4/defects)).

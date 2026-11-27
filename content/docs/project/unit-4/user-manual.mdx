@@ -1,0 +1,105 @@
+---
+title: "Manual de usuario"
+description: "Cómo usar Kampus: crear la cuenta, completar el perfil, descubrir, chatear, unirse a grupos y cuidar la seguridad de la cuenta."
+---
+
+**[Nuevo]** Kampus es una app para conocer a otros estudiantes de la UTT, la UAdeC y el Tecnológico de la Laguna. Funciona en el navegador y en el celular (Android e iOS con Expo Go). Este manual sigue el orden en que una persona usa la app por primera vez.
+
+## Dónde entrar
+
+| Entorno | App | Para qué |
+| --- | --- | --- |
+| Pruebas | `https://app.kodev.online` | Probar la app con los estudiantes de demostración |
+| Celular | Expo Go, con el código QR del equipo de app | Probar en Android o iOS ([Instalación de la app](/docs/mobile/installation)) |
+
+### Cuenta de prueba
+
+En el entorno de pruebas hay **67 estudiantes de demostración** con perfil, fotos e intereses, y una cuenta lista para presentar:
+
+| Dato | Valor |
+| --- | --- |
+| Correo | `demo@demo.kampus.test` |
+| Contraseña | La da el equipo (es la variable `DEMO_PASSWORD` del servidor; no se publica) |
+| Qué trae | 3 matches y 8 personas que ya le dieron "Me interesa": al evaluarlas en Descubrir, el match sale al momento |
+
+Los correos de demostración usan el dominio `demo.kampus.test`, que nunca recibe correo. Producción no tiene datos de demostración.
+
+## 1. Crear la cuenta
+
+1. Abre la app y elige **Registrarse**.
+2. Escribe tu nombre, apellido, **correo institucional** y una contraseña de al menos 8 caracteres con mayúsculas, minúsculas y números.
+3. Acepta el **aviso de privacidad** y las **normas de comunidad**, y da **Registrarse**.
+4. Abre el correo de verificación y toca el enlace. Sin verificar el correo no puedes entrar.
+
+Solo se aceptan los dominios de las tres universidades (por ejemplo `@uttcampus.edu.mx` en la UTT). Con otro correo, la app te dice que el dominio no es válido.
+
+## 2. Iniciar sesión
+
+1. Escribe tu correo institucional y tu contraseña y da **Iniciar sesión**.
+2. Si activaste la verificación en dos pasos, la app te pide el código de 6 dígitos de tu app de autenticación.
+
+Después de 5 intentos fallidos, la cuenta se bloquea unos minutos. La sesión se mantiene al cerrar la app y dura 7 días.
+
+### Si olvidaste la contraseña
+
+1. En Inicio de sesión, toca **¿Olvidaste tu contraseña?**
+2. Escribe tu correo institucional y da **Enviar enlace**.
+3. Abre el correo y toca el enlace: te lleva a la pantalla para escribir la contraseña nueva. El enlace sirve una sola vez.
+4. Al cambiarla, se cierran todas tus sesiones abiertas.
+
+## 3. Completar el perfil
+
+La primera vez, la app te guía por pasos: nombre, fecha de nacimiento (mínimo 17 años), género, carrera, semestre, unas líneas sobre ti, tus intereses y **al menos una foto**. La primera foto es la que ven los demás en Descubrir. Hasta terminar el perfil no puedes usar Descubrir.
+
+Desde **Perfil → Editar** puedes cambiar todo después. Las fotos se guardan sin la ubicación GPS que traen las del celular.
+
+## 4. Descubrir
+
+**Para ti** muestra estudiantes, uno a la vez, empezando por quienes tienen más intereses en común contigo.
+
+- Toca la tarjeta para ver el perfil completo: fotos, carrera, semestre, universidad e intereses.
+- **Me interesa** o deslizar a la derecha: te interesa conocer a esa persona.
+- Deslizar a la izquierda: pasar.
+- **Filtros:** universidad, carrera e intereses.
+
+Si las dos personas se dan "Me interesa", aparece **Es un match** y ya pueden chatear.
+
+**Cerca de ti** muestra en un mapa a los estudiantes de tu zona. Primero hay que activarlo (**Activar Cerca de ti**, en Descubrir o en tu perfil) y elegir tu zona (campus o colonia). Tu ubicación nunca se muestra exacta: solo una zona aproximada de 1 km y una distancia redondeada ([Privacidad de la ubicación](/docs/project/location-privacy)).
+
+## 5. Chats y videollamada
+
+- En **Chats** están tus matches y tus conversaciones.
+- En una conversación puedes mandar texto e **imágenes**. Los mensajes llegan al momento.
+- Desde la conversación puedes iniciar una **videollamada 1 a 1**. La otra persona recibe el aviso de llamada entrante. La primera vez, la app pide permiso para la cámara y el micrófono.
+
+## 6. Grupos
+
+- En **Grupos** ves los grupos y clubes de tu campus, puedes buscarlos por nombre y filtrarlos por categoría o universidad.
+- **Unirte:** entra al grupo y únete. En **Tus grupos** aparecen los tuyos y sus actividades próximas.
+- **Crear un grupo:** toca **Crear**, ponle nombre, categoría, descripción e imagen. Queda **En revisión** hasta que un moderador lo apruebe; si lo rechaza, te llega un correo con el motivo.
+- Quien administra un grupo puede publicar **actividades**, editar el grupo o borrarlo. Cualquier integrante puede **abandonarlo**.
+- Los grupos **oficiales** los crea el staff de cada universidad. Los **interinstitucionales** están abiertos a las tres.
+
+## 7. Seguridad de la cuenta
+
+En **Perfil → Seguridad**:
+
+1. Toca **Activar verificación en dos pasos** y confirma tu contraseña.
+2. Escanea el código QR con Google Authenticator, Microsoft Authenticator o Authy.
+3. Escribe el código de 6 dígitos para confirmar.
+4. Guarda los **códigos de respaldo**: cada uno sirve una vez si pierdes el celular.
+
+Para cerrar sesión: **Perfil → Cerrar sesión**.
+
+## 8. Panel de administración (staff)
+
+Las cuentas de staff no tienen perfil social: al entrar ven el panel.
+
+| Rol | Qué puede hacer |
+| --- | --- |
+| **Moderador** | Revisar los grupos pendientes de su universidad (aprobar o rechazar con motivo) y crear grupos oficiales |
+| **Administrador** | Lo mismo para todas las universidades, y además crear y desactivar cuentas de staff |
+
+## Lo que todavía no está en la app
+
+La API ya lo tiene, pero la app aún no trae estas pantallas: ver y cerrar las **sesiones abiertas** en otros dispositivos, recuperar la contraseña **por SMS**, **bloquear y reportar** a alguien (T-22), **eliminar la cuenta** desde Ajustes (T-38) y la revisión de **reportes** y **usuarios** en el panel (T-44). Ver [Rúbrica de la Unidad 3](/docs/project/unit-3#3-y-5-integración-de-la-app-con-la-api).

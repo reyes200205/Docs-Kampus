@@ -1,0 +1,119 @@
+---
+title: "Pruebas de seguridad"
+description: "Las pruebas automáticas que comprueban autenticación, autorización, rutas protegidas, inyección, XSS, CSRF, tokens y límites."
+---
+
+**[Nuevo]** Cada control de seguridad de [Seguridad (OWASP)](/docs/project/unit-3/security) tiene al menos una prueba automática que corre en cada PR. Si alguien rompe un control, la CI se pone en rojo y el PR no se puede fusionar. Aquí están agrupadas por tema; los nombres son los de los métodos de prueba en [`tests/`](https://github.com/WilbertDevMx/backend-kampus/tree/develop/tests).
+
+## Autenticación
+
+| Prueba | Qué comprueba |
+| --- | --- |
+| `LoginApiTest::test_wrong_password_is_rejected_without_issuing_a_token` | Contraseña incorrecta: `422` y ningún token. |
+| `LoginApiTest::test_unknown_email_gets_the_same_error_as_a_wrong_password` | No se puede saber si un correo tiene cuenta. |
+| `LoginApiTest::test_account_is_locked_after_five_failed_attempts` | Bloqueo tras 5 intentos fallidos. |
+| `LoginApiTest::test_lockout_expires_after_the_lockout_period` | El bloqueo se levanta solo. |
+| `LoginApiTest::test_unverified_user_cannot_log_in` y `test_suspended_user_cannot_log_in` | Sin correo verificado o con la cuenta suspendida no hay token. |
+| `LoginApiTest::test_a_wrong_password_on_a_suspended_account_does_not_reveal_the_suspension` | Una contraseña incorrecta no revela que la cuenta está suspendida. |
+| `SecurityHardeningTest::test_password_policy_requires_letters_mixed_case_and_numbers` | Política de contraseñas. |
+| `RegisterApiTest::test_registration_rejects_a_domain_not_in_an_active_university` | Solo correos institucionales. |
+| `RegisterApiTest::test_public_registration_always_creates_a_student` | El registro público no puede crear staff aunque se mande el rol. |
+
+## Verificación en dos pasos
+
+| Prueba | Qué comprueba |
+| --- | --- |
+| `TwoFactorApiTest::test_a_code_cannot_be_used_twice` | Un código TOTP no se reutiliza (el defecto DEF-22). |
+| `TwoFactorApiTest::test_recovery_codes_work_once` | Cada código de respaldo sirve una vez. |
+| `TwoFactorApiTest::test_the_challenge_dies_after_five_wrong_codes_or_five_minutes` | El reto del segundo paso muere tras 5 errores o 5 minutos. |
+| `TwoFactorApiTest::test_disabling_and_regenerating_codes_ask_for_the_password` | Desactivarla pide la contraseña. |
+| `TwoFactorApiTest::test_it_is_the_second_factor_when_resetting_the_password` | Restablecer la contraseña también pide el segundo factor. |
+
+## Manejo de tokens y sesiones
+
+| Prueba | Qué comprueba |
+| --- | --- |
+| `LoginApiTest::test_verified_user_receives_an_expiring_token` | El token tiene vencimiento. |
+| `LoginApiTest::test_expired_token_is_rejected` | Un token vencido responde `401`. |
+| `LoginApiTest::test_logout_revokes_only_the_current_token` | Cerrar sesión borra ese token y no los de otros dispositivos. |
+| `SessionApiTest` (8 pruebas) | Cada quien solo ve y cierra sus sesiones; cerrar las demás conserva la actual. |
+| `PasswordResetApiTest::test_a_valid_token_resets_the_password_and_closes_every_session` | Restablecer la contraseña cierra todas las sesiones. |
+| `PasswordResetApiTest::test_a_token_works_only_once` | El enlace de recuperación es de un solo uso. |
+| `UnauthenticatedResponseTest` (4 pruebas, [backend #80](https://github.com/WilbertDevMx/backend-kampus/pull/80)) | Sin token, con token falso o sin verificar responde `401` o `403` en JSON, aunque falte `Accept`. |
+
+## Autorización y rutas protegidas
+
+| Prueba | Qué comprueba |
+| --- | --- |
+| `RoleMiddlewareTest` (4 pruebas) | Estudiante, moderador, administrador e invitado: cada uno llega solo a sus rutas. |
+| `UserPolicyTest` (7 pruebas) | Un moderador no toca estudiantes de otra universidad ni a otro staff. |
+| `BroadcastChannelAuthTest` (8 pruebas) | Solo los dos del match abren su canal; nunca con bloqueo o suspensión. |
+| `ReportReviewTest`, `UserModerationTest`, `GroupReviewTest` y `StaffManagementTest` | Cada acción del panel responde `403` o `404` fuera del rol o de la universidad. |
+| `MatchApiTest`, `MessageApiTest` y `VideoCallApiTest` | Nadie fuera del match ve sus mensajes ni entra a su llamada. |
+| `RegisterApiTest::test_verification_rejects_a_tampered_signature` | El enlace de verificación firmado no se puede alterar. |
+
+## Inyección SQL
+
+**[Nuevo]** `SqlInjectionTest` (20 pruebas, [backend #86](https://github.com/WilbertDevMx/backend-kampus/pull/86)) ataca las dos consultas que arman SQL a mano con un texto del usuario: la búsqueda de cuentas del panel (`/api/admin/users?search=`) y el filtro de carrera de Descubrir. Cada una se prueba con seis cadenas de ataque: `' OR '1'='1`, `' OR 1=1 --`, `%' OR '1'='1' --`, `' UNION SELECT password FROM users --`, `'; DROP TABLE users; --` y `' OR 1=1 --`.
+
+| Prueba | Qué comprueba |
+| --- | --- |
+| `SqlInjectionTest::test_the_panel_user_search_treats_sql_as_plain_text` (6 casos) | La búsqueda no devuelve a nadie, y la tabla `users` sigue ahí con las mismas cuentas. |
+| `SqlInjectionTest::test_quotes_in_the_panel_search_are_searched_literally` | Buscar `o'con` encuentra a "Sinéad O'Connor": las comillas se buscan como texto. |
+| `SqlInjectionTest::test_the_discovery_career_filter_treats_sql_as_plain_text` (6 casos) | El filtro se guarda tal cual y Descubrir solo muestra a quien tiene ese texto exacto en su carrera. |
+| `SqlInjectionTest::test_sql_in_the_login_does_not_log_anyone_in` (6 casos) | Como correo o como contraseña, la cadena responde `422` y no crea ningún token. |
+| `SqlInjectionTest::test_filters_with_fixed_values_reject_anything_else` | `sort`, `status`, `role` y `university_id` del panel solo aceptan sus valores y responden `422` con cualquier otra cosa. |
+| `DiscoveryApiTest::test_the_career_filter_treats_wildcards_as_plain_text` | Un `%` o un `_` en el filtro de carrera se busca como texto, no como comodín de `LIKE`. |
+| `DatabaseErrorResponseTest::test_api_hides_database_details` | Si algo falla en la base, la respuesta no revela host, consulta ni `SQLSTATE`. |
+
+**Las pruebas sí detectan una inyección.** Para comprobarlo, se cambiaron a propósito, solo en local, las dos consultas para que pegaran el texto en el SQL en lugar de mandarlo como parámetro: **13 de las 20 pruebas fallaron**. Por ejemplo, `' OR '1'='1` devolvió a los 3 estudiantes y `' OR 1=1 --` rompió la consulta con un `500`. Con el código real pasan las 20.
+
+## XSS
+
+**[Nuevo]** `XssTest` (16 pruebas, [backend #86](https://github.com/WilbertDevMx/backend-kampus/pull/86)) guarda cinco cadenas de ataque en cada campo de texto libre: `<script>alert(document.cookie)</script>`, `<img src=x onerror=alert(1)>`, `"><svg onload=alert(1)>`, un enlace `javascript:` y un `<iframe>`.
+
+| Prueba | Qué comprueba |
+| --- | --- |
+| `XssTest::test_a_chat_message_is_stored_and_returned_as_plain_text` (5 casos) | El mensaje se guarda y se devuelve igual, al mandarlo y en el historial. |
+| `XssTest::test_the_profile_bio_and_name_are_returned_as_plain_text` (5 casos) | Lo mismo con el nombre y el "Sobre mí". |
+| `XssTest::test_a_group_name_and_description_are_returned_as_plain_text` (5 casos) | Lo mismo con el nombre y la descripción de un grupo. |
+| `XssTest::test_input_reflected_in_an_error_stays_inside_json` | Una ruta con un `<script>`, que el error `404` repite, sigue siendo JSON y no HTML. |
+
+En cada respuesta revisan que salga como `application/json`, con `X-Content-Type-Options: nosniff` y `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`: así el navegador no la interpreta como HTML ni ejecuta nada de ella. La API no borra ni cambia el texto (eso dañaría lo que escribió la persona); la app lo muestra como texto, así que el `<script>` se ve como letras y no se ejecuta.
+
+## Entradas peligrosas
+
+| Prueba | Qué comprueba |
+| --- | --- |
+| `SecurityHardeningTest::test_user_endpoint_only_exposes_public_fields` | `/api/user` no devuelve contraseña, secretos ni campos internos. |
+| `ImageSanitizerTest` (8 pruebas) | Un archivo que no es imagen, un formato no permitido o dimensiones enormes se rechazan; el EXIF se borra. |
+| `ImageUploadValidationTest::test_a_huge_image_is_rejected_instead_of_crashing` | Una "bomba" de 9000 × 9000 px no tumba la API (DEF-27). |
+
+## CSRF, CORS, cabeceras y límites
+
+| Prueba | Qué comprueba |
+| --- | --- |
+| `SecurityHardeningTest::test_cors_only_allows_the_configured_frontend` | Otro origen no recibe permiso de CORS. |
+| `SecurityHardeningTest::test_api_responses_include_security_headers` | Las cabeceras de seguridad salen en toda respuesta. |
+| `SecurityHardeningTest::test_hsts_is_only_sent_over_https` | HSTS solo por HTTPS. |
+| `SecurityHardeningTest::test_api_is_rate_limited_per_user` | El límite general responde `429`. |
+| `PasswordResetApiTest::test_requesting_links_is_rate_limited` | No se pueden pedir enlaces sin límite. |
+| `SmsTest` y `SmsPasswordRecoveryTest` | Los códigos por SMS vencen, tienen intentos limitados y espera entre envíos. |
+
+CSRF no aplica a esta API: no usa cookies de sesión, sino el token en `Authorization: Bearer`, y CORS no permite credenciales ([CSRF](/docs/project/unit-3/security#csrf)).
+
+## Registro de eventos de seguridad
+
+| Prueba | Qué comprueba |
+| --- | --- |
+| `SecurityHardeningTest::test_failed_login_and_lockout_are_logged_with_a_masked_email` | Los intentos fallidos y el bloqueo quedan en `security.log`, con el correo enmascarado. |
+| `SecurityHardeningTest::test_registration_and_verification_events_are_logged` | El registro y la verificación quedan en `security.log`. |
+
+## Dependencias
+
+`composer audit` corre en cada CI. Ya detuvo los PR tres veces por avisos de seguridad (DEF-09, DEF-20 y **[Nuevo]** DEF-41, el 27 nov), hasta actualizar la dependencia. Dependabot abre cada semana los PR de actualización.
+
+## Qué falta
+
+- Una revisión con una herramienta externa (por ejemplo OWASP ZAP) contra el entorno de pruebas.
+- **[Nuevo]** `SqlInjectionTest` y `XssTest` llegan con el [backend #86](https://github.com/WilbertDevMx/backend-kampus/pull/86), en revisión. Con ellas, la suite pasa de 331 a 367 pruebas.

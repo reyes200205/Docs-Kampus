@@ -48,6 +48,11 @@ description: "Registro de los errores que han salido en el proyecto: qué pasaba
 | 14 nov | El WebSocket rechazaba a la app de celular en el servidor | Despliegue | Backend #63 |
 | 14 nov | La app web publicada en Vercel salía en blanco | Despliegue | [Despliegue](/docs/backend/deployment) |
 | 14 nov | La API respondía `502` después de recrear el contenedor `app` | Despliegue | [Despliegue](/docs/backend/deployment#desplegar) |
+| **[Nuevo]** 14 nov | Compilar todos los servicios juntos fallaba con "image already exists" | Despliegue | [Despliegue](/docs/backend/deployment#desplegar) |
+| **[Nuevo]** 17 y 20 nov | GitHub borraba la aprobación de un PR en cuanto se daba | Flujo de PRs | Backend #66 y #76 |
+| **[Nuevo]** 19 nov | Cada código por SMS se cobraba como dos mensajes | SMS | Backend #77 |
+| **[Nuevo]** 24 nov | Una ruta protegida respondía `500` si la petición no pedía JSON | Backend | Backend #80 |
+| **[Nuevo]** 27 nov | CI en rojo por los avisos de seguridad de Symfony del 25 nov | CI | Backend #87 |
 
 ## Seguridad y privacidad
 
@@ -173,6 +178,22 @@ Salieron juntos, al revisar qué pasa cuando alguien sube una foto de más de 5 
 - **Solución:** el seeder asigna género y recalcula el perfil de cada estudiante.
 - **Dónde:** backend `c5f3d1b`.
 
+### Cada código por SMS se cobraba doble (19 nov, antes de fusionar)
+
+- **[Nuevo] Qué pasaba:** en la prueba real con Vonage, un solo SMS de prueba descontó 0.38 del saldo, el doble de lo que cuesta un SMS a México (unos 0.19).
+- **Causa:** el texto llevaba acentos ("código", "contraseña"). Con un solo carácter fuera del alfabeto GSM-7, el SMS se manda en Unicode, que admite **70 caracteres** por mensaje en lugar de 160. El texto de prueba tenía 72, así que se partió en dos mensajes y se cobraron los dos. Los códigos reales, de 114 y 119 caracteres, también se habrían cobrado como dos.
+- **Solución:** `VonageSmsSender` manda el texto sin acentos (`Str::ascii`: "código" pasa a "codigo") y con `type=text`. Así cada código cabe en un solo SMS de 160 caracteres, con margen para el aviso que Vonage agrega en la cuenta de prueba.
+- **Para que no vuelva:** `SmsTest` revisa que lo que recibe Vonage no tenga acentos y que cada código, ya sin acentos, tenga como máximo 125 caracteres. Si alguien alarga el texto, la prueba falla.
+- **Dónde:** backend #77 (`11d5fb6`). Ver [Recuperar la contraseña](/docs/backend/api/auth/password).
+
+### `500` en lugar de `401` sin el encabezado `Accept` (24 nov)
+
+- **[Nuevo] Qué pasaba:** al levantar producción, `GET /api/user` sin token respondía `500` en lugar de `401`. En el log: "Route [login] not defined.". Pasaba en pruebas y en producción con cualquier cliente que no mande `Accept: application/json` (un navegador, `curl` o un monitor). Lo mismo pasaba con una cuenta sin verificar, que debía recibir `403`.
+- **Causa:** `auth:sanctum` y `verified` deciden si redirigen o responden JSON según ese encabezado. Sin él intentaban redirigir a las rutas web `login` y `verification.notice`, que la API no tiene.
+- **Solución:** el middleware `ForceJsonResponse`, global y al principio, marca toda petición a `api/*` como JSON. La app ya mandaba el encabezado, así que para ella no cambia nada.
+- **Para que no vuelva:** `UnauthenticatedResponseTest` prueba sin token, con token inválido y con cuenta sin verificar, sin el encabezado. Sin el arreglo, tres de las cuatro pruebas fallan con `500`.
+- **Dónde:** backend #80.
+
 ## Despliegue
 
 ### La cola antes de las migraciones (8 nov)
@@ -208,7 +229,15 @@ Salieron juntos, al revisar qué pasa cuando alguien sube una foto de más de 5 
 - **Qué pasaba:** después de cambiar `.env.production` y recrear los contenedores de la API, todas las peticiones respondían `502`.
 - **Causa:** Nginx resuelve la dirección interna de `app` al arrancar y se queda con ella. Al recrear `app`, Docker le da otra dirección.
 - **Solución:** reiniciar Nginx después de recrear `app`. Quedó como paso en [Desplegar](/docs/backend/deployment#desplegar).
-- **Para que no vuelva:** hoy es un paso manual. La solución de fondo sería que Nginx vuelva a resolver el nombre en cada petición, con `resolver 127.0.0.11` y la dirección de `app` en una variable; está pendiente en el backend.
+- **Para que no vuelva:** hoy es un paso manual. La solución de fondo sería que Nginx vuelva a resolver el nombre en cada petición, con `resolver 127.0.0.11` y la dirección de `app` en una variable; está pendiente en el backend. **[Nuevo]** La [actualización automática](/docs/backend/deployment#actualización-automática) ya reinicia Nginx en cada despliegue.
+
+### "image already exists" al compilar (14 nov)
+
+- **[Nuevo] Qué pasaba:** en el servidor, `docker compose build` (o `up -d --build`) fallaba a veces con `image "kampus-api:latest": already exists`.
+- **Causa:** `app`, `queue`, `scheduler` y `reverb` usan la misma imagen, `kampus-api`. Al compilar todo junto, Compose compila los cuatro a la vez y, al guardar la imagen con el mismo nombre, chocan.
+- **Solución:** compilar solo `app`, que deja lista la imagen de los cuatro, y luego `nginx`. Después, `up -d` sin `--build`.
+- **Para que no vuelva:** así está en los pasos de [Desplegar](/docs/backend/deployment#desplegar) y en el script de la actualización automática.
+- **Dónde:** entorno de pruebas.
 
 ## CI y dependencias
 
@@ -217,6 +246,7 @@ Salieron juntos, al revisar qué pasa cuando alguien sube una foto de más de 5 
 - **Qué pasaba:** "Formato y pruebas" fallaba en `composer audit`. Primero fue `symfony/mime` (CVE-2026-45070). Luego, los avisos de Symfony del 4 de noviembre dejaron en rojo todos los PR.
 - **Solución:** actualizar solo los paquetes afectados en `composer.lock`, en un PR aparte que se fusiona primero.
 - **Dónde:** backend #25 y #47.
+- **[Nuevo] Otra vez el 27 nov:** cinco avisos del 25 de noviembre en `symfony/routing` (CVE-2026-133746 y CVE-2026-133754), `symfony/http-kernel` (CVE-2026-133743) y `symfony/mailer` (CVE-2026-133751 y CVE-2026-133755) volvieron a poner en rojo todos los PR. Se actualizaron los `symfony/*` dentro de la 7.4, solo en `composer.lock`, en el backend #87. Los PR abiertos necesitan "Update branch" después de fusionarlo.
 
 ### commitlint (29 oct y 4 nov)
 
@@ -234,6 +264,14 @@ Salieron juntos, al revisar qué pasa cuando alguien sube una foto de más de 5 
 - **Qué pasaba:** `ModerationSchemaTest` deshacía la migración con `--step`. Al agregar migraciones nuevas, deshacía la que no era y fallaba.
 - **Solución:** deshace la migración por su ruta (`--path`).
 - **Dónde:** backend #44 y #48.
+
+### Las aprobaciones se borraban solas (17 y 20 nov)
+
+- **[Nuevo] Qué pasaba:** al aprobar el backend #66, y luego el #76, GitHub quitaba la aprobación en el mismo momento ("dismissed"). En el #76, Alejandro lo aprobó tres veces y las tres se borraron; el PR seguía bloqueado.
+- **Causa:** la regla de la rama `develop` descarta las aprobaciones viejas cuando hay cambios. Cuando se fusiona otro PR antes, cambia la base contra la que se compara la rama, y GitHub cuenta la aprobación como vieja. El #76 además estaba montado sobre la rama del #75, así que al fusionarse el #75 la base cambió seguro.
+- **Solución:** "Update branch" en el PR (con merge, sin rebase), y después aprobar otra vez. Con la rama al día, la aprobación ya no se borra.
+- **Para que no vuelva:** la regla quedó en [Pull requests](/docs/development/pull-requests#revisión): antes de aprobar, revisa si GitHub dice que la rama está atrás de `develop`; si sí, primero "Update branch".
+- **Dónde:** backend #66 (`5df5536`) y #76 (`26d27aa`).
 
 ## Entorno local
 

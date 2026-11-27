@@ -1,0 +1,52 @@
+---
+title: "Seguridad (OWASP)"
+description: "Cómo aplica Kampus cada punto del OWASP Top 10: validación, sanitización, contraseñas, variables de entorno y más."
+---
+
+**[Nuevo]** Esta página junta las medidas de seguridad del backend, ordenadas con el [OWASP Top 10 (2021)](https://owasp.org/Top10/). Cada medida tiene una prueba automática que la comprueba en cada PR: ver [Pruebas de seguridad](/docs/project/unit-4/security-tests). Las rutas y sus permisos están en [Rutas seguras](/docs/project/unit-3/secure-routes).
+
+## OWASP Top 10
+
+| Riesgo | Qué hace Kampus |
+| --- | --- |
+| **A01 Control de acceso roto** | Token, correo verificado, rol y *Policy* en cada ruta. Lo que no es tuyo responde `404`. Las fotos e imágenes están en un bucket privado y solo se ven con URLs firmadas que vencen en 15 minutos. |
+| **A02 Fallas criptográficas** | Contraseñas con bcrypt (cast `hashed`). El secreto de la verificación en dos pasos y sus códigos de respaldo se guardan cifrados con `APP_KEY` (cast `encrypted`). Los códigos por SMS se guardan como HMAC, no en claro. Sanctum guarda los tokens con hash. HTTPS obligatorio en producción, con HSTS de un año. |
+| **A03 Inyección** | Todas las consultas van por Eloquent o el *query builder*, con parámetros. Las búsquedas con `LIKE` escapan `%`, `_` y `\` ([`UserModerationController`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/app/Http/Controllers/Admin/UserModerationController.php), [`DiscoveryQuery`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/app/Discovery/DiscoveryQuery.php)). Cada entrada se valida con `FormRequest` antes de llegar al controlador. |
+| **A04 Diseño inseguro** | La ubicación nunca se guarda exacta, solo una celda aproximada de unos 1 km (geohash de precisión 6) ([Privacidad de la ubicación](/docs/project/location-privacy)). Recuperar la contraseña responde lo mismo exista o no el correo, para no revelar quién tiene cuenta. Los enlaces y códigos son de un solo uso y vencen. |
+| **A05 Configuración insegura** | `APP_DEBUG=false` en el servidor; cabeceras de seguridad en toda respuesta (`SecurityHeaders`); CORS solo para los orígenes de `FRONTEND_URLS` y sin cookies; un error de la base de datos responde un mensaje genérico, sin host, consulta ni `SQLSTATE` (T-52). |
+| **A06 Componentes vulnerables** | `composer audit` en cada corrida de CI: un aviso de seguridad en una dependencia pone el PR en rojo. Dependabot abre los PR de actualización. |
+| **A07 Fallas de identificación y autenticación** | Contraseña de al menos 8 caracteres con mayúsculas, minúsculas y números, que en producción además no debe aparecer en filtraciones conocidas. Bloqueo tras 5 intentos fallidos, verificación en dos pasos con TOTP, tokens que vencen a los 7 días y [sesiones](/docs/backend/api/auth/sessions) que se pueden cerrar a distancia. |
+| **A08 Integridad del software y de los datos** | El enlace de verificación del correo va firmado. Nadie sube directo a `main` ni a `develop`: todo entra por PR revisado y con la CI en verde ([Protección de ramas](/docs/project/unit-2/repository-setup#protección-de-ramas)). |
+| **A09 Registro y monitoreo** | Los eventos de seguridad van a `security.log` (90 días), con el correo enmascarado. UptimeRobot vigila `/up` de pruebas y de producción. Ver [Monitoreo y logging](/docs/project/unit-4/monitoring). |
+| **A10 SSRF** | La API no descarga URLs que mande el usuario. Solo llama a servicios fijos de la configuración: S3, LiveKit, Vonage y Resend. |
+
+## Validación y sanitización de entradas
+
+- **Validación:** cada ruta que recibe datos tiene su `FormRequest` o `validate()`, con los mensajes en español. Un dato inválido responde `422` con el campo y el motivo.
+- **Correo:** se guarda sin espacios y en minúsculas, y solo se aceptan los dominios de las universidades activas.
+- **Imágenes:** [`ImageSanitizer`](https://github.com/WilbertDevMx/backend-kampus/blob/develop/app/Support/Images/ImageSanitizer.php) revisa que sea una imagen real (JPEG, PNG o WebP), rechaza las de más de 20 megapíxeles antes de abrirlas, la vuelve a codificar y así borra el EXIF con la ubicación GPS, la endereza y la reduce a 2048 px.
+- **Texto:** la API devuelve JSON, nunca HTML, y la cabecera `Content-Security-Policy: default-src 'none'` impide que el navegador ejecute algo de una respuesta. La app muestra los textos como texto, así que un `<script>` en un mensaje no se ejecuta.
+
+## CSRF
+
+La API no usa cookies de sesión: cada petición lleva el token en el encabezado `Authorization: Bearer`. Un sitio externo no puede hacer que el navegador mande ese encabezado por su cuenta, así que el ataque CSRF no aplica. Por eso `supports_credentials` está en `false` en `config/cors.php`.
+
+## Variables de entorno y secretos
+
+- Las llaves (base de datos, S3, Resend, Vonage, LiveKit, Reverb y `APP_KEY`) solo están en el `.env` de cada entorno, que no se sube al repositorio. Los repositorios solo tienen `.env.example` y `.env.production.example`, sin valores reales.
+- Pruebas y producción tienen su propia `APP_KEY`, contraseña de la base y llaves de Reverb ([Producción](/docs/backend/deployment#producción)).
+- GitHub revisa cada push con *secret scanning* y *push protection*, y los tokens de la API llevan el prefijo `kampus_` para que un escáner los reconozca si se filtran.
+
+## Cabeceras de seguridad
+
+Todas las respuestas de la API, incluidas las de error, llevan:
+
+| Cabecera | Valor |
+| --- | --- |
+| `X-Content-Type-Options` | `nosniff` |
+| `X-Frame-Options` | `DENY` |
+| `Referrer-Policy` | `no-referrer` |
+| `Content-Security-Policy` | `default-src 'none'; frame-ancestors 'none'` |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=()` |
+| `Cache-Control` | `no-store, private` |
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` (solo por HTTPS) |
