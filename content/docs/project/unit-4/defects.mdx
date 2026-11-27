@@ -24,7 +24,7 @@ description: "Cada defecto encontrado con su severidad, cómo se reproducía, su
 | Estado | Crítica | Alta | Media | Baja | Total |
 | --- | :---: | :---: | :---: | :---: | :---: |
 | Cerrado | 5 | 10 | 17 | 6 | **38** |
-| En revisión | — | — | 1 | — | **1** |
+| En revisión | — | — | 2 | — | **2** |
 | Abierto | — | — | — | 1 | **1** |
 
 Los cinco críticos se encontraron en la revisión o en una prueba **antes de llegar a usuarios reales**, y los cinco tienen hoy una prueba automática que los detecta.
@@ -73,6 +73,7 @@ Los cinco críticos se encontraron en la revisión o en una prueba **antes de ll
 | DEF-38 | 19 nov | Cada código por SMS se cobraba como dos mensajes | Pedir un código de recuperación por SMS | Media | Cerrado | Backend #77 |
 | DEF-39 | 24 nov | Una ruta protegida respondía `500` si la petición no pedía JSON | `curl https://api.kodev.online/api/user` sin token ni `Accept` | Media | En revisión | [Backend #80](https://github.com/WilbertDevMx/backend-kampus/pull/80) |
 | DEF-40 | 27 nov | Los campos de correo de la app muestran de ejemplo `matricula@utt.edu.mx`, el dominio viejo de la UTT | Abrir Registro, Inicio de sesión u Olvidé mi contraseña | Baja | Abierto | Reportado al equipo de app |
+| DEF-41 | 27 nov | CI en rojo en todos los PR por cinco avisos de seguridad de Symfony del 25 nov | Correr la CI de cualquier PR del backend | Media | En revisión | [Backend #87](https://github.com/WilbertDevMx/backend-kampus/pull/87) |
 
 ## Seguimiento
 

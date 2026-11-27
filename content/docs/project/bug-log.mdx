@@ -52,6 +52,7 @@ description: "Registro de los errores que han salido en el proyecto: qué pasaba
 | **[Nuevo]** 17 y 20 nov | GitHub borraba la aprobación de un PR en cuanto se daba | Flujo de PRs | Backend #66 y #76 |
 | **[Nuevo]** 19 nov | Cada código por SMS se cobraba como dos mensajes | SMS | Backend #77 |
 | **[Nuevo]** 24 nov | Una ruta protegida respondía `500` si la petición no pedía JSON | Backend | Backend #80 |
+| **[Nuevo]** 27 nov | CI en rojo por los avisos de seguridad de Symfony del 25 nov | CI | Backend #87 |
 
 ## Seguridad y privacidad
 
@@ -245,6 +246,7 @@ Salieron juntos, al revisar qué pasa cuando alguien sube una foto de más de 5 
 - **Qué pasaba:** "Formato y pruebas" fallaba en `composer audit`. Primero fue `symfony/mime` (CVE-2026-45070). Luego, los avisos de Symfony del 4 de noviembre dejaron en rojo todos los PR.
 - **Solución:** actualizar solo los paquetes afectados en `composer.lock`, en un PR aparte que se fusiona primero.
 - **Dónde:** backend #25 y #47.
+- **[Nuevo] Otra vez el 27 nov:** cinco avisos del 25 de noviembre en `symfony/routing` (CVE-2026-133746 y CVE-2026-133754), `symfony/http-kernel` (CVE-2026-133743) y `symfony/mailer` (CVE-2026-133751 y CVE-2026-133755) volvieron a poner en rojo todos los PR. Se actualizaron los `symfony/*` dentro de la 7.4, solo en `composer.lock`, en el backend #87. Los PR abiertos necesitan "Update branch" después de fusionarlo.
 
 ### commitlint (29 oct y 4 nov)
 
